@@ -1,0 +1,36 @@
+﻿<!DOCTYPE html>
+<html>
+<body>
+<video id="v" src="http://localhost:5173/../media.mp4" crossorigin="anonymous"></video>
+<canvas id="c"></canvas>
+<script>
+async function run() {
+  const v = document.createElement('video');
+  v.src = '/media.mp4';
+  await new Promise(r => v.onloadedmetadata = r);
+  const duration = v.duration;
+  console.log('Duration:', duration);
+  const times = [3.0, 3.8, 4.2, 4.6, 5.0, 5.5, 6.0, 6.5, 7.0];
+  const c = document.getElementById('c');
+  const ctx = c.getContext('2d');
+  
+  for(let i=0; i<times.length; i++) {
+    if (times[i] > duration) break;
+    v.currentTime = times[i];
+    await new Promise(r => v.onseeked = r);
+    c.width = v.videoWidth;
+    c.height = v.videoHeight;
+    ctx.drawImage(v, 0, 0);
+    const data = c.toDataURL('image/jpeg', 0.85);
+    await fetch('http://127.0.0.1:8000/api/save_frame/', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ index: 10 + i, data: data })
+    });
+  }
+  document.title = 'DONE';
+}
+run();
+</script>
+</body>
+</html>

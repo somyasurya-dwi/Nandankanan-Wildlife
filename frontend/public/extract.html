@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Extract Frames</title>
+</head>
+<body style="background:#111; color:#fff; font-family:sans-serif; padding:20px;">
+  <h2>Extracting Video Frames...</h2>
+  <div id="status">Loading video...</div>
+  <video id="vid" src="/videos/user_uploaded_feature2.mp4" muted playsinline style="max-width:400px; display:block; margin:10px 0;"></video>
+  <canvas id="cvs" style="display:none;"></canvas>
+
+  <script>
+    const vid = document.getElementById('vid');
+    const status = document.getElementById('status');
+    const cvs = document.getElementById('cvs');
+    const ctx = cvs.getContext('2d');
+
+    vid.addEventListener('loadedmetadata', () => {
+      status.innerText = `Duration: ${vid.duration}s, Dimensions: ${vid.videoWidth}x${vid.videoHeight}`;
+      cvs.width = vid.videoWidth || 640;
+      cvs.height = vid.videoHeight || 360;
+
+      const count = 10;
+      let step = Math.max(0.1, (vid.duration - 0.2) / (count - 1));
+      let times = [];
+      for (let i = 0; i < count; i++) {
+        times.push(Math.min(vid.duration - 0.05, 0.1 + i * step));
+      }
+
+      let currentIdx = 0;
+
+      function seekNext() {
+        if (currentIdx >= times.length) {
+          status.innerText = "DONE! All frames extracted and saved!";
+          return;
+        }
+        vid.currentTime = times[currentIdx];
+      }
+
+      vid.addEventListener('seeked', async () => {
+        ctx.drawImage(vid, 0, 0, cvs.width, cvs.height);
+        const dataUrl = cvs.toDataURL('image/jpeg', 0.85);
+
+        try {
+          await fetch('http://127.0.0.1:8000/api/save_frame/', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+              name: `new_frame_${currentIdx}.jpg`,
+              data: dataUrl
+            })
+          });
+          status.innerText = `Saved frame ${currentIdx + 1}/${times.length}`;
+        } catch(e) {
+          status.innerText = `Error saving frame ${currentIdx}: ${e}`;
+        }
+
+        currentIdx++;
+        setTimeout(seekNext, 200);
+      });
+
+      seekNext();
+    });
+  </script>
+</body>
+</html>
