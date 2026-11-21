@@ -8,7 +8,22 @@ from .views import (
     ConservationStoryViewSet,
     park_stats,
     demo_auth,
-    save_frame
+    save_frame,
+    tiger_tracking_status,
+    create_subscription_order,
+    verify_subscription_payment,
+    check_subscription_status,
+    track_preview_usage,
+    wallet_details,
+    create_wallet_topup_order,
+    verify_wallet_topup,
+    make_wildlife_contribution,
+    get_recent_contributions,
+    like_community_moment,
+    get_wallet_transactions,
+    get_animal_care_fund,
+    get_animal_reactions,
+    send_animal_reaction
 )
 
 router = DefaultRouter()
@@ -23,5 +38,22 @@ urlpatterns = [
     path('stats/', park_stats, name='park-stats'),
     path('auth/', demo_auth, name='demo-auth'),
     path('save_frame/', save_frame, name='save-frame'),
+    path('tracking/tiger/', tiger_tracking_status, name='tiger-tracking-status'),
+    path('subscription/create-order/', create_subscription_order, name='create-subscription-order'),
+    path('subscription/verify/', verify_subscription_payment, name='verify-subscription-payment'),
+    path('subscription/status/', check_subscription_status, name='check-subscription-status'),
+    path('subscription/preview-usage/', track_preview_usage, name='track-preview-usage'),
+    # Wildlife Wallet & Contribution API
+    path('wallet/', wallet_details, name='wallet-details'),
+    path('wallet/topup/create-order/', create_wallet_topup_order, name='wallet-topup-create-order'),
+    path('wallet/topup/verify/', verify_wallet_topup, name='wallet-topup-verify'),
+    path('wallet/contribute/', make_wildlife_contribution, name='wallet-make-contribution'),
+    path('wallet/contributions/', get_recent_contributions, name='wallet-recent-contributions'),
+    path('wallet/contributions/<str:contribution_id>/like/', like_community_moment, name='wallet-like-contribution'),
+    path('wallet/transactions/', get_wallet_transactions, name='wallet-transactions'),
+    path('wallet/fund-stats/', get_animal_care_fund, name='wallet-fund-stats'),
+    # Dynamic Animal Reactions API
+    path('reactions/<slug:animal_slug>/', get_animal_reactions, name='animal-reactions'),
+    path('reactions/<slug:animal_slug>/send/', send_animal_reaction, name='send-animal-reaction'),
 ]
 

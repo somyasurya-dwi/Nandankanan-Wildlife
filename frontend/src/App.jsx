@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import Lenis from 'lenis';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -38,6 +38,8 @@ export default function App() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [adminOpen, setAdminOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  const [cameras, setCameras] = useState(INITIAL_CAMERAS);
+  const [animals, setAnimals] = useState(INITIAL_ANIMALS);
   
   // Active Camera Modal for Live Wildlife Streaming
   const [activeModalCamera, setActiveModalCamera] = useState(null);
@@ -124,7 +126,7 @@ export default function App() {
 
         {/* 4. Live Wildlife Streaming Section: "THE WILD, LIVE" */}
         <LiveStreaming 
-          cameras={INITIAL_CAMERAS}
+          cameras={cameras}
           activeModalCamera={activeModalCamera}
           setActiveModalCamera={setActiveModalCamera}
         />
@@ -137,7 +139,7 @@ export default function App() {
 
         {/* 6. Encyclopaedia of Species with Featured Animals, Roars & Filters */}
         <ExploreAnimals 
-          animals={INITIAL_ANIMALS}
+          animals={animals}
           onSponsorAnimal={handleSponsorAnimal}
         />
 
@@ -160,7 +162,7 @@ export default function App() {
 
         {/* 11. Virtual Animal Guardianship / Adoption Portal with Live Certificate */}
         <SponsorshipPortal 
-          animals={INITIAL_ANIMALS}
+          animals={animals}
           preSelectedAnimal={sponsorAnimal}
         />
 
@@ -200,6 +202,10 @@ export default function App() {
           isOpen={adminOpen}
           onClose={() => setAdminOpen(false)}
           currentUser={currentUser}
+          cameras={cameras}
+          setCameras={setCameras}
+          animals={animals}
+          setAnimals={setAnimals}
         />
       )}
 

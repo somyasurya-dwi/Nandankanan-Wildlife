@@ -56,6 +56,8 @@ export default function CinematicVideoHero({ onExploreClick, onWatchLiveClick })
           loop
           muted={isMuted}
           playsInline
+          disablePictureInPicture
+          controlsList="nodownload noplaybackrate nofullscreen noremoteplayback"
           poster="/images/tiger_hero_poster.jpg"
           className="w-full h-full object-cover object-center filter brightness-95 contrast-105"
         >

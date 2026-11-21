@@ -529,6 +529,8 @@ export default function InteractiveMap({ markers = [], onSelectAnimalBySlug, onO
                       loop
                       muted={isMuted}
                       playsInline
+                      disablePictureInPicture
+                      controlsList="nodownload noplaybackrate nofullscreen noremoteplayback"
                       className="w-full h-full object-cover"
                     />
 
@@ -536,10 +538,7 @@ export default function InteractiveMap({ markers = [], onSelectAnimalBySlug, onO
                     <div className="absolute top-3 left-3 flex items-center gap-1.5 z-10">
                       <span className="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-red-600/95 text-white flex items-center gap-1.5 shadow-lg shadow-red-600/50">
                         <span className="w-2 h-2 rounded-full bg-white live-indicator" />
-                        LIVE STREAM
-                      </span>
-                      <span className="px-2 py-0.5 rounded-md bg-forest-950/80 text-[9px] uppercase tracking-wider text-gold-400 border border-gold-500/30 backdrop-blur-md">
-                        DEMO FEED
+                        LIVE
                       </span>
                     </div>
 
