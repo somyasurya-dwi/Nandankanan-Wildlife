@@ -268,12 +268,16 @@ export default function VirtualExperience() {
   ];
 
   return (
-    <section id="virtual-experience" className="py-24 bg-forest-950 text-ivory-50 relative overflow-hidden">
+    <section id="virtual-experience" className="pt-10 sm:pt-12 lg:pt-14 pb-10 sm:pb-12 lg:pb-14 bg-forest-950 text-ivory-50 relative overflow-hidden">
       
+      {/* Top Subtle Golden Forest Horizon Separator */}
+      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[#C8A96B]/25 to-transparent pointer-events-none" />
+      <div className="absolute top-0 inset-x-0 h-14 bg-gradient-to-b from-[#0B2A1A]/50 to-transparent pointer-events-none" />
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-14">
+        <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-10">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full glass-badge mb-3">
             <Sparkles className="w-3.5 h-3.5 text-gold-400" />
             <span className="text-[11px] font-bold tracking-[0.2em] uppercase text-gold-300">
@@ -291,7 +295,7 @@ export default function VirtualExperience() {
           </p>
 
           {/* Experience Mode Switcher Tabs */}
-          <div className="mt-8 inline-flex items-center p-1.5 rounded-2xl bg-forest-900 border border-gold-500/30">
+          <div className="mt-6 inline-flex max-w-full overflow-x-auto items-center p-1.5 rounded-2xl bg-forest-900 border border-gold-500/30">
             <button
               onClick={() => setActiveTab('360')}
               className={`px-5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 ${
@@ -529,4 +533,3 @@ export default function VirtualExperience() {
     </section>
   );
 }
-
