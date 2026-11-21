@@ -456,3 +456,71 @@ export function updateAmbientTrack(trackName, volume) {
     mixerTracks[trackName] = { source: osc, gain: gainNode, mod };
   }
 }
+
+/**
+ * Synthesizes a crisp, dynamic reaction pop with pitch scaled by combo streak.
+ * Provides immediate, delightful tactile audio feedback for stream reactions.
+ */
+export function playReactionPop(comboCount = 1) {
+  try {
+    const ctx = getAudioContext();
+    if (!ctx) return;
+    const now = ctx.currentTime;
+
+    // Pitch rises dynamically with rapid combo clicks (460Hz up to 920Hz)
+    const baseFreq = Math.min(920, 460 + Math.max(0, comboCount - 1) * 35);
+
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(baseFreq, now);
+    osc.frequency.exponentialRampToValueAtTime(baseFreq * 1.35, now + 0.08);
+
+    gain.gain.setValueAtTime(0.18, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start(now);
+    osc.stop(now + 0.12);
+  } catch (e) {
+    // AudioContext suspended or blocked
+  }
+}
+
+/**
+ * Synthesizes a triumphant, sparkling multi-tone chord for Hold-to-Charge Mega Bursts.
+ */
+export function playMegaReactionBurst() {
+  try {
+    const ctx = getAudioContext();
+    if (!ctx) return;
+    const now = ctx.currentTime;
+
+    // Celebratory C-Major arpeggiated chime [C5, E5, G5, C6]
+    const notes = [523.25, 659.25, 783.99, 1046.50];
+
+    notes.forEach((freq, idx) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = idx === 3 ? 'triangle' : 'sine';
+      osc.frequency.setValueAtTime(freq, now + idx * 0.045);
+
+      gain.gain.setValueAtTime(0.01, now + idx * 0.045);
+      gain.gain.linearRampToValueAtTime(0.18, now + idx * 0.045 + 0.04);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.045 + 0.55);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(now + idx * 0.045);
+      osc.stop(now + idx * 0.045 + 0.55);
+    });
+  } catch (e) {
+    // AudioContext suspended or blocked
+  }
+}
+

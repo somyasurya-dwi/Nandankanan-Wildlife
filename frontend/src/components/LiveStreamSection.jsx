@@ -164,6 +164,8 @@ export default function LiveStreamSection({ language }) {
             loop
             muted={isMuted}
             playsInline
+            disablePictureInPicture
+            controlsList="nodownload noplaybackrate nofullscreen noremoteplayback"
             poster={currentCam.poster}
             className="w-full h-full object-cover object-center"
           >

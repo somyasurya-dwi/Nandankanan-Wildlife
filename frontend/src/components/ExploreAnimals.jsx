@@ -683,6 +683,8 @@ export default function ExploreAnimals({ animals = [], onSponsorAnimal }) {
                         src={activeAnimalModal.video_url}
                         controls
                         playsInline
+                        disablePictureInPicture
+                        controlsList="nodownload noplaybackrate nofullscreen noremoteplayback"
                         className="w-full h-full object-cover"
                       />
                     </div>
