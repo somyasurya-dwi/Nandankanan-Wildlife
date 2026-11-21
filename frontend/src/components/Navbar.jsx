@@ -403,7 +403,7 @@ export default function Navbar({
   ];
 
   return (
-    <header className="sticky top-0 z-50 w-full font-sans shadow-2xl transition-all">
+    <header id="main-navbar" className="sticky top-0 z-50 w-full font-sans shadow-2xl transition-all">
       
       {/* =========================================================================
           TIER 1: OFFICIAL GOVERNMENT OF ODISHA PORTAL HEADER (White / Ivory Background)
