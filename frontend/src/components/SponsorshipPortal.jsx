@@ -18,6 +18,7 @@ import {
   ChevronRight,
   RefreshCw
 } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function SponsorshipPortal({ 
   animals, 
@@ -25,6 +26,7 @@ export default function SponsorshipPortal({
   onSponsorshipCreated,
   sponsorships 
 }) {
+  const { t, getAnimalName } = useLanguage();
   const [selectedAnimalId, setSelectedAnimalId] = useState(
     preSelectedAnimal ? preSelectedAnimal.id : (animals[0] ? animals[0].id : 1)
   );
@@ -135,12 +137,16 @@ export default function SponsorshipPortal({
   };
 
   return (
-    <section id="sponsorship-portal" className="py-24 bg-forest-900 text-ivory-50 relative overflow-hidden">
+    <section id="sponsorship-portal" className="pt-10 sm:pt-12 lg:pt-14 pb-12 sm:pb-16 lg:pb-20 bg-forest-900 text-ivory-50 relative overflow-hidden">
       
+      {/* Top Subtle Golden Forest Horizon Separator */}
+      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[#C8A96B]/25 to-transparent pointer-events-none" />
+      <div className="absolute top-0 inset-x-0 h-14 bg-gradient-to-b from-[#071D12]/50 to-transparent pointer-events-none" />
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-16">
+        <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-10">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full glass-badge mb-3">
             <HeartHandshake className="w-3.5 h-3.5 text-gold-400" />
             <span className="text-[11px] font-bold tracking-[0.2em] uppercase text-gold-300">
@@ -477,7 +483,7 @@ export default function SponsorshipPortal({
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full py-3.5 rounded-xl bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-400 hover:to-gold-500 text-forest-950 font-extrabold text-xs uppercase tracking-widest shadow-xl shadow-gold-500/25 transition-all flex items-center justify-center gap-2"
+                    className="w-full py-3.5 btn-accent text-xs uppercase tracking-widest flex items-center justify-center gap-2"
                   >
                     {isSubmitting ? (
                       <span>Generating Official Certificate...</span>

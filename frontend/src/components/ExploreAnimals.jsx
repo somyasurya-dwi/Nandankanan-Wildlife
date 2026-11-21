@@ -26,8 +26,10 @@ import {
   playDeerCall, 
   playBearGrunt 
 } from '../utils/audioSynthesizer';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function ExploreAnimals({ animals, onSponsorAnimal }) {
+  const { t, getAnimalName, language } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedStatus, setSelectedStatus] = useState('All');
@@ -78,8 +80,12 @@ export default function ExploreAnimals({ animals, onSponsorAnimal }) {
   };
 
   return (
-    <section id="explore-animals" className="py-24 bg-[#0B2A1A] text-[#F5F4EA] relative overflow-hidden">
+    <section id="explore-animals" className="pt-10 sm:pt-12 lg:pt-14 pb-10 sm:pb-12 lg:pb-14 bg-[#0B2A1A] text-[#F5F4EA] relative overflow-hidden">
       
+      {/* Top Subtle Golden Forest Horizon Separator */}
+      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[#C8A96B]/25 to-transparent pointer-events-none" />
+      <div className="absolute top-0 inset-x-0 h-14 bg-gradient-to-b from-[#071D12]/50 to-transparent pointer-events-none" />
+
       {/* Background Soft Glow */}
       <div className="absolute top-0 right-10 w-[500px] h-[500px] bg-[#14532D]/30 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-10 left-10 w-[500px] h-[500px] bg-[#2E7D32]/20 rounded-full blur-3xl pointer-events-none" />
@@ -87,7 +93,7 @@ export default function ExploreAnimals({ animals, onSponsorAnimal }) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-14">
+        <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-10">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#123D2B]/80 border border-[#C8A96B]/40 mb-3 shadow-md">
             <Compass className="w-3.5 h-3.5 text-[#C8A96B]" />
             <span className="text-[11px] font-bold tracking-[0.2em] uppercase text-[#C8A96B]">
@@ -106,7 +112,7 @@ export default function ExploreAnimals({ animals, onSponsorAnimal }) {
         </div>
 
         {/* Search & Filters Bar */}
-        <div className="bg-[#071D12]/90 rounded-2xl p-5 border border-[#26734D]/50 shadow-2xl backdrop-blur-md mb-12">
+        <div className="bg-[#071D12]/90 rounded-2xl p-4 sm:p-5 border border-[#26734D]/50 shadow-2xl backdrop-blur-md mb-8 sm:mb-10">
           
           <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
             
@@ -190,7 +196,7 @@ export default function ExploreAnimals({ animals, onSponsorAnimal }) {
           {filteredAnimals.map((animal) => (
             <div
               key={animal.id}
-              className="group rounded-2xl bg-[#123D2B]/70 border border-[#26734D]/50 hover:border-[#C8A96B]/60 overflow-hidden flex flex-col shadow-xl hover:shadow-2xl hover:shadow-[#C8A96B]/10 hover:-translate-y-1.5 transition-all duration-500"
+              className="group rounded-2xl bg-[#123D2B]/70 border border-[#26734D]/50 hover:border-[#C8A96B]/60 overflow-hidden flex flex-col shadow-xl hover:shadow-2xl hover:shadow-[#C8A96B]/10 hover:-translate-y-1.5 transition-all duration-500 parallax-card"
             >
               {/* Image Container */}
               <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#071D12]">
@@ -248,7 +254,7 @@ export default function ExploreAnimals({ animals, onSponsorAnimal }) {
                   </div>
 
                   <h3 className="font-display font-bold text-2xl text-[#F5F4EA] group-hover:text-[#C8A96B] transition-colors">
-                    {animal.name}
+                    {getAnimalName(animal) || animal.name}
                   </h3>
 
                   <p className="mt-2.5 text-xs text-[#F5F4EA]/75 line-clamp-3 leading-relaxed">
@@ -320,7 +326,7 @@ export default function ExploreAnimals({ animals, onSponsorAnimal }) {
                   </div>
 
                   <h3 className="font-display font-extrabold text-3xl sm:text-4xl text-[#F5F4EA]">
-                    {activeAnimalModal.name}
+                    {getAnimalName(activeAnimalModal) || activeAnimalModal.name}
                   </h3>
                   <p className="font-editorial italic text-[#C8A96B] text-base sm:text-lg mt-0.5">
                     {activeAnimalModal.scientific_name}
