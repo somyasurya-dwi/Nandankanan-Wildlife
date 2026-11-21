@@ -12,10 +12,39 @@ import {
   Train, 
   Plane, 
   CheckCircle2, 
-  Sparkles,
   ArrowRight
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+
+function SafariVehicleIcon({ className = "w-6 h-6" }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      {/* Spare tire on rear */}
+      <path d="M2 10v4" />
+      {/* Roof, windshield, hood, bumper */}
+      <path d="M3 6h11l3 5h4a1 1 0 0 1 1 1v3h-2" />
+      {/* Rear body & undercarriage */}
+      <path d="M3 6v9h1.5" />
+      <path d="M9.5 15h5" />
+      {/* Safari roll cage & open seating bar */}
+      <path d="M3 11h14" />
+      <path d="M9 6v5" />
+      {/* Headlight */}
+      <path d="M20 13h1" />
+      {/* Off-road safari wheels */}
+      <circle cx="7" cy="15" r="2.5" />
+      <circle cx="17" cy="15" r="2.5" />
+    </svg>
+  );
+}
 
 export default function PlanVisitSection({ onOpenTickets }) {
   const { language, t } = useLanguage();
@@ -195,7 +224,7 @@ export default function PlanVisitSection({ onOpenTickets }) {
 
             <div className="relative z-10">
               <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-[#F28C1B] mb-6">
-                <Sparkles className="w-6 h-6" />
+                <SafariVehicleIcon className="w-6 h-6" />
               </div>
               <h3 className="text-2xl font-serif font-bold text-white mb-2">
                 Safaris & Rides

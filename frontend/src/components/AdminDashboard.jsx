@@ -398,6 +398,7 @@ export default function AdminDashboard({
                         <option value="Mammals">Mammals</option>
                         <option value="Birds">Birds</option>
                         <option value="Reptiles">Reptiles</option>
+                        <option value="Semi-Aquatic Animals">Semi-Aquatic Animals</option>
                         <option value="Aquatic Animals">Aquatic Animals</option>
                       </select>
                     </div>
