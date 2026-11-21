@@ -123,7 +123,7 @@ export const INITIAL_ANIMALS = [
       "A single adult pangolin consumes approximately 70 million ants and termites per year."
     ],
     photo_url: "/images/pangolin.jpg",
-    video_url: "/videos/bear_live.webm",
+    video_url: "/videos/birds_live.webm",
     audio_type: "birds",
     featured: true,
     sponsorship_available: true,
@@ -409,7 +409,7 @@ export const INITIAL_ANIMALS = [
       "Their eyes, ears, and nostrils are positioned atop their head, allowing them to remain almost completely submerged."
     ],
     photo_url: "/images/hippopotamus.jpg",
-    video_url: "/videos/bear_live.webm",
+    video_url: "/videos/deer_live.webm",
     audio_type: "bear",
     featured: false,
     sponsorship_available: true,
@@ -1338,7 +1338,7 @@ export const INITIAL_MARKERS = [
     badge_text: "Nocturnal Wildlife House",
     emoji: "🛡️",
     photo_url: "/images/pangolin.jpg",
-    stream_url: "/videos/bear_live.webm",
+    stream_url: "/videos/birds_live.webm",
     animal_slug: "indian-pangolin",
     live_cam_available: true,
     camera_id: 5

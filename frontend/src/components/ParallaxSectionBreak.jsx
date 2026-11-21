@@ -134,8 +134,13 @@ export default function ParallaxSectionBreak({
           <div className="inline-block">
             <a
               href={ctaHref || '#'}
-              onClick={onCtaClick}
-              className="btn-accent px-6 sm:px-8 py-3.5 rounded-2xl text-xs sm:text-sm tracking-wider uppercase inline-flex items-center gap-3"
+              onClick={(e) => {
+                if (onCtaClick) {
+                  e.preventDefault();
+                  onCtaClick(e);
+                }
+              }}
+              className="btn-accent px-6 sm:px-8 py-3.5 rounded-2xl text-xs sm:text-sm tracking-wider uppercase inline-flex items-center gap-3 cursor-pointer"
             >
               <CtaIcon className="w-4 h-4 text-[#071D12]" />
               <span>{ctaText}</span>

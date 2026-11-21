@@ -39,7 +39,7 @@ export default function LiveStreamSection({ language }) {
       habitat: "Savannah & Rock Outcrop Safari",
       viewers: 1920,
       badge: "HD Feed",
-      src: "/videos/tiger_walking_zoo.webm",
+      src: "/videos/lion_live.webm",
       poster: "/images/asiatic_lion.jpg",
       status: "LIVE",
       desc: "Observing pride basking on the sunlit ridges of the lion safari."
@@ -51,34 +51,34 @@ export default function LiveStreamSection({ language }) {
       habitat: "Bathing Pool & Mud Wallow",
       viewers: 1650,
       badge: "HD Feed",
-      src: "/videos/tiger_safari.webm",
+      src: "/videos/elephant_live.webm",
       poster: "/images/asian_elephant.jpg",
       status: "LIVE",
       desc: "Family herd foraging along the lush borders of Kanjia wetland."
     },
     {
       id: 5,
-      name: "Sloth Bear Cavern",
-      species: "Melursus ursinus",
-      habitat: "Rocky Ravine & Termite Mounds",
-      viewers: 1140,
+      name: "Spotted Deer Safari",
+      species: "Axis axis (Chital)",
+      habitat: "Herbivore Safari & Dappled Woodland",
+      viewers: 1280,
       badge: "HD Feed",
-      src: "/videos/tiger_walking_1080p.webm",
-      poster: "/images/sloth_bear.jpg",
+      src: "/videos/deer_live.webm",
+      poster: "/images/spotted_deer.jpg",
       status: "LIVE",
-      desc: "Nocturnal & crepuscular foraging behavior monitoring."
+      desc: "Peaceful herd of spotted deer foraging through open sal groves and bamboo thickets."
     },
     {
       id: 6,
       name: "Walk-Through Bird Aviary",
-      species: "Aves Sanctuary",
+      species: "Pavo cristatus & Avifauna",
       habitat: "Canopy Walkway & Wetland Pools",
-      viewers: 980,
+      viewers: 1420,
       badge: "1080p Stream",
-      src: "/videos/tiger_walking_pacing.webm",
+      src: "/videos/birds_live.webm",
       poster: "/images/indian_peafowl.jpg",
       status: "LIVE",
-      desc: "Over 80 indigenous and migratory wetland bird species."
+      desc: "Over 80 indigenous and migratory wetland bird species and displaying Indian peafowl."
     }
   ];
 
@@ -164,8 +164,6 @@ export default function LiveStreamSection({ language }) {
             loop
             muted={isMuted}
             playsInline
-            disablePictureInPicture
-            controlsList="nodownload noplaybackrate nofullscreen noremoteplayback"
             poster={currentCam.poster}
             className="w-full h-full object-cover object-center"
           >
