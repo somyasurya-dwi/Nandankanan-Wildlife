@@ -589,7 +589,7 @@ export default function ExploreAnimals({ animals = [], onSponsorAnimal }) {
                   </div>
 
                   <h3 className="font-display font-extrabold text-3xl sm:text-4xl text-[#F5F4EA]">
-                    {activeAnimalModal.name}
+                    {(getAnimalName && getAnimalName(activeAnimalModal)) || activeAnimalModal.name}
                   </h3>
                   <p className="font-editorial italic text-[#C8A96B] text-base sm:text-lg mt-0.5">
                     {activeAnimalModal.scientific_name}
@@ -602,7 +602,7 @@ export default function ExploreAnimals({ animals = [], onSponsorAnimal }) {
                 
                 {/* Key Ecological Parameters */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                  <div className="p-4 rounded-2xl bg-[#123D2B]/80 border border-[#26734D]/40 shadow-sm">
+                  <div className="p-4 rounded-2xl bg-[#071D12]/80 border border-[#26734D]/40 shadow-sm">
                     <div className="flex items-center gap-2 text-[#C8A96B] text-xs font-bold uppercase tracking-wider mb-1">
                       <MapPin className="w-3.5 h-3.5 text-[#C8A96B]" />
                       Habitat
@@ -612,7 +612,7 @@ export default function ExploreAnimals({ animals = [], onSponsorAnimal }) {
                     </div>
                   </div>
 
-                  <div className="p-4 rounded-2xl bg-[#123D2B]/80 border border-[#26734D]/40 shadow-sm">
+                  <div className="p-4 rounded-2xl bg-[#071D12]/80 border border-[#26734D]/40 shadow-sm">
                     <div className="flex items-center gap-2 text-[#C8A96B] text-xs font-bold uppercase tracking-wider mb-1">
                       <Utensils className="w-3.5 h-3.5 text-[#C8A96B]" />
                       Diet & Feeding
@@ -622,7 +622,7 @@ export default function ExploreAnimals({ animals = [], onSponsorAnimal }) {
                     </div>
                   </div>
 
-                  <div className="p-4 rounded-2xl bg-[#123D2B]/80 border border-[#26734D]/40 shadow-sm">
+                  <div className="p-4 rounded-2xl bg-[#071D12]/80 border border-[#26734D]/40 shadow-sm">
                     <div className="flex items-center gap-2 text-[#C8A96B] text-xs font-bold uppercase tracking-wider mb-1">
                       <Scale className="w-3.5 h-3.5 text-[#C8A96B]" />
                       Adult Weight
@@ -632,7 +632,7 @@ export default function ExploreAnimals({ animals = [], onSponsorAnimal }) {
                     </div>
                   </div>
 
-                  <div className="p-4 rounded-2xl bg-[#123D2B]/80 border border-[#26734D]/40 shadow-sm">
+                  <div className="p-4 rounded-2xl bg-[#071D12]/80 border border-[#26734D]/40 shadow-sm">
                     <div className="flex items-center gap-2 text-[#C8A96B] text-xs font-bold uppercase tracking-wider mb-1">
                       <Clock className="w-3.5 h-3.5 text-[#C8A96B]" />
                       Typical Lifespan
@@ -655,7 +655,7 @@ export default function ExploreAnimals({ animals = [], onSponsorAnimal }) {
 
                 {/* Fascinating Facts */}
                 {activeAnimalModal.fun_facts && activeAnimalModal.fun_facts.length > 0 && (
-                  <div className="p-5 rounded-2xl bg-[#123D2B]/90 text-[#F5F4EA] border border-[#C8A96B]/40">
+                  <div className="p-5 rounded-2xl bg-[#071D12]/90 text-[#F5F4EA] border border-[#C8A96B]/40">
                     <h4 className="font-display font-bold text-base text-[#C8A96B] mb-3 flex items-center gap-2">
                       <Sparkles className="w-4 h-4 text-[#C8A96B]" />
                       Fascinating Wildlife Facts
@@ -699,10 +699,10 @@ export default function ExploreAnimals({ animals = [], onSponsorAnimal }) {
                       setActiveAnimalModal(null);
                       onSponsorAnimal && onSponsorAnimal(animal);
                     }}
-                    className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-gradient-to-r from-[#C8A96B] to-[#b39352] hover:from-[#d8b87a] hover:to-[#C8A96B] text-[#123D2B] font-black text-xs uppercase tracking-widest shadow-lg shadow-[#C8A96B]/20 transition-all flex items-center justify-center gap-2"
+                    className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-gradient-to-r from-[#C8A96B] to-[#b39352] hover:from-[#d8b87a] hover:to-[#C8A96B] text-[#071D12] font-black text-xs uppercase tracking-widest shadow-lg shadow-[#C8A96B]/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
                   >
                     <HeartHandshake className="w-4 h-4" />
-                    <span>Sponsor {activeAnimalModal.name}</span>
+                    <span>Sponsor {(getAnimalName && getAnimalName(activeAnimalModal)) || activeAnimalModal.name}</span>
                   </button>
                 </div>
 

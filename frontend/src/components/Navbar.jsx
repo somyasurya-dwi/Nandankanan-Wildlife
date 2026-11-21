@@ -117,7 +117,7 @@ export default function Navbar({
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, [onSectionChange]);
 
-  // Dynamic Scroll Tracking: Detect which section is currently active and update navbar highlight
+  // Dynamic Scrollspy with Intersection Observer & Sticky Navbar Offset
   useEffect(() => {
     const sectionIds = [
       'hero',
@@ -126,93 +126,121 @@ export default function Navbar({
       'explore-animals',
       'virtual-experience',
       'conservation-stories',
-      'plan-visit',
       'sponsorship-portal',
     ];
 
-    let ticking = false;
+    const getHeaderHeight = () => {
+      const header = document.querySelector('header');
+      return header ? header.offsetHeight : 95;
+    };
 
+    let headerHeight = getHeaderHeight();
+
+    // Map storing active intersection entries from IntersectionObserver
+    const intersectionEntries = new Map();
+
+    const evaluateActiveSection = () => {
+      // Skip updates during smooth programmatic scrolling triggered by navbar clicks
+      if (isManualScrollingRef.current) return;
+
+      // 1. When near the top of the viewport, activate 'hero'
+      if (window.scrollY < 80) {
+        if (activeSection !== 'hero') {
+          setActiveSection('hero');
+          if (onSectionChange) onSectionChange('hero');
+        }
+        return;
+      }
+
+      // 2. When near the bottom of document, activate the last section ('sponsorship-portal')
+      const scrollBottom = window.innerHeight + window.scrollY;
+      const docHeight = document.documentElement.scrollHeight;
+      if (scrollBottom >= docHeight - 80) {
+        const lastId = sectionIds[sectionIds.length - 1];
+        if (activeSection !== lastId) {
+          setActiveSection(lastId);
+          if (onSectionChange) onSectionChange(lastId);
+        }
+        return;
+      }
+
+      headerHeight = getHeaderHeight();
+      const activationOffset = headerHeight + 60;
+
+      let candidateId = null;
+
+      // 3. Primary Section Boundary Detection: find section intersecting the sticky header threshold
+      for (const id of sectionIds) {
+        const el = document.getElementById(id);
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          if (rect.top <= activationOffset && rect.bottom > activationOffset) {
+            candidateId = id;
+            break;
+          }
+        }
+      }
+
+      // 4. Secondary Observer Fallback: highest intersection ratio in viewport
+      if (!candidateId) {
+        let highestRatio = 0;
+        intersectionEntries.forEach((entry, id) => {
+          if (entry.isIntersecting && entry.intersectionRatio > highestRatio) {
+            highestRatio = entry.intersectionRatio;
+            candidateId = id;
+          }
+        });
+      }
+
+      // Update state if section changed
+      if (candidateId && candidateId !== activeSection) {
+        setActiveSection(candidateId);
+        if (onSectionChange) onSectionChange(candidateId);
+      }
+    };
+
+    // Initialize IntersectionObserver with rootMargin accounting for sticky header offset
+    const observerOptions = {
+      root: null,
+      rootMargin: `-${headerHeight}px 0px -40% 0px`,
+      threshold: [0, 0.15, 0.3, 0.5, 0.7, 1.0]
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        intersectionEntries.set(entry.target.id, entry);
+      });
+      evaluateActiveSection();
+    }, observerOptions);
+
+    sectionIds.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+
+    // Handle scroll events with rAF for instant feedback on rapid trackpad/mousewheel scrolling
+    let scrollTicking = false;
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
-
-      // Skip dynamic override during smooth click scrolling to prevent intermediate flicker
-      if (isManualScrollingRef.current) return;
-      if (ticking) return;
-
-      ticking = true;
+      if (scrollTicking) return;
+      scrollTicking = true;
       window.requestAnimationFrame(() => {
-        ticking = false;
-
-        // When user is near the very top of the page, HOME is active
-        if (window.scrollY < 140) {
-          if (activeSection !== 'hero') {
-            setActiveSection('hero');
-            if (onSectionChange) onSectionChange('hero');
-          }
-          return;
-        }
-
-        // When user is near bottom of page, the final section (sponsorship-portal / ADOPT) is active
-        const scrollBottom = window.innerHeight + window.scrollY;
-        const docHeight = document.documentElement.scrollHeight;
-        if (scrollBottom >= docHeight - 90) {
-          if (activeSection !== 'sponsorship-portal') {
-            setActiveSection('sponsorship-portal');
-            if (onSectionChange) onSectionChange('sponsorship-portal');
-          }
-          return;
-        }
-
-        // Calculate dynamic activation threshold taking sticky header height into account
-        const header = document.querySelector('header');
-        const headerHeight = header ? header.offsetHeight : 120;
-        const activationThreshold = headerHeight + 80;
-
-        let currentId = null;
-
-        for (const id of sectionIds) {
-          const el = document.getElementById(id);
-          if (el) {
-            const rect = el.getBoundingClientRect();
-            if (rect.top <= activationThreshold && rect.bottom > activationThreshold) {
-              currentId = id;
-              break;
-            }
-          }
-        }
-
-        // Fallback: find the last section whose top is above the threshold
-        if (!currentId) {
-          for (let i = sectionIds.length - 1; i >= 0; i--) {
-            const id = sectionIds[i];
-            const el = document.getElementById(id);
-            if (el) {
-              const rect = el.getBoundingClientRect();
-              if (rect.top <= activationThreshold) {
-                currentId = id;
-                break;
-              }
-            }
-          }
-        }
-
-        if (currentId && currentId !== activeSection) {
-          setActiveSection(currentId);
-          if (onSectionChange) onSectionChange(currentId);
-        }
+        evaluateActiveSection();
+        scrollTicking = false;
       });
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
+    evaluateActiveSection();
 
     return () => {
+      observer.disconnect();
       window.removeEventListener('scroll', handleScroll);
       if (manualScrollTimeoutRef.current) clearTimeout(manualScrollTimeoutRef.current);
     };
   }, [activeSection, onSectionChange]);
 
-  // Smooth Navigation Click Handler with Dynamic Header Offset
+  // Smooth Navigation Click Handler with Dynamic Sticky Header Offset
   const handleNavClick = (e, link) => {
     if (link.onClick) {
       e.preventDefault();
@@ -224,11 +252,11 @@ export default function Navbar({
       e.preventDefault();
       const targetId = link.sectionId || link.href.slice(1);
 
-      // Immediately highlight the selected item
+      // Immediately highlight the selected item on click (0 lag)
       setActiveSection(targetId);
       if (onSectionChange) onSectionChange(targetId);
 
-      // Lock scroll detection momentarily during smooth animation
+      // Lock scroll detection momentarily during smooth animation to prevent intermediate flicker
       isManualScrollingRef.current = true;
       if (manualScrollTimeoutRef.current) clearTimeout(manualScrollTimeoutRef.current);
       manualScrollTimeoutRef.current = setTimeout(() => {
@@ -238,14 +266,22 @@ export default function Navbar({
       const targetEl = document.getElementById(targetId);
       if (targetEl) {
         const header = document.querySelector('header');
-        const headerHeight = header ? header.offsetHeight : 120;
-        const elementPosition = targetEl.getBoundingClientRect().top + window.scrollY;
-        const offsetPosition = Math.max(0, elementPosition - headerHeight + 2);
+        const headerHeight = header ? header.offsetHeight : 95;
 
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: 'smooth'
-        });
+        if (window.__lenis) {
+          window.__lenis.scrollTo(targetEl, {
+            offset: -headerHeight,
+            duration: 1.2,
+            immediate: false
+          });
+        } else {
+          const elementPosition = targetEl.getBoundingClientRect().top + window.scrollY;
+          const offsetPosition = Math.max(0, elementPosition - headerHeight + 2);
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth'
+          });
+        }
 
         // Update URL hash without abrupt jumps
         if (window.history && window.history.pushState) {
@@ -397,7 +433,6 @@ export default function Navbar({
     { key: 'virtualTour', name: t('nav.virtualTour'), href: '#virtual-experience', sectionId: 'virtual-experience' },
     { key: 'stories', name: t('nav.stories'), href: '#conservation-stories', sectionId: 'conservation-stories' },
     { key: 'notices', name: t('nav.newsNotice'), href: '#notices', onClick: () => setNewsNoticeModalOpen(true) },
-    { key: 'planVisit', name: t('nav.planVisit'), href: '#plan-visit', sectionId: 'plan-visit' },
     { key: 'adopt', name: t('nav.adopt'), href: '#sponsorship-portal', sectionId: 'sponsorship-portal' },
     { key: 'wallet', name: t('nav.wallet'), href: '#wallet', onClick: () => setWalletModalOpen(true) },
   ];
@@ -415,6 +450,7 @@ export default function Navbar({
           {/* Official Nandankanan Brand Logo */}
           <a 
             href="#hero" 
+            onClick={(e) => handleNavClick(e, { key: 'home', href: '#hero', sectionId: 'hero' })}
             className="flex items-center gap-2.5 sm:gap-3.5 min-w-0 focus:outline-none group"
             aria-label="Nandankanan Zoological Park Home"
           >
@@ -562,37 +598,9 @@ export default function Navbar({
             {/* Right Action Area (Grouped Utility Controls + Eco-Wallet + User + Explore Button) */}
             <div className="hidden lg:flex items-center gap-1.5 xl:gap-2 shrink-0">
               
-              {/* Sleek Frosted Utility Hub (Audio Ambience + Accessibility + Language Switcher) */}
+              {/* Sleek Frosted Utility Hub (Accessibility + Language Switcher) */}
               <div className="flex items-center bg-[#092215]/85 border border-[#26734D]/50 rounded-xl px-1.5 py-0.5 shadow-inner">
-                {/* 1. Rainforest Nature Audio Ambience Toggle */}
-                <button
-                  onClick={handleToggleAmbience}
-                  className={`p-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all ${
-                    ambientPlaying 
-                      ? 'bg-[#123D2B] text-[#C8A96B]' 
-                      : 'text-[#F5F4EA]/80 hover:text-white hover:bg-[#1B6537]/50'
-                  }`}
-                  title={ambientPlaying ? "Mute Rainforest Audio" : "Play Rainforest Ambience"}
-                  aria-label="Toggle Nature Audio"
-                >
-                  {ambientPlaying ? (
-                    <>
-                      <Volume2 className="w-3.5 h-3.5 text-[#C8A96B]" />
-                      <span className="flex items-end gap-0.5 h-2.5">
-                        <span className="w-0.5 bg-[#C8A96B] rounded-full animate-bounce h-1.5" style={{ animationDuration: '0.6s' }} />
-                        <span className="w-0.5 bg-[#C8A96B] rounded-full animate-bounce h-2.5" style={{ animationDuration: '0.4s' }} />
-                        <span className="w-0.5 bg-[#C8A96B] rounded-full animate-bounce h-1" style={{ animationDuration: '0.7s' }} />
-                      </span>
-                    </>
-                  ) : (
-                    <VolumeX className="w-3.5 h-3.5" />
-                  )}
-                </button>
-
-                {/* Subtle Divider */}
-                <span className="h-3.5 w-[1px] bg-white/20 mx-0.5" />
-
-                {/* 2. ACCESSIBILITY TOOL (Official UN Universal Symbol of Accessibility) */}
+                {/* 1. ACCESSIBILITY TOOL (Official UN Universal Symbol of Accessibility) */}
                 <div className="relative" ref={accessibilityRef}>
                   <button
                     onClick={() => setAccessibilityOpen(!accessibilityOpen)}
@@ -846,15 +854,6 @@ export default function Navbar({
               >
                 <span>अ</span>
                 <span className="text-[9px] text-[#C8A96B]">A</span>
-              </button>
-
-              <button
-                onClick={handleToggleAmbience}
-                className={`p-1.5 rounded-lg border text-xs ${
-                  ambientPlaying ? 'bg-[#C8A96B] text-[#071D12]' : 'bg-[#0B2A1A] border-[#26734D] text-white'
-                }`}
-              >
-                {ambientPlaying ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
               </button>
 
               <button
