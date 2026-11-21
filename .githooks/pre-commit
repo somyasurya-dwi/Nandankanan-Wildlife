@@ -1,0 +1,26 @@
+#!/bin/sh
+# ==============================================================================
+# Pre-commit Hook: Strictly prevent staging or committing migration files
+# ==============================================================================
+
+MIGRATION_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E 'migrations/0[0-9]+.*\.py$')
+
+if [ -n "$MIGRATION_FILES" ]; then
+    echo ""
+    echo "======================================================================"
+    echo "  [ERROR] COMMIT REJECTED: Database migration files detected!"
+    echo "======================================================================"
+    echo "The following migration file(s) are staged for commit:"
+    echo "$MIGRATION_FILES"
+    echo ""
+    echo "POLICY: Migration files are strictly local and must NEVER be committed"
+    echo "or pushed to the remote repository under any circumstances."
+    echo ""
+    echo "To fix this, unstage the migration file(s):"
+    echo "    git restore --staged <file-path>"
+    echo "======================================================================"
+    echo ""
+    exit 1
+fi
+
+exit 0

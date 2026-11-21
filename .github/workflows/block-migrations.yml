@@ -1,0 +1,43 @@
+name: Enforce No Migration Files
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches: ['**']
+
+jobs:
+  check-migrations:
+    name: Verify Zero Migration Files
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Inspect commits for migration files
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BASE_SHA="${{ github.event.pull_request.base.sha }}"
+            HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+            DIFF_RANGE="$BASE_SHA...$HEAD_SHA"
+          else
+            if [ "${{ github.event.before }}" = "0000000000000000000000000000000000000000" ] || [ -z "${{ github.event.before }}" ]; then
+              DIFF_RANGE="HEAD~1...HEAD"
+            else
+              DIFF_RANGE="${{ github.event.before }}...${{ github.sha }}"
+            fi
+          fi
+
+          echo "Inspecting commit range: $DIFF_RANGE"
+          MIGRATIONS=$(git diff --name-only "$DIFF_RANGE" 2>/dev/null | grep -E 'migrations/0[0-9]+.*\.py$' || true)
+
+          if [ -n "$MIGRATIONS" ]; then
+            echo "::error::CRITICAL POLICY VIOLATION: Database migration files detected in push/PR!"
+            echo "$MIGRATIONS"
+            echo "Migration files must NEVER be pushed to GitHub under any circumstances."
+            exit 1
+          fi
+
+          echo "✅ Clean: No migration files detected."
