@@ -553,6 +553,76 @@ export const INITIAL_CAMERAS = [
     description: "Vibrant aviary stream highlighting Indian peacocks, migratory teal, and painted storks.",
     camera_location: "Walk-Through Aviary Dome",
     order: 6
+  },
+  {
+    id: 7,
+    title: "White Bengal Tiger Heritage Feed",
+    animal_name: "White Bengal Tiger",
+    habitat_name: "White Tiger Heritage Glade",
+    stream_url: "/videos/tiger_walking_pacing.webm",
+    video_type: "demo_video",
+    status: "LIVE",
+    viewer_count: 2410,
+    thumbnail_url: "/images/white_tiger.jpg",
+    description: "Continuous observation stream of Nandankanan's world-famous royal white tigers resting by the shaded pool.",
+    camera_location: "White Tiger Heritage Enclosure",
+    order: 7
+  },
+  {
+    id: 8,
+    title: "Indian Pangolin Conservation Feed",
+    animal_name: "Indian Pangolin",
+    habitat_name: "Nocturnal Burrow & Mound Terrain",
+    stream_url: "/videos/bear_live.webm",
+    video_type: "demo_video",
+    status: "LIVE",
+    viewer_count: 1120,
+    thumbnail_url: "/images/pangolin.jpg",
+    description: "High-definition infrared stream inside Nandankanan's pioneering pangolin research and breeding facility.",
+    camera_location: "Pangolin Conservation Center",
+    order: 8
+  },
+  {
+    id: 9,
+    title: "Gharial Crocodile Sanctuary Feed",
+    animal_name: "Gharial Crocodile",
+    habitat_name: "Deep River Pool & Sandy Bank",
+    stream_url: "/videos/deer_live.webm",
+    video_type: "demo_video",
+    status: "LIVE",
+    viewer_count: 980,
+    thumbnail_url: "/images/gharial.jpg",
+    description: "Subsurface and bank camera observing critically endangered gharials basking in the historic breeding pool.",
+    camera_location: "Gharial Breeding Pool #1",
+    order: 9
+  },
+  {
+    id: 10,
+    title: "King Cobra Terrarium Stream",
+    animal_name: "King Cobra",
+    habitat_name: "Dense Tropical Terrarium",
+    stream_url: "/videos/tiger_walking_1080p.webm",
+    video_type: "demo_video",
+    status: "LIVE",
+    viewer_count: 1270,
+    thumbnail_url: "/images/king_cobra.jpg",
+    description: "Macro-focus live view of the world's longest venomous snake inside the temperature-regulated pavilion.",
+    camera_location: "King Cobra Pavilion Deck",
+    order: 10
+  },
+  {
+    id: 11,
+    title: "Freshwater Flapshell Turtle Stream",
+    animal_name: "Indian Flapshell Turtle",
+    habitat_name: "Kanjia Wetland Lily Waters",
+    stream_url: "/videos/birds_live.webm",
+    video_type: "demo_video",
+    status: "LIVE",
+    viewer_count: 620,
+    thumbnail_url: "/images/freshwater_turtle.jpg",
+    description: "Peaceful observation feed of native flapshell turtles foraging among lotus pads in Lake Kanjia.",
+    camera_location: "Lake Kanjia Basin Sector 3",
+    order: 11
   }
 ];
 
