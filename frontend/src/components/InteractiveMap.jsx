@@ -1,7 +1,8 @@
-import { useLanguage } from '../context/LanguageContext';
-﻿import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import L from 'leaflet';
 import ThreeZooMap from './ThreeZooMap';
+import InteractiveMap3D from './InteractiveMap3D';
+import { useLanguage } from '../context/LanguageContext';
 import { INITIAL_ANIMALS } from '../data/mockData';
 import {
   MapPin,
@@ -60,8 +61,8 @@ export default function InteractiveMap({
 
   // Exact center of Nandankanan's animal enclosures (for satellite mode)
   const NANDANKANAN_CENTER = [20.4020, 85.8190];
-  // Illustrated Map bounds: 1024 x 526
-  const ILLUSTRATED_BOUNDS = [[0, 0], [526, 1024]];
+  // Illustrated Map bounds: 1024 x 571 (exact aspect ratio of real environment map)
+  const ILLUSTRATED_BOUNDS = [[0, 0], [571, 1024]];
 
   const categories = [
     { key: 'all', label: (t && t('map.categories.all')) || 'All Sanctuary Highlights' },
@@ -292,7 +293,7 @@ export default function InteractiveMap({
         boxZoom: true,
         keyboard: true,
         zoomControl: false,
-        maxBounds: [[-100, -100], [626, 1124]],
+        maxBounds: [[-100, -100], [671, 1124]],
         maxBoundsViscosity: 0.7
       });
 
@@ -414,6 +415,19 @@ export default function InteractiveMap({
               </button>
 
               <button
+                onClick={() => setMapStyle('deepzoom')}
+                className={`px-3.5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all ${
+                  mapStyle === 'deepzoom'
+                    ? 'bg-[#C8A96B] text-[#071810] shadow-md ring-2 ring-[#C8A96B]'
+                    : 'text-[#FAF9F5] hover:text-[#C8A96B] hover:bg-forest-900/70'
+                }`}
+                title="4K Deep-Zoom DZI Interactive Pyramidal Map"
+              >
+                <span className="text-sm">🔍</span>
+                <span>4K DEEP ZOOM</span>
+              </button>
+
+              <button
                 onClick={() => setMapStyle('illustrated')}
                 className={`px-3.5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all ${
                   mapStyle === 'illustrated'
@@ -516,8 +530,15 @@ export default function InteractiveMap({
             className={`${isDoubleScreen ? "w-full" : "lg:col-span-7 xl:col-span-8"} relative rounded-3xl overflow-hidden zoo-map-frame bg-forest-950 transition-all ${isFullscreenMap ? 'fixed inset-4 z-50 rounded-2xl shadow-2xl' : ''
             }`}>
 
-            {/* Render 3D Google Earth WebGL canvas OR 2D Leaflet Container */}
-            {mapStyle === '3d' ? (
+            {/* Render 4K Deep Zoom OR 3D Google Earth WebGL canvas OR 2D Leaflet Container */}
+            {mapStyle === 'deepzoom' ? (
+              <InteractiveMap3D
+                markers={markers}
+                onSelectAnimalBySlug={onSelectAnimalBySlug}
+                onOpenLiveCam={onOpenLiveCam}
+                embedded={true}
+              />
+            ) : mapStyle === '3d' ? (
               <ThreeZooMap
                 markers={markers}
                 activeMarker={activeMarker}
