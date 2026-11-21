@@ -13,11 +13,11 @@ import {
   playTigerRoar, 
   playLionRoar, 
   playElephantTrumpet, 
-  playBearGrunt 
+  playPeafowlCry 
 } from '../utils/audioSynthesizer';
 import { useLanguage } from '../context/LanguageContext';
 
-export default function CinematicVideoHero({ onExploreClick, onWatchLiveClick }) {
+export default function CinematicVideoHero({ onExploreClick, onMapClick, onWatchLiveClick }) {
   const { language, t } = useLanguage();
 
   // Multi-animal video scenes
@@ -50,13 +50,13 @@ export default function CinematicVideoHero({ onExploreClick, onWatchLiveClick })
       emoji: '🐘'
     },
     {
-      id: 'bear',
-      animal: t('hero.scenes.bear') || 'Sloth Bear',
-      videoUrl: '/videos/bear_live.webm',
-      fallbackVideoUrl: '/videos/bear_live.webm',
-      poster: '/images/bear_poster_16x9.jpg',
-      audioFn: playBearGrunt,
-      emoji: '🐻'
+      id: 'peafowl',
+      animal: t('hero.scenes.peafowl') || 'Indian Peafowl',
+      videoUrl: '/videos/birds_live.webm',
+      fallbackVideoUrl: '/videos/birds_live.webm',
+      poster: '/images/peafowl_poster_16x9.jpg',
+      audioFn: playPeafowlCry,
+      emoji: '🦚'
     }
   ];
 
@@ -139,104 +139,90 @@ export default function CinematicVideoHero({ onExploreClick, onWatchLiveClick })
       id="hero" 
       className="relative w-full min-h-[72vh] sm:min-h-[80vh] md:min-h-[85vh] flex flex-col justify-center overflow-hidden select-none bg-[#071D12] pt-8 sm:pt-12 md:pt-14 pb-24 sm:pb-28"
     >
-      {/* 1. Cinematic Background Video Carousel (Rock-Solid Frame, No Parallax Shift Before THE WILD, LIVE) */}
+      {/* 1. Cinematic Background Video Carousel */}
       <div className="absolute inset-0 z-0 overflow-hidden">
         {scenes.map((scene, idx) => {
           const isActive = idx === activeSceneIndex;
           return (
-            <div
-              key={scene.id}
-              className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
-                isActive && !isTransitioning ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
+            <div 
+              key={scene.id} 
+              className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out ${
+                isActive ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
               }`}
             >
               <video
                 ref={(el) => (videoRefs.current[idx] = el)}
+                src={scene.videoUrl}
                 autoPlay={isActive}
                 loop
                 muted={isMuted}
                 playsInline
-                preload="metadata"
                 poster={scene.poster}
-                className="w-full h-full object-cover object-center filter brightness-105 contrast-115 saturate-110"
+                className="w-full h-full object-cover object-center scale-105"
               >
                 <source src={scene.videoUrl} type="video/webm" />
-                <source src={scene.fallbackVideoUrl} type="video/webm" />
+                {scene.fallbackVideoUrl && (
+                  <source src={scene.fallbackVideoUrl} type="video/webm" />
+                )}
               </video>
             </div>
           );
         })}
 
-        {/* Focused Cinematic Text Vignette: Deep contrast under text on the left, crystal-clear over animal on the right */}
-        <div className="absolute inset-0 z-20 bg-gradient-to-r from-[#04120A]/90 via-[#04120A]/55 via-45% to-transparent pointer-events-none" />
-        <div className="absolute inset-x-0 bottom-0 h-40 z-20 bg-gradient-to-t from-[#071D12] via-[#071D12]/40 to-transparent pointer-events-none" />
-        <div className="absolute inset-x-0 top-0 h-24 z-20 bg-gradient-to-b from-[#04120A]/70 to-transparent pointer-events-none" />
-
-        {/* Subtle Atmospheric Forest Dust Particles */}
-        <div className="absolute inset-0 z-20 pointer-events-none overflow-hidden opacity-60">
-          <div className="forest-dust-particle p1" />
-          <div className="forest-dust-particle p2" />
-          <div className="forest-dust-particle p3" />
-          <div className="forest-dust-particle p4" />
-          <div className="forest-dust-particle p5" />
-        </div>
+        {/* Cinematic Darkness Vignette Overlays for Maximum Text Legibility */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#05140C]/90 via-[#071D12]/70 to-transparent z-10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#071D12] via-transparent to-[#05140C]/60 z-10" />
+        <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[#071D12] to-transparent z-10 pointer-events-none" />
       </div>
 
-      {/* 2. Main Hero Content Flow (Stable, No Parallax Bleed into Subsequent Sections) */}
-      <div className="relative z-30 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex flex-col justify-center">
-        <div className="max-w-3xl pb-2">
-
-          {/* Bilingual Hero Heading */}
-          <div className="mb-5">
-            {language === 'en' ? (
-              <>
-                {/* Odia Tagline above English Heading in default English view */}
-                <div className="text-xl sm:text-2xl md:text-3xl font-odia font-bold text-[#C8A96B] tracking-wide mb-3 drop-shadow-md">
-                  {t('hero.odiaTagline')}
-                </div>
-                {/* English Main Heading */}
-                <h1 className="font-display font-black text-4xl sm:text-6xl md:text-7xl lg:text-[5.25rem] tracking-tight text-[#F5F4EA] leading-[1.04] drop-shadow-2xl">
-                  {t('hero.englishHeadingLine1')} <br />
-                  <span className="text-[#C8A96B] font-editorial italic font-normal tracking-normal drop-shadow-lg">
-                    {t('hero.englishHeadingLine2')}
-                  </span>
-                </h1>
-              </>
-            ) : (
-              <>
-                {/* English Tagline above when Odia/Hindi/Bengali is selected */}
-                <div className="text-xs sm:text-sm font-mono tracking-[0.2em] uppercase text-[#C8A96B] mb-3 drop-shadow-md">
-                  {t('hero.odiaTagline')}
-                </div>
-                {/* Native Script Main Heading */}
-                <h1 className="font-display font-black text-3xl sm:text-5xl md:text-6xl lg:text-7xl tracking-tight text-[#F5F4EA] leading-[1.15] drop-shadow-2xl">
-                  {t('hero.englishHeadingLine1')} <br />
-                  <span className="text-[#C8A96B] font-serif font-bold tracking-normal drop-shadow-lg">
-                    {t('hero.englishHeadingLine2')}
-                  </span>
-                </h1>
-              </>
-            )}
+      {/* 2. Hero Content Container */}
+      <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-8 sm:pt-12">
+        <div className="max-w-3xl">
+          
+          {/* Bilingual Crest Badge: English + Odia Official Header */}
+          <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-[#0B2A1A]/85 border border-[#C8A96B]/50 shadow-xl backdrop-blur-md mb-6">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-[11px] sm:text-xs font-mono font-bold tracking-widest uppercase text-[#C8A96B]">
+              {t('hero.badge')}
+            </span>
+            <span className="text-white/40">|</span>
+            <span className="text-xs sm:text-sm font-odia font-bold text-[#F5F4EA] tracking-wide">
+              ନନ୍ଦନକାନନ ପ୍ରାଣୀ ଉଦ୍ୟାନ
+            </span>
           </div>
 
-          {/* Paragraph Introduction */}
-          <p className="text-base sm:text-lg md:text-xl text-[#F5F4EA]/90 max-w-2xl font-light leading-relaxed mb-6 drop-shadow">
-            {t('hero.subtitle')}
+          {/* Editorial Grand Typography */}
+          <h1 className="font-display font-black text-4xl sm:text-6xl md:text-7xl lg:text-8xl tracking-tight leading-[0.95] text-[#F5F4EA] drop-shadow-2xl mb-4">
+            {t('hero.titleLine1')}{' '}
+            <span className="font-editorial italic font-normal text-[#C8A96B] block sm:inline">
+              {t('hero.titleLine2')}
+            </span>
+          </h1>
+
+          {/* Description Paragraph */}
+          <p className="text-sm sm:text-base md:text-lg text-[#F5F4EA]/90 font-light leading-relaxed max-w-2xl mb-8 drop-shadow-md">
+            {t('hero.shortIntro')}
           </p>
 
-          {/* Primary Action Buttons */}
-          <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-8">
+          {/* Call-To-Action Button Suite */}
+          <div className="flex flex-wrap items-center gap-3.5 mb-10">
             <button
               onClick={onExploreClick}
-              className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#C8A96B] to-[#b39352] hover:from-[#d8b87a] hover:to-[#C8A96B] text-[#071D12] font-black text-xs uppercase tracking-widest shadow-lg hover:shadow-[0_0_20px_rgba(200,169,107,0.4)] hover:scale-105 active:scale-95 transition-all flex items-center gap-2 group cursor-pointer"
+              className="btn-accent px-6 sm:px-8 py-3.5 rounded-xl text-xs sm:text-sm tracking-wider uppercase inline-flex items-center gap-2.5 shadow-xl group cursor-pointer"
             >
               <span>{t('hero.exploreWildlife')}</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
             </button>
 
             <a
               href="#interactive-map"
-              className="px-5 py-3 rounded-xl bg-[#06180E]/75 hover:bg-[#123D2B] text-[#F5F4EA] hover:text-[#C8A96B] border border-[#26734D]/60 hover:border-[#C8A96B]/80 font-bold text-xs uppercase tracking-wider backdrop-blur-md shadow-md transition-all flex items-center gap-2"
+              onClick={(e) => {
+                if (onMapClick) {
+                  e.preventDefault();
+                  onMapClick();
+                }
+              }}
+              className="px-5 py-3 rounded-xl bg-[#06180E]/75 hover:bg-[#123D2B] text-[#F5F4EA] hover:text-[#C8A96B] border border-[#26734D]/60 hover:border-[#C8A96B]/80 font-bold text-xs uppercase tracking-wider backdrop-blur-md shadow-md transition-all flex items-center gap-2 cursor-pointer"
             >
               <MapIcon className="w-4 h-4 text-[#C8A96B]" />
               <span>{t('hero.discoverZooMap')}</span>
@@ -244,7 +230,7 @@ export default function CinematicVideoHero({ onExploreClick, onWatchLiveClick })
 
             <button
               onClick={onWatchLiveClick}
-              className="px-4 py-3 rounded-xl bg-black/30 hover:bg-[#123D2B]/80 text-[#F5F4EA]/90 hover:text-white border border-white/15 hover:border-emerald-500/60 font-semibold text-xs uppercase tracking-wider backdrop-blur-md transition-all flex items-center gap-2"
+              className="px-5 py-3 rounded-xl bg-[#06180E]/75 hover:bg-[#123D2B] text-[#F5F4EA] hover:text-[#C8A96B] border border-[#26734D]/60 hover:border-[#C8A96B]/80 font-bold text-xs uppercase tracking-wider backdrop-blur-md shadow-md transition-all flex items-center gap-2 cursor-pointer"
             >
               <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
               <span>{t('hero.watchLive')}</span>
@@ -295,7 +281,7 @@ export default function CinematicVideoHero({ onExploreClick, onWatchLiveClick })
               <button
                 key={s.id}
                 onClick={() => switchScene(idx)}
-                className={`relative overflow-hidden px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 ${
+                className={`relative overflow-hidden px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 cursor-pointer ${
                   isCurr
                     ? 'bg-[#C8A96B] text-[#071D12] font-bold shadow-sm'
                     : 'bg-[#123D2B]/80 text-[#F5F4EA]/80 hover:text-white hover:bg-[#1B6537]'
@@ -323,7 +309,7 @@ export default function CinematicVideoHero({ onExploreClick, onWatchLiveClick })
           {/* Roar Button */}
           <button
             onClick={handleRoar}
-            className={`p-1.5 rounded-lg text-xs transition-all ${
+            className={`p-1.5 rounded-lg text-xs transition-all cursor-pointer ${
               isRoaring 
                 ? 'bg-[#C8A96B] text-[#071D12] scale-105 shadow-[0_0_12px_#C8A96B]' 
                 : 'bg-[#123D2B]/80 text-[#C8A96B] hover:bg-[#1B6537]'
@@ -336,7 +322,7 @@ export default function CinematicVideoHero({ onExploreClick, onWatchLiveClick })
 
           <button
             onClick={togglePlay}
-            className="p-1.5 rounded-lg bg-[#123D2B]/80 text-[#F5F4EA] hover:text-[#C8A96B] hover:bg-[#1B6537] transition-colors"
+            className="p-1.5 rounded-lg bg-[#123D2B]/80 text-[#F5F4EA] hover:text-[#C8A96B] hover:bg-[#1B6537] transition-colors cursor-pointer"
             title={isPlaying ? "Pause Video" : "Play Video"}
             aria-label="Play or Pause Video"
           >
@@ -345,7 +331,7 @@ export default function CinematicVideoHero({ onExploreClick, onWatchLiveClick })
 
           <button
             onClick={toggleMute}
-            className="p-1.5 rounded-lg bg-[#123D2B]/80 text-[#F5F4EA] hover:text-[#C8A96B] hover:bg-[#1B6537] transition-colors"
+            className="p-1.5 rounded-lg bg-[#123D2B]/80 text-[#F5F4EA] hover:text-[#C8A96B] hover:bg-[#1B6537] transition-colors cursor-pointer"
             title={isMuted ? "Unmute Video" : "Mute Video"}
             aria-label="Mute or Unmute Video"
           >

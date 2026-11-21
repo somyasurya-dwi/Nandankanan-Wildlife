@@ -1,8 +1,6 @@
-import { useLanguage } from '../context/LanguageContext';
-﻿import React, { useState, useMemo, useRef, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   Search, 
-  Filter, 
   Compass, 
   Tv, 
   HeartHandshake, 
@@ -10,115 +8,39 @@ import {
   Sparkles, 
   CheckCircle2, 
   MapPin, 
-  Activity, 
   Clock, 
   Scale, 
   Utensils, 
-  ShieldAlert, 
   ChevronRight,
-  ChevronDown,
-  RotateCcw,
-  ExternalLink
+  RotateCcw
 } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
-export const ANIMAL_CATEGORY_GROUPS = {
-  Mammals: [
-    'Big Cats',
-    'Elephants and Large Mammals',
-    'Deer and Antelopes',
-    'Primates',
-    'Other Mammals'
-  ],
-  Birds: [
-    'Parrots and Parakeets',
-    'Peafowl and Pheasants',
-    'Water Birds',
-    'Birds of Prey',
-    'Other Birds'
-  ],
-  Reptiles: [
-    'Crocodiles',
-    'Snakes',
-    'Lizards',
-    'Turtles and Tortoises'
-  ],
-  'Semi-Aquatic Animals': [
-    'Freshwater Fishes',
-    'Aquatic Mammals',
-    'Amphibians'
-  ],
-  'Aquatic Animals': [
-    'Freshwater Fishes',
-    'Aquatic Mammals',
-    'Amphibians'
-  ]
-};
+export const SANCTUARY_CATEGORIES = [
+  { key: 'All', label: 'All Species', emoji: '🐾', count: 18 },
+  { key: 'Mammals', label: 'Mammals', title: 'Mammals & Big Cats', emoji: '🐅', count: 7 },
+  { key: 'Birds', label: 'Birds', title: 'Avian Sanctuary & Birds', emoji: '🦚', count: 5 },
+  { key: 'Reptiles', label: 'Reptiles', title: 'Reptiles & Crocodilians', emoji: '🐊', count: 3 },
+  { key: 'Semi-Aquatic Animals', label: 'Aquatic', title: 'Aquatic & Semi-Aquatic Wildlife', emoji: '🌊', count: 3 }
+];
 
 export default function ExploreAnimals({ animals = [], onSponsorAnimal }) {
   const { t, getAnimalName, language } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
-  const [selectedGroup, setSelectedGroup] = useState('All');
-  const [openDropdown, setOpenDropdown] = useState(null);
-  const [selectedStatus, setSelectedStatus] = useState('All');
   const [activeAnimalModal, setActiveAnimalModal] = useState(null);
-  const dropdownRef = useRef(null);
 
-  const categories = ['All', 'Mammals', 'Birds', 'Reptiles', 'Semi-Aquatic Animals'];
-  const statuses = ['All', 'Critically Endangered', 'Endangered', 'Vulnerable', 'Least Concern'];
-
-  // Close dropdown on outside click
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setOpenDropdown(null);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  // Helper: Retrieve category-appropriate group for an animal
-  const getAnimalGroup = (animal) => {
-    if (!animal?.group) return '';
-    if (animal.group === 'Crocodilians') return 'Crocodiles';
-    return animal.group;
+  // Category matching helper
+  const matchesCat = (animalCat, targetCat) => {
+    if (targetCat === 'All') return true;
+    if (!animalCat) return false;
+    if (targetCat.toLowerCase().includes('aquatic') || targetCat === 'Semi-Aquatic Animals') {
+      return animalCat.toLowerCase().includes('aquatic');
+    }
+    return animalCat.toLowerCase() === targetCat.toLowerCase();
   };
 
-  // Helper: Get available animal groups and exact counts for any category
-  const getCategoryGroups = (cat) => {
-    if (cat === 'All') return [];
-    const referenceGroups = ANIMAL_CATEGORY_GROUPS[cat] || (cat.toLowerCase().includes('aquatic') ? ANIMAL_CATEGORY_GROUPS['Semi-Aquatic Animals'] : []);
-    const catAnimals = animals.filter((animal) => {
-      if (!animal.category) return false;
-      if (cat === 'Semi-Aquatic Animals' || cat === 'Aquatic Animals') {
-        return animal.category.toLowerCase().includes('aquatic');
-      }
-      return animal.category.toLowerCase() === cat.toLowerCase();
-    });
-
-    const counts = {};
-    catAnimals.forEach((animal) => {
-      const grp = getAnimalGroup(animal);
-      if (grp) counts[grp] = (counts[grp] || 0) + 1;
-    });
-
-    const result = referenceGroups.map((name) => ({
-      name,
-      count: counts[name] || 0
-    }));
-
-    // In case there are extra groups present in animals:
-    Object.keys(counts).forEach(name => {
-      if (!referenceGroups.includes(name)) {
-        result.push({ name, count: counts[name] });
-      }
-    });
-
-    return result;
-  };
-
-  // Filtered animals based on search query, category, animal group, and IUCN status
+  // Filtered animals based on search query & category
   const filteredAnimals = useMemo(() => {
     return animals.filter((animal) => {
       const query = searchQuery.trim().toLowerCase();
@@ -128,57 +50,29 @@ export default function ExploreAnimals({ animals = [], onSponsorAnimal }) {
         animal.scientific_name.toLowerCase().includes(query) ||
         animal.habitat.toLowerCase().includes(query) ||
         animal.diet.toLowerCase().includes(query) ||
-        (animal.group && animal.group.toLowerCase().includes(query));
+        (animal.group && animal.group.toLowerCase().includes(query)) ||
+        (animal.category && animal.category.toLowerCase().includes(query));
       
-      const matchesCategory = 
-        selectedCategory === 'All' || 
-        animal.category.toLowerCase() === selectedCategory.toLowerCase() ||
-        (selectedCategory.toLowerCase().includes('aquatic') && animal.category && animal.category.toLowerCase().includes('aquatic'));
+      const categoryMatch = matchesCat(animal.category, selectedCategory);
 
-      const animalGroup = getAnimalGroup(animal);
-      const matchesGroup = 
-        selectedCategory === 'All' ||
-        selectedGroup === 'All' || 
-        (animalGroup && animalGroup.toLowerCase() === selectedGroup.toLowerCase());
-
-      const matchesStatus = 
-        selectedStatus === 'All' || 
-        animal.conservation_status.toLowerCase() === selectedStatus.toLowerCase();
-
-      return matchesSearch && matchesCategory && matchesGroup && matchesStatus;
+      return matchesSearch && categoryMatch;
     });
-  }, [animals, searchQuery, selectedCategory, selectedGroup, selectedStatus]);
+  }, [animals, searchQuery, selectedCategory]);
 
-  const handleSelectAll = () => {
-    setSelectedCategory('All');
-    setSelectedGroup('All');
-    setOpenDropdown(null);
-  };
-
-  // 1. Direct Category Click: selects category and immediately displays animals, never opens dropdown
-  const handleCategorySelect = (cat) => {
-    setSelectedCategory(cat);
-    setSelectedGroup('All');
-    setOpenDropdown(null);
-  };
-
-  // 2. Dropdown Symbol Click: ONLY toggles the dropdown menu for selecting a specific group
-  const handleToggleDropdown = (cat) => {
-    setOpenDropdown((prev) => (prev === cat ? null : cat));
-  };
-
-  const handleGroupSelect = (cat, grpName) => {
-    setSelectedCategory(cat);
-    setSelectedGroup(grpName);
-    setOpenDropdown(null);
-  };
+  // Animals grouped for the default "All" view
+  const categorizedGroups = useMemo(() => {
+    return SANCTUARY_CATEGORIES.filter((c) => c.key !== 'All').map((cat) => {
+      const groupAnimals = animals.filter((a) => matchesCat(a.category, cat.key));
+      return {
+        ...cat,
+        animals: groupAnimals
+      };
+    });
+  }, [animals]);
 
   const handleResetFilters = () => {
     setSearchQuery('');
     setSelectedCategory('All');
-    setSelectedGroup('All');
-    setSelectedStatus('All');
-    setOpenDropdown(null);
   };
 
   const getStatusColor = (status) => {
@@ -190,18 +84,120 @@ export default function ExploreAnimals({ animals = [], onSponsorAnimal }) {
     }
   };
 
+  const getCategoryEmoji = (catName) => {
+    if (!catName) return '🐾';
+    const c = catName.toLowerCase();
+    if (c.includes('mammal')) return '🐅';
+    if (c.includes('bird')) return '🦚';
+    if (c.includes('reptile')) return '🐊';
+    if (c.includes('aquatic')) return '🌊';
+    return '🐾';
+  };
+
+  // Render a Single Animal Card
+  const renderAnimalCard = (animal) => {
+    return (
+      <div
+        key={animal.id}
+        className="group rounded-2xl bg-[#0D2619]/80 border border-[#26734D]/50 hover:border-[#C8A96B]/70 overflow-hidden flex flex-col shadow-xl hover:shadow-2xl hover:shadow-[#C8A96B]/10 hover:-translate-y-1.5 transition-all duration-500"
+      >
+        {/* Image Container */}
+        <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#071D12]">
+          <img
+            src={animal.photo_url}
+            alt={animal.name}
+            className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700"
+            loading="lazy"
+          />
+
+          {/* Category Pill on Top-Left */}
+          <div className="absolute top-3 left-3 z-10">
+            <span className="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-[#071D12]/92 text-[#C8A96B] backdrop-blur-md border border-[#C8A96B]/40 shadow-md flex items-center gap-1.5">
+              <span>{getCategoryEmoji(animal.category)}</span>
+              <span>{animal.category}</span>
+            </span>
+          </div>
+
+          {/* Conservation Status on Top-Right */}
+          <div className="absolute top-3 right-3 z-10">
+            <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border backdrop-blur-md shadow-md ${getStatusColor(animal.conservation_status)}`}>
+              {animal.conservation_status}
+            </span>
+          </div>
+
+          <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-[#0D2619] to-transparent pointer-events-none" />
+        </div>
+
+        {/* Card Body */}
+        <div className="p-6 flex-1 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between text-xs text-[#F5F4EA]/60 mb-2">
+              <span className="font-editorial italic text-[#C8A96B] font-semibold text-xs">
+                {animal.scientific_name}
+              </span>
+              <span className="flex items-center gap-1 text-[11px] text-[#F5F4EA]/65">
+                <MapPin className="w-3 h-3 text-[#C8A96B]" />
+                {animal.habitat.split(',')[0]}
+              </span>
+            </div>
+
+            {/* Sub-Group / Taxonomic Classification Tag */}
+            {animal.group && (
+              <div className="mb-2.5">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-[#071D12]/90 text-[10px] font-bold tracking-wider uppercase text-[#C8A96B] border border-[#26734D]/60 shadow-sm">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#C8A96B]" />
+                  <span>{animal.group}</span>
+                </span>
+              </div>
+            )}
+
+            <h3 className="font-display font-bold text-2xl text-[#F5F4EA] group-hover:text-[#C8A96B] transition-colors leading-tight">
+              {(getAnimalName && getAnimalName(animal)) || animal.name}
+            </h3>
+
+            <p className="mt-2.5 text-xs text-[#F5F4EA]/75 line-clamp-3 leading-relaxed">
+              {animal.short_description}
+            </p>
+          </div>
+
+          {/* Card Action Area */}
+          <div className="mt-6 pt-4 border-t border-[#26734D]/40 flex items-center justify-between gap-2">
+            <button
+              onClick={() => onSponsorAnimal && onSponsorAnimal(animal)}
+              className="text-xs font-bold text-[#C8A96B] hover:text-white flex items-center gap-1 hover:underline transition-colors cursor-pointer"
+            >
+              <HeartHandshake className="w-3.5 h-3.5 text-[#C8A96B]" />
+              <span>Sponsor Animal</span>
+            </button>
+
+            <button
+              onClick={() => setActiveAnimalModal(animal)}
+              className="px-4 py-2 rounded-xl bg-[#26734D] hover:bg-[#2E7D32] text-[#F5F4EA] font-bold text-xs uppercase tracking-wider transition-all duration-300 flex items-center gap-1.5 shadow-md hover:shadow-lg border border-[#C8A96B]/30 cursor-pointer"
+            >
+              <span>Explore More</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+
+      </div>
+    );
+  };
+
+  const isDefaultView = selectedCategory === 'All' && !searchQuery.trim();
+
   return (
-    <section id="explore-animals" className="py-24 bg-[#0B2A1A] text-[#F5F4EA] relative overflow-hidden">
+    <section id="explore-animals" className="py-20 sm:py-24 bg-[#071D12] text-[#F5F4EA] relative overflow-hidden scroll-mt-24 sm:scroll-mt-28">
       
-      {/* Background Soft Glow */}
-      <div className="absolute top-0 right-10 w-[500px] h-[500px] bg-[#14532D]/30 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-10 left-10 w-[500px] h-[500px] bg-[#2E7D32]/20 rounded-full blur-3xl pointer-events-none" />
+      {/* Background Soft Glow Ambience */}
+      <div className="absolute top-0 right-10 w-[550px] h-[550px] bg-[#14532D]/20 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-10 left-10 w-[550px] h-[550px] bg-[#2E7D32]/15 rounded-full blur-3xl pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-14">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#123D2B]/80 border border-[#C8A96B]/40 mb-3 shadow-md">
+        <div className="text-center max-w-3xl mx-auto mb-10">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#0B2A1A] border border-[#C8A96B]/40 mb-3 shadow-md">
             <Compass className="w-3.5 h-3.5 text-[#C8A96B]" />
             <span className="text-[11px] font-bold tracking-[0.2em] uppercase text-[#C8A96B]">
               Faunal Diversity & Taxonomy
@@ -213,334 +209,145 @@ export default function ExploreAnimals({ animals = [], onSponsorAnimal }) {
           </h2>
 
           <p className="mt-3 text-[#F5F4EA]/80 text-sm sm:text-base font-light">
-            Immerse yourself in Nandankanan's rich biodiversity—home to over 150 species including 
-            legendary royal Bengal tigers, white tigers, critically endangered gharials, and rescued wildlife.
+            Discover Nandankanan's iconic wildlife species across Mammals, Birds, Reptiles, and Aquatic wildlife.
           </p>
         </div>
 
-        {/* Search & Filters Bar */}
-        <div className="relative z-40 bg-[#071D12]/95 rounded-2xl p-5 border border-[#26734D]/50 shadow-2xl backdrop-blur-md mb-12">
+        {/* LUXURY FROSTED GLASS CATEGORY DOCK & SEARCH BAR */}
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-4 mb-12">
           
-          <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
-            
-            {/* Search Input */}
-            <div className="relative w-full lg:w-96">
-              <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#C8A96B]" />
+          {/* Frosted Glass Segmented Category Capsule Dock (No-Scrollbar Guaranteed) */}
+          <div className="p-1.5 rounded-full bg-[#05180F]/85 backdrop-blur-2xl border border-[#C8A96B]/25 shadow-[0_12px_40px_rgba(0,0,0,0.6)] flex items-center gap-1.5 overflow-x-auto max-w-full no-scrollbar scrollbar-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+            {SANCTUARY_CATEGORIES.map((cat) => {
+              const isSelected = selectedCategory === cat.key;
+              return (
+                <button
+                  key={cat.key}
+                  type="button"
+                  onClick={() => {
+                    setSelectedCategory(cat.key);
+                    setSearchQuery('');
+                  }}
+                  className={`flex items-center gap-2.5 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm transition-all duration-300 whitespace-nowrap cursor-pointer select-none ${
+                    isSelected
+                      ? 'bg-gradient-to-r from-[#C8A96B] via-[#E5CE9E] to-[#C8A96B] text-[#071D12] font-black shadow-[0_4px_20px_rgba(200,169,107,0.4)] scale-[1.02]'
+                      : 'text-[#F5F4EA]/80 hover:text-white hover:bg-white/5 font-medium'
+                  }`}
+                >
+                  <span className="text-base sm:text-lg filter drop-shadow-sm">{cat.emoji}</span>
+                  <span className="tracking-wide">{cat.label}</span>
+                  <span className={`text-[11px] font-mono px-2 py-0.5 rounded-full font-bold transition-colors ${
+                    isSelected 
+                      ? 'bg-[#071D12]/20 text-[#071D12] border border-black/10' 
+                      : 'bg-[#071D12]/80 text-[#C8A96B] border border-[#C8A96B]/30'
+                  }`}>
+                    {cat.count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Sleek Frosted Glass Search Capsule */}
+          <div className="relative w-full lg:w-80 shrink-0">
+            <div className="relative flex items-center">
+              <Search className="w-4 h-4 absolute left-4 text-[#C8A96B] pointer-events-none" />
               <input
                 type="text"
-                placeholder="Search by animal name, scientific name, habitat..."
+                placeholder="Search sanctuary species..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[#0B2A1A] border border-[#26734D]/60 text-xs sm:text-sm text-[#F5F4EA] focus:outline-none focus:border-[#C8A96B] focus:ring-1 focus:ring-[#C8A96B] transition-all placeholder:text-[#F5F4EA]/40"
+                className="w-full pl-11 pr-10 py-2.5 sm:py-3 rounded-full bg-[#05180F]/85 backdrop-blur-2xl border border-[#C8A96B]/25 text-xs sm:text-sm text-[#F5F4EA] focus:outline-none focus:border-[#C8A96B] focus:ring-2 focus:ring-[#C8A96B]/25 shadow-[0_12px_40px_rgba(0,0,0,0.4)] transition-all placeholder:text-[#F5F4EA]/45"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#F5F4EA]/50 hover:text-[#F5F4EA] text-xs font-semibold"
+                  className="absolute right-3.5 p-1 rounded-full text-[#F5F4EA]/50 hover:text-white hover:bg-white/10 text-xs transition-colors cursor-pointer"
+                  title="Clear search"
                 >
-                  Clear
+                  <X className="w-3.5 h-3.5" />
                 </button>
               )}
             </div>
-
-            {/* Category Filter Options with Distinct Dropdown Symbols */}
-            <div ref={dropdownRef} className="relative flex items-center gap-1.5 flex-wrap sm:flex-nowrap w-full lg:w-auto">
-              
-              {/* ALL Pill */}
-              <button
-                type="button"
-                onClick={handleSelectAll}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold uppercase tracking-wider whitespace-nowrap transition-all ${
-                  selectedCategory === 'All'
-                    ? 'bg-[#C8A96B] text-[#123D2B] font-black shadow-lg shadow-[#C8A96B]/25'
-                    : 'bg-[#0B2A1A] text-[#F5F4EA]/80 hover:bg-[#123D2B] border border-[#26734D]/40'
-                }`}
-              >
-                All
-              </button>
-
-              {/* Specific Categories with Separate Label Click & Dropdown Arrow */}
-              {['Mammals', 'Birds', 'Reptiles', 'Semi-Aquatic Animals'].map((cat) => {
-                const isSelected = selectedCategory === cat;
-                const isOpen = openDropdown === cat;
-                const groups = getCategoryGroups(cat);
-                const totalInCat = groups.reduce((acc, g) => acc + g.count, 0);
-
-                return (
-                  <div key={cat} className="relative inline-flex items-center">
-                    
-                    {/* Unified Pill with Split Click Targets */}
-                    <div className={`inline-flex items-center rounded-xl text-xs font-semibold uppercase tracking-wider whitespace-nowrap transition-all border ${
-                      isSelected
-                        ? 'bg-[#C8A96B] text-[#123D2B] border-[#C8A96B] shadow-lg shadow-[#C8A96B]/25'
-                        : 'bg-[#0B2A1A] text-[#F5F4EA]/80 hover:bg-[#123D2B] border border-[#26734D]/40'
-                    }`}>
-                      
-                      {/* 1. Category Name Button: immediately shows that category, does NOT open dropdown */}
-                      <button
-                        type="button"
-                        onClick={() => handleCategorySelect(cat)}
-                        className={`pl-3.5 pr-2 py-1.5 font-bold tracking-wider hover:opacity-85 transition-opacity flex items-center gap-1.5 ${
-                          isSelected ? 'text-[#123D2B] font-black' : 'text-[#F5F4EA]/90'
-                        }`}
-                        title={`Show all ${cat}`}
-                      >
-                        <span>{cat}</span>
-                        {isSelected && selectedGroup !== 'All' && (
-                          <span className="w-1.5 h-1.5 rounded-full bg-[#123D2B]" />
-                        )}
-                      </button>
-
-                      {/* Subtle divider */}
-                      <span className={`w-[1px] h-3.5 self-center ${
-                        isSelected ? 'bg-[#123D2B]/30' : 'bg-[#26734D]/60'
-                      }`} />
-
-                      {/* 2. Dropdown Arrow Button: ONLY opens/closes the dropdown menu */}
-                      <button
-                        type="button"
-                        onClick={() => handleToggleDropdown(cat)}
-                        className={`px-2.5 py-1.5 flex items-center justify-center hover:opacity-80 transition-all rounded-r-xl ${
-                          isOpen 
-                            ? (isSelected ? 'bg-[#b89858]' : 'bg-[#144730]') 
-                            : ''
-                        }`}
-                        aria-label={`Toggle ${cat} sub-groups menu`}
-                        title={`Filter ${cat} by group`}
-                      >
-                        <ChevronDown 
-                          className={`w-3.5 h-3.5 transition-transform duration-200 ${
-                            isOpen ? 'rotate-180' : ''
-                          }`} 
-                        />
-                      </button>
-                    </div>
-
-                    {/* Floating Dropdown Menu: floats cleanly above all content below */}
-                    {isOpen && (
-                      <>
-                        {/* Backdrop to close dropdown cleanly when clicking outside */}
-                        <div 
-                          className="fixed inset-0 z-40 bg-black/30 backdrop-blur-[1px]" 
-                          onClick={() => setOpenDropdown(null)} 
-                        />
-                        <div className={`absolute top-full mt-2.5 ${
-                          cat === 'Semi-Aquatic Animals' || cat === 'Aquatic Animals' || cat === 'Reptiles' ? 'right-0' : 'left-0'
-                        } min-w-[260px] bg-[#071D12]/98 border-2 border-[#C8A96B] rounded-2xl shadow-[0_25px_60px_rgba(0,0,0,0.95)] backdrop-blur-2xl overflow-hidden py-1.5 z-50 animate-fadeIn`}>
-                          
-                          <div className="px-3.5 py-2 border-b border-[#26734D]/40 flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-[#C8A96B]">
-                            <span>Select Animal Group</span>
-                            <span className="text-[10px] text-[#F5F4EA]/60 font-mono">({totalInCat} verified)</span>
-                          </div>
-
-                          <div className="max-h-60 overflow-y-auto py-1">
-                            {/* Option: All [Category] */}
-                            <button
-                              type="button"
-                              onClick={() => handleGroupSelect(cat, 'All')}
-                              className={`w-full text-left px-3.5 py-2 text-xs flex items-center justify-between transition-colors ${
-                                isSelected && selectedGroup === 'All'
-                                  ? 'bg-[#123D2B] text-[#C8A96B] font-bold border-l-2 border-[#C8A96B]'
-                                  : 'text-[#F5F4EA]/90 hover:bg-[#123D2B] hover:text-[#C8A96B]'
-                              }`}
-                            >
-                              <span>All {cat}</span>
-                              <span className="text-[10px] opacity-60 font-mono">({totalInCat})</span>
-                            </button>
-
-                            {/* Individual Animal Groups */}
-                            {groups.map((grp) => (
-                              <button
-                                key={grp.name}
-                                type="button"
-                                onClick={() => handleGroupSelect(cat, grp.name)}
-                                className={`w-full text-left px-3.5 py-2 text-xs flex items-center justify-between transition-colors ${
-                                  isSelected && selectedGroup === grp.name
-                                    ? 'bg-[#123D2B] text-[#C8A96B] font-bold border-l-2 border-[#C8A96B]'
-                                    : 'text-[#F5F4EA]/90 hover:bg-[#123D2B] hover:text-[#C8A96B]'
-                                }`}
-                              >
-                                <span>{grp.name}</span>
-                                <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded ${
-                                  grp.count > 0 
-                                    ? 'bg-[#123D2B] text-[#C8A96B]' 
-                                    : 'text-[#F5F4EA]/30'
-                                }`}>
-                                  ({grp.count})
-                                </span>
-                              </button>
-                            ))}
-                          </div>
-
-                        </div>
-                      </>
-                    )}
-                  </div>
-                );
-              })}
-
-            </div>
-
           </div>
 
-          {/* Secondary filter: Conservation status */}
-          <div className="mt-4 pt-4 border-t border-[#26734D]/30 flex flex-wrap items-center gap-2 text-xs">
-            <span className="text-[#C8A96B] font-medium flex items-center gap-1">
-              <Filter className="w-3.5 h-3.5" />
-              IUCN Status:
-            </span>
-            {statuses.map((stat) => (
-              <button
-                key={stat}
-                onClick={() => setSelectedStatus(stat)}
-                className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors ${
-                  selectedStatus === stat
-                    ? 'bg-[#C8A96B] text-[#123D2B] font-bold shadow-md shadow-[#C8A96B]/20'
-                    : 'text-[#F5F4EA]/70 hover:bg-[#123D2B]'
-                }`}
-              >
-                {stat}
-              </button>
+        </div>
+
+        {/* SPECIES CARDS GRID */}
+        {isDefaultView ? (
+          /* DEFAULT VIEW: CLEAN CATEGORY SECTIONS */
+          <div className="space-y-14">
+            {categorizedGroups.map((cat) => (
+              <div key={cat.key} className="space-y-6">
+                
+                {/* Editorial Section Divider */}
+                <div className="flex items-center justify-between pb-3.5 border-b border-[#C8A96B]/20">
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl sm:text-3xl filter drop-shadow">{cat.emoji}</span>
+                    <h3 className="font-display font-black text-2xl sm:text-3xl text-[#F5F4EA] tracking-wide">
+                      {cat.title}
+                    </h3>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <span className="px-3 py-1 rounded-full bg-[#05180F] text-[#C8A96B] font-mono font-bold text-xs border border-[#C8A96B]/30 shadow-sm">
+                      {cat.animals.length} Species
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedCategory(cat.key)}
+                      className="text-xs font-bold text-[#C8A96B] hover:text-white flex items-center gap-1 transition-colors cursor-pointer group"
+                    >
+                      <span>View only {cat.label}</span>
+                      <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* 3-Column Responsive Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {cat.animals.map((animal) => renderAnimalCard(animal))}
+                </div>
+
+              </div>
             ))}
           </div>
-
-        </div>
-
-        {/* Results Counter and Active Filter Pill */}
-        <div className="relative z-20 flex flex-wrap items-center justify-between gap-3 text-xs text-[#F5F4EA]/70 font-medium mb-6 px-1">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span>Showing {filteredAnimals.length} species conserved at Nandankanan</span>
-            {selectedCategory !== 'All' && (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#123D2B] text-[#C8A96B] text-[11px] font-bold border border-[#C8A96B]/30">
-                <span>{selectedCategory}</span>
-                {selectedGroup !== 'All' && (
-                  <>
-                    <span className="text-[#F5F4EA]/40">›</span>
-                    <span className="text-white">{selectedGroup}</span>
-                    <button 
-                      onClick={() => setSelectedGroup('All')}
-                      className="ml-0.5 hover:text-white transition-colors"
-                      title="Clear group filter"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  </>
-                )}
-              </span>
-            )}
-          </div>
-          {(selectedCategory !== 'All' || selectedGroup !== 'All' || selectedStatus !== 'All' || searchQuery) && (
-            <button 
-              onClick={handleResetFilters}
-              className="text-[#C8A96B] font-semibold hover:underline flex items-center gap-1"
-            >
-              <RotateCcw className="w-3 h-3" />
-              <span>Reset all filters</span>
-            </button>
-          )}
-        </div>
-
-        {/* Animal Cards Grid or Empty State */}
-        {filteredAnimals.length > 0 ? (
-          <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredAnimals.map((animal) => {
-              return (
-                <div
-                  key={animal.id}
-                  className="group rounded-2xl bg-[#123D2B]/70 border border-[#26734D]/50 hover:border-[#C8A96B]/60 overflow-hidden flex flex-col shadow-xl hover:shadow-2xl hover:shadow-[#C8A96B]/10 hover:-translate-y-1.5 transition-all duration-500"
-                >
-                  {/* Image Container */}
-                  <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#071D12]">
-                    <img
-                      src={animal.photo_url}
-                      alt={animal.name}
-                      className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700"
-                    />
-
-                    {/* Category Badge on Top-Left */}
-                    <div className="absolute top-3 left-3">
-                      <span className="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-[#071D12]/90 text-[#F5F4EA] backdrop-blur-md border border-[#C8A96B]/40 shadow-sm">
-                        {animal.category}
-                      </span>
-                    </div>
-
-                    {/* Conservation Status on Top-Right */}
-                    <div className="absolute top-3 right-3">
-                      <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border backdrop-blur-md shadow-sm ${getStatusColor(animal.conservation_status)}`}>
-                        {animal.conservation_status}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Card Body */}
-                  <div className="p-6 flex-1 flex flex-col justify-between">
-                    <div>
-                      <div className="flex items-center justify-between text-xs text-[#F5F4EA]/60 mb-1">
-                        <span className="font-editorial italic text-[#C8A96B] font-semibold text-xs">
-                          {animal.scientific_name}
-                        </span>
-                        <span className="flex items-center gap-1 text-[11px] text-[#F5F4EA]/60">
-                          <MapPin className="w-3 h-3 text-[#C8A96B]" />
-                          {animal.habitat.split(',')[0]}
-                        </span>
-                      </div>
-
-                      {animal.group && (
-                        <div className="mb-2">
-                          <span className="inline-block px-2.5 py-0.5 rounded-md bg-[#071D12]/90 text-[10px] font-bold tracking-wider uppercase text-[#C8A96B] border border-[#26734D]/60 shadow-sm">
-                            {animal.group}
-                          </span>
-                        </div>
-                      )}
-
-                      <h3 className="font-display font-bold text-2xl text-[#F5F4EA] group-hover:text-[#C8A96B] transition-colors">
-                        {(getAnimalName && getAnimalName(animal)) || animal.name}
-                      </h3>
-
-                      <p className="mt-2.5 text-xs text-[#F5F4EA]/75 line-clamp-3 leading-relaxed">
-                        {animal.short_description}
-                      </p>
-                    </div>
-
-                    {/* Card Action Area */}
-                    <div className="mt-6 pt-4 border-t border-[#26734D]/40 flex items-center justify-between gap-2">
-                      <button
-                        onClick={() => onSponsorAnimal && onSponsorAnimal(animal)}
-                        className="text-xs font-bold text-[#C8A96B] hover:text-white flex items-center gap-1 hover:underline transition-colors"
-                      >
-                        <HeartHandshake className="w-3.5 h-3.5 text-[#C8A96B]" />
-                        <span>Sponsor Animal</span>
-                      </button>
-
-                      <button
-                        onClick={() => setActiveAnimalModal(animal)}
-                        className="px-4 py-2 rounded-xl bg-[#26734D] hover:bg-[#2E7D32] text-[#F5F4EA] font-bold text-xs uppercase tracking-wider transition-all duration-300 flex items-center gap-1 shadow-md hover:shadow-lg border border-[#C8A96B]/30"
-                      >
-                        <span>Explore More</span>
-                        <ChevronRight className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </div>
-
-                </div>
-              );
-            })}
-          </div>
         ) : (
-          <div className="text-center py-16 bg-[#123D2B]/30 border border-[#26734D]/40 rounded-2xl p-8 max-w-lg mx-auto">
-            <div className="w-12 h-12 mx-auto rounded-full bg-[#123D2B] border border-[#C8A96B]/40 flex items-center justify-center text-[#C8A96B] mb-3">
-              <Compass className="w-6 h-6" />
+          /* FILTERED CATEGORY OR SEARCH VIEW */
+          <div>
+            <div className="flex items-center justify-between text-xs text-[#F5F4EA]/70 font-medium mb-6 px-1">
+              <span>Showing {filteredAnimals.length} species {selectedCategory !== 'All' ? `in ${selectedCategory}` : ''}</span>
+              <button
+                type="button"
+                onClick={handleResetFilters}
+                className="text-[#C8A96B] hover:underline flex items-center gap-1 cursor-pointer"
+              >
+                <RotateCcw className="w-3 h-3" />
+                <span>Show All Categories</span>
+              </button>
             </div>
-            <h3 className="font-display font-bold text-lg text-[#F5F4EA]">No species recorded yet</h3>
-            <p className="text-xs text-[#F5F4EA]/70 mt-1 max-w-sm mx-auto">
-              No animal records currently match {selectedGroup !== 'All' ? `"${selectedGroup}"` : 'your filters'}. Nandankanan exhibits are continuously updated.
-            </p>
-            <button
-              onClick={handleResetFilters}
-              className="mt-5 px-4 py-2 rounded-xl bg-[#C8A96B] text-[#123D2B] text-xs font-bold uppercase tracking-wider hover:bg-[#d8bc7f] transition-all shadow-md"
-            >
-              Reset Filters
-            </button>
+
+            {filteredAnimals.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {filteredAnimals.map((animal) => renderAnimalCard(animal))}
+              </div>
+            ) : (
+              <div className="text-center py-16 bg-[#0B2A1A]/40 border border-[#26734D]/40 rounded-2xl p-8 max-w-lg mx-auto">
+                <div className="w-12 h-12 mx-auto rounded-full bg-[#0B2A1A] border border-[#C8A96B]/40 flex items-center justify-center text-[#C8A96B] mb-3">
+                  <Compass className="w-6 h-6" />
+                </div>
+                <h3 className="font-display font-bold text-lg text-[#F5F4EA]">No matching species</h3>
+                <p className="text-xs text-[#F5F4EA]/70 mt-1 max-w-sm mx-auto">
+                  No animal records match your search. Nandankanan exhibits are continuously updated.
+                </p>
+                <button
+                  onClick={handleResetFilters}
+                  className="mt-5 px-4 py-2 rounded-xl bg-[#C8A96B] text-[#071D12] text-xs font-bold uppercase tracking-wider hover:bg-[#d8bc7f] transition-all shadow-md cursor-pointer"
+                >
+                  Reset Filters
+                </button>
+              </div>
+            )}
           </div>
         )}
 
@@ -555,7 +362,7 @@ export default function ExploreAnimals({ animals = [], onSponsorAnimal }) {
             <div className="absolute top-4 right-4 z-20">
               <button
                 onClick={() => setActiveAnimalModal(null)}
-                className="p-2.5 rounded-full bg-[#071D12]/80 hover:bg-[#123D2B] text-[#F5F4EA] border border-[#C8A96B]/30 transition-all shadow-xl"
+                className="p-2.5 rounded-full bg-[#071D12]/80 hover:bg-[#123D2B] text-[#F5F4EA] border border-[#C8A96B]/30 transition-all shadow-xl cursor-pointer"
                 aria-label="Close animal details"
               >
                 <X className="w-5 h-5" />
@@ -575,8 +382,9 @@ export default function ExploreAnimals({ animals = [], onSponsorAnimal }) {
                 {/* Floating Bio Summary over Image */}
                 <div className="absolute bottom-6 left-6 right-6 text-[#F5F4EA]">
                   <div className="flex flex-wrap items-center gap-2 mb-2">
-                    <span className="px-3 py-1 rounded-md bg-[#123D2B]/90 text-xs font-bold uppercase tracking-wider text-[#C8A96B] border border-[#C8A96B]/40">
-                      {activeAnimalModal.category}
+                    <span className="px-3 py-1 rounded-md bg-[#123D2B]/90 text-xs font-bold uppercase tracking-wider text-[#C8A96B] border border-[#C8A96B]/40 flex items-center gap-1.5">
+                      <span>{getCategoryEmoji(activeAnimalModal.category)}</span>
+                      <span>Category: {activeAnimalModal.category}</span>
                     </span>
                     {activeAnimalModal.group && (
                       <span className="px-3 py-1 rounded-md bg-[#071D12]/90 text-xs font-semibold uppercase tracking-wider text-[#F5F4EA]/90 border border-[#26734D]">
@@ -589,7 +397,7 @@ export default function ExploreAnimals({ animals = [], onSponsorAnimal }) {
                   </div>
 
                   <h3 className="font-display font-extrabold text-3xl sm:text-4xl text-[#F5F4EA]">
-                    {activeAnimalModal.name}
+                    {(getAnimalName && getAnimalName(activeAnimalModal)) || activeAnimalModal.name}
                   </h3>
                   <p className="font-editorial italic text-[#C8A96B] text-base sm:text-lg mt-0.5">
                     {activeAnimalModal.scientific_name}
@@ -602,7 +410,7 @@ export default function ExploreAnimals({ animals = [], onSponsorAnimal }) {
                 
                 {/* Key Ecological Parameters */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                  <div className="p-4 rounded-2xl bg-[#123D2B]/80 border border-[#26734D]/40 shadow-sm">
+                  <div className="p-4 rounded-2xl bg-[#071D12]/80 border border-[#26734D]/40 shadow-sm">
                     <div className="flex items-center gap-2 text-[#C8A96B] text-xs font-bold uppercase tracking-wider mb-1">
                       <MapPin className="w-3.5 h-3.5 text-[#C8A96B]" />
                       Habitat
@@ -612,7 +420,7 @@ export default function ExploreAnimals({ animals = [], onSponsorAnimal }) {
                     </div>
                   </div>
 
-                  <div className="p-4 rounded-2xl bg-[#123D2B]/80 border border-[#26734D]/40 shadow-sm">
+                  <div className="p-4 rounded-2xl bg-[#071D12]/80 border border-[#26734D]/40 shadow-sm">
                     <div className="flex items-center gap-2 text-[#C8A96B] text-xs font-bold uppercase tracking-wider mb-1">
                       <Utensils className="w-3.5 h-3.5 text-[#C8A96B]" />
                       Diet & Feeding
@@ -622,7 +430,7 @@ export default function ExploreAnimals({ animals = [], onSponsorAnimal }) {
                     </div>
                   </div>
 
-                  <div className="p-4 rounded-2xl bg-[#123D2B]/80 border border-[#26734D]/40 shadow-sm">
+                  <div className="p-4 rounded-2xl bg-[#071D12]/80 border border-[#26734D]/40 shadow-sm">
                     <div className="flex items-center gap-2 text-[#C8A96B] text-xs font-bold uppercase tracking-wider mb-1">
                       <Scale className="w-3.5 h-3.5 text-[#C8A96B]" />
                       Adult Weight
@@ -632,7 +440,7 @@ export default function ExploreAnimals({ animals = [], onSponsorAnimal }) {
                     </div>
                   </div>
 
-                  <div className="p-4 rounded-2xl bg-[#123D2B]/80 border border-[#26734D]/40 shadow-sm">
+                  <div className="p-4 rounded-2xl bg-[#071D12]/80 border border-[#26734D]/40 shadow-sm">
                     <div className="flex items-center gap-2 text-[#C8A96B] text-xs font-bold uppercase tracking-wider mb-1">
                       <Clock className="w-3.5 h-3.5 text-[#C8A96B]" />
                       Typical Lifespan
@@ -655,7 +463,7 @@ export default function ExploreAnimals({ animals = [], onSponsorAnimal }) {
 
                 {/* Fascinating Facts */}
                 {activeAnimalModal.fun_facts && activeAnimalModal.fun_facts.length > 0 && (
-                  <div className="p-5 rounded-2xl bg-[#123D2B]/90 text-[#F5F4EA] border border-[#C8A96B]/40">
+                  <div className="p-5 rounded-2xl bg-[#071D12]/90 text-[#F5F4EA] border border-[#C8A96B]/40">
                     <h4 className="font-display font-bold text-base text-[#C8A96B] mb-3 flex items-center gap-2">
                       <Sparkles className="w-4 h-4 text-[#C8A96B]" />
                       Fascinating Wildlife Facts
@@ -697,10 +505,10 @@ export default function ExploreAnimals({ animals = [], onSponsorAnimal }) {
                       setActiveAnimalModal(null);
                       onSponsorAnimal && onSponsorAnimal(animal);
                     }}
-                    className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-gradient-to-r from-[#C8A96B] to-[#b39352] hover:from-[#d8b87a] hover:to-[#C8A96B] text-[#123D2B] font-black text-xs uppercase tracking-widest shadow-lg shadow-[#C8A96B]/20 transition-all flex items-center justify-center gap-2"
+                    className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-gradient-to-r from-[#C8A96B] to-[#b39352] hover:from-[#d8b87a] hover:to-[#C8A96B] text-[#071D12] font-black text-xs uppercase tracking-widest shadow-lg shadow-[#C8A96B]/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
                   >
                     <HeartHandshake className="w-4 h-4" />
-                    <span>Sponsor {activeAnimalModal.name}</span>
+                    <span>Sponsor {(getAnimalName && getAnimalName(activeAnimalModal)) || activeAnimalModal.name}</span>
                   </button>
                 </div>
 

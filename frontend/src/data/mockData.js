@@ -123,7 +123,7 @@ export const INITIAL_ANIMALS = [
       "A single adult pangolin consumes approximately 70 million ants and termites per year."
     ],
     photo_url: "/images/pangolin.jpg",
-    video_url: "/videos/bear_live.webm",
+    video_url: "/videos/birds_live.webm",
     audio_type: "birds",
     featured: true,
     sponsorship_available: true,
@@ -201,7 +201,7 @@ export const INITIAL_ANIMALS = [
       "Their vacuum-suction eating sounds can be heard over 100 meters away."
     ],
     photo_url: "/images/sloth_bear.jpg",
-    video_url: "/videos/bear_live.webm",
+    video_url: "",
     audio_type: "bear",
     featured: false,
     sponsorship_available: true,
@@ -409,7 +409,7 @@ export const INITIAL_ANIMALS = [
       "Their eyes, ears, and nostrils are positioned atop their head, allowing them to remain almost completely submerged."
     ],
     photo_url: "/images/hippopotamus.jpg",
-    video_url: "/videos/bear_live.webm",
+    video_url: "/videos/deer_live.webm",
     audio_type: "bear",
     featured: false,
     sponsorship_available: true,
@@ -528,16 +528,16 @@ export const INITIAL_CAMERAS = [
   },
   {
     id: 5,
-    title: "Sloth Bear Rocky Gorge",
-    animal_name: "Bear",
-    habitat_name: "Rock Cavern Habitat & Foraging Mound",
-    stream_url: "/videos/bear_live.webm",
+    title: "White Bengal Tiger Haven",
+    animal_name: "White Bengal Tiger",
+    habitat_name: "Heritage Water Pool & Sal Canopy",
+    stream_url: "/videos/tiger_safari.webm",
     video_type: "demo_video",
     status: "LIVE",
-    viewer_count: 645,
-    thumbnail_url: "/images/sloth_bear.jpg",
-    description: "Observing sloth bears digging for termites, climbing natural boulders, and resting in caves.",
-    camera_location: "Bear Safari Rock Bluff",
+    viewer_count: 2450,
+    thumbnail_url: "/images/white_tiger.jpg",
+    description: "Observation of Nandankanan's iconic white tigers exploring shady grove channels.",
+    camera_location: "White Tiger Sector A",
     order: 5
   },
   {
@@ -712,9 +712,9 @@ export const INITIAL_MARKERS = [
     badge_text: "Rock Escarpment Safari",
     emoji: "🐻",
     photo_url: "/images/sloth_bear.jpg",
-    stream_url: "/videos/bear_live.webm",
+    stream_url: "",
     animal_slug: "sloth-bear",
-    live_cam_available: true,
+    live_cam_available: false,
     camera_id: 5
   },
   {
@@ -766,7 +766,7 @@ export const INITIAL_MARKERS = [
     badge_text: "Pangolin Conservation",
     emoji: "🛡️",
     photo_url: "/images/pangolin.jpg",
-    stream_url: "/videos/bear_live.webm",
+    stream_url: "/videos/birds_live.webm",
     animal_slug: "indian-pangolin",
     live_cam_available: true,
     camera_id: 5

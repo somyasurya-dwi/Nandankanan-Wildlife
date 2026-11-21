@@ -6,6 +6,9 @@ echo   Starting Backend (Django) and Frontend (Vite)...
 echo ===================================================
 
 set "PYTHON_EXE=python"
+if exist "%~dp0backend\envv\Scripts\python.exe" (
+    set "PYTHON_EXE=%~dp0backend\envv\Scripts\python.exe"
+)
 if exist "%~dp0backend\venv\Scripts\python.exe" (
     set "PYTHON_EXE=%~dp0backend\venv\Scripts\python.exe"
 )

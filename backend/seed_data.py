@@ -136,7 +136,7 @@ def seed():
                 "A single adult pangolin consumes approximately 70 million ants and termites per year."
             ],
             "photo_url": "/images/pangolin.jpg",
-            "video_url": "/videos/bear_live.webm",
+            "video_url": "/videos/birds_live.webm",
             "audio_type": "birds",
             "featured": True,
             "sponsorship_available": True,
@@ -208,7 +208,7 @@ def seed():
                 "Their vacuum-suction eating sounds can be heard over 100 meters away."
             ],
             "photo_url": "/images/sloth_bear.jpg",
-            "video_url": "/videos/bear_live.webm",
+            "video_url": "",
             "audio_type": "bear",
             "featured": False,
             "sponsorship_available": True,
@@ -349,16 +349,16 @@ def seed():
             "order": 4
         },
         {
-            "title": "Sloth Bear Rocky Gorge",
-            "animal_name": "Bear",
-            "habitat_name": "Rock Cavern Habitat & Foraging Mound",
-            "stream_url": "/videos/bear_live.webm",
+            "title": "White Bengal Tiger Haven",
+            "animal_name": "White Bengal Tiger",
+            "habitat_name": "Heritage Water Pool & Sal Canopy",
+            "stream_url": "/videos/tiger_safari.webm",
             "video_type": "demo_video",
             "status": "LIVE",
-            "viewer_count": 645,
-            "thumbnail_url": "/images/sloth_bear.jpg",
-            "description": "Observing sloth bears digging for termites, climbing natural boulders, and resting in caves.",
-            "camera_location": "Bear Safari Rock Bluff",
+            "viewer_count": 2450,
+            "thumbnail_url": "/images/white_tiger.jpg",
+            "description": "Observation of Nandankanan's iconic white tigers exploring shady grove channels.",
+            "camera_location": "White Tiger Sector A",
             "order": 5
         },
         {

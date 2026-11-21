@@ -16,7 +16,8 @@ html {
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 9px;
+  width: 8px;
+  height: 0px; /* Completely eliminate horizontal scrollbars across all components */
 }
 ::-webkit-scrollbar-track {
   background: #0B2419;
@@ -28,6 +29,20 @@ html {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #C8A96B;
+}
+
+/* Universal Scrollbar Hide Utilities */
+.scrollbar-none::-webkit-scrollbar,
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+.scrollbar-none,
+.no-scrollbar {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
 }
 
 /* Typography styles */
