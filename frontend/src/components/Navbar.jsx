@@ -617,31 +617,31 @@ export default function Navbar({
 
                   {/* Accessibility Dropdown Panel */}
                   {accessibilityOpen && (
-                    <div className="absolute right-0 mt-2 w-72 bg-[#06180E]/98 border border-[#C8A96B]/50 rounded-2xl shadow-2xl p-4 z-50 backdrop-blur-xl animate-fadeIn text-[#F5F4EA]">
-                      <div className="flex items-center justify-between pb-2 mb-3 border-b border-white/10">
-                        <span className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                    <div className="absolute right-0 mt-2 w-72 bg-[#0B2A1A] border border-[#C8A96B]/50 rounded-2xl shadow-2xl p-4 z-50 animate-fadeIn text-[#F5F4EA]">
+                      <div className="flex items-center justify-between pb-2.5 mb-3 border-b border-white/10">
+                        <span className="text-[11px] font-mono uppercase tracking-widest text-[#C8A96B] flex items-center gap-1.5 font-bold">
                           <UniversalAccessibilityIcon className="w-4 h-4 text-[#C8A96B]" />
                           <span>Accessibility / ସୁଗମ୍ୟତା</span>
                         </span>
                         <button
                           onClick={handleResetAccessibility}
-                          className="text-[10px] font-mono text-[#C8A96B] hover:underline flex items-center gap-1"
+                          className="text-[10px] font-mono text-[#C8A96B] hover:text-white hover:underline flex items-center gap-1 transition-colors"
                           title="Reset accessibility options"
                         >
-                          <RotateCcw className="w-3 h-3" /> Reset
+                          <RotateCcw className="w-3 h-3 text-[#C8A96B]" /> Reset
                         </button>
                       </div>
 
                       {/* Font Size Scaling */}
                       <div className="mb-3">
-                        <label className="text-[11px] font-medium text-white/70 block mb-1.5">
+                        <label className="text-[11px] font-medium text-[#F5F4EA]/80 block mb-1.5">
                           Text Size / ଅକ୍ଷର ଆକାର
                         </label>
-                        <div className="grid grid-cols-3 gap-1.5 bg-[#0B2419] p-1 rounded-xl border border-white/10">
+                        <div className="grid grid-cols-3 gap-1.5 bg-[#061D12] p-1 rounded-xl border border-[#26734D]/50">
                           <button
                             onClick={() => setFontSize('small')}
                             className={`py-1.5 rounded-lg text-xs font-bold transition-all ${
-                              fontSize === 'small' ? 'bg-[#C8A96B] text-[#071D12]' : 'text-white/80 hover:bg-white/5'
+                              fontSize === 'small' ? 'bg-[#C8A96B] text-[#071D12] shadow-sm' : 'text-[#F5F4EA]/80 hover:bg-[#1B6537]/50 hover:text-white'
                             }`}
                           >
                             A- Small
@@ -649,7 +649,7 @@ export default function Navbar({
                           <button
                             onClick={() => setFontSize('normal')}
                             className={`py-1.5 rounded-lg text-xs font-bold transition-all ${
-                              fontSize === 'normal' ? 'bg-[#C8A96B] text-[#071D12]' : 'text-white/80 hover:bg-white/5'
+                              fontSize === 'normal' ? 'bg-[#C8A96B] text-[#071D12] shadow-sm' : 'text-[#F5F4EA]/80 hover:bg-[#1B6537]/50 hover:text-white'
                             }`}
                           >
                             A Normal
@@ -657,7 +657,7 @@ export default function Navbar({
                           <button
                             onClick={() => setFontSize('large')}
                             className={`py-1.5 rounded-lg text-xs font-bold transition-all ${
-                              fontSize === 'large' ? 'bg-[#C8A96B] text-[#071D12]' : 'text-white/80 hover:bg-white/5'
+                              fontSize === 'large' ? 'bg-[#C8A96B] text-[#071D12] shadow-sm' : 'text-[#F5F4EA]/80 hover:bg-[#1B6537]/50 hover:text-white'
                             }`}
                           >
                             A+ Large
@@ -666,15 +666,15 @@ export default function Navbar({
                       </div>
 
                       {/* High Contrast Toggle */}
-                      <div className="mb-3 flex items-center justify-between p-2 rounded-xl bg-[#0B2419] border border-white/10">
-                        <span className="text-xs font-medium flex items-center gap-2">
+                      <div className="mb-3 flex items-center justify-between p-2.5 rounded-xl bg-[#061D12] border border-[#26734D]/50">
+                        <span className="text-xs font-medium text-[#F5F4EA] flex items-center gap-2">
                           <Sun className="w-3.5 h-3.5 text-[#C8A96B]" />
                           <span>High Contrast Mode</span>
                         </span>
                         <button
                           onClick={() => setHighContrast(!highContrast)}
                           className={`w-10 h-5 rounded-full transition-colors relative p-0.5 ${
-                            highContrast ? 'bg-[#C8A96B]' : 'bg-gray-600'
+                            highContrast ? 'bg-[#C8A96B]' : 'bg-[#123D2B] border border-[#26734D]/70'
                           }`}
                         >
                           <span className={`block w-4 h-4 rounded-full bg-white transition-transform ${
@@ -684,15 +684,15 @@ export default function Navbar({
                       </div>
 
                       {/* Highlight Links Toggle */}
-                      <div className="mb-3 flex items-center justify-between p-2 rounded-xl bg-[#0B2419] border border-white/10">
-                        <span className="text-xs font-medium flex items-center gap-2">
+                      <div className="mb-3 flex items-center justify-between p-2.5 rounded-xl bg-[#061D12] border border-[#26734D]/50">
+                        <span className="text-xs font-medium text-[#F5F4EA] flex items-center gap-2">
                           <Type className="w-3.5 h-3.5 text-[#C8A96B]" />
                           <span>Highlight All Links</span>
                         </span>
                         <button
                           onClick={() => setHighlightLinks(!highlightLinks)}
                           className={`w-10 h-5 rounded-full transition-colors relative p-0.5 ${
-                            highlightLinks ? 'bg-[#C8A96B]' : 'bg-gray-600'
+                            highlightLinks ? 'bg-[#C8A96B]' : 'bg-[#123D2B] border border-[#26734D]/70'
                           }`}
                         >
                           <span className={`block w-4 h-4 rounded-full bg-white transition-transform ${
@@ -704,10 +704,10 @@ export default function Navbar({
                       {/* Screen Reader Speech Assistance */}
                       <button
                         onClick={handleToggleSpeech}
-                        className={`w-full py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-2 border transition-all ${
+                        className={`w-full py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 border transition-all ${
                           isSpeaking
                             ? 'bg-emerald-600 text-white border-emerald-400 animate-pulse'
-                            : 'bg-[#123D2B] text-[#C8A96B] border-[#C8A96B]/30 hover:bg-[#C8A96B] hover:text-[#071D12]'
+                            : 'bg-[#1B6537] text-white hover:text-[#C8A96B] hover:bg-[#217c44] border border-[#26734D]/70 shadow-sm'
                         }`}
                       >
                         <Volume1 className="w-4 h-4" />
