@@ -1,28 +1,28 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { 
-  Compass, 
-  Volume2, 
-  VolumeX, 
-  Maximize2, 
-  Sparkles, 
-  Eye, 
-  Camera, 
-  Layers, 
-  RotateCw, 
-  Play, 
-  Tv, 
+import {
+  Compass,
+  Volume2,
+  VolumeX,
+  Maximize2,
+  Sparkles,
+  Eye,
+  Camera,
+  Layers,
+  RotateCw,
+  Play,
+  Tv,
   X,
   ChevronLeft,
   ChevronRight,
   Headphones
 } from 'lucide-react';
-import { 
-  playTigerRoar, 
-  playLionRoar, 
-  playElephantTrumpet, 
-  playPeafowlCry, 
-  playDeerCall, 
-  playBearGrunt 
+import {
+  playTigerRoar,
+  playLionRoar,
+  playElephantTrumpet,
+  playPeafowlCry,
+  playDeerCall,
+  playBearGrunt
 } from '../utils/audioSynthesizer';
 
 export default function VirtualExperience() {
@@ -269,9 +269,9 @@ export default function VirtualExperience() {
 
   return (
     <section id="virtual-experience" className="py-24 bg-forest-950 text-ivory-50 relative overflow-hidden">
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        
+
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-14">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full glass-badge mb-3">
@@ -286,7 +286,7 @@ export default function VirtualExperience() {
           </h2>
 
           <p className="mt-3 text-ivory-200/80 text-sm sm:text-base font-light">
-            Step directly into the living ecosystem of Nandankanan through 360-degree habitat panoramas, 
+            Step directly into the living ecosystem of Nandankanan through 360-degree habitat panoramas,
             realistic bio-acoustic wildlife calls, and high-definition photography.
           </p>
 
@@ -294,11 +294,10 @@ export default function VirtualExperience() {
           <div className="mt-8 inline-flex items-center p-1.5 rounded-2xl bg-forest-900 border border-gold-500/30">
             <button
               onClick={() => setActiveTab('360')}
-              className={`px-5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 ${
-                activeTab === '360'
-                  ? 'bg-gold-500 text-forest-950 shadow-md'
-                  : 'text-ivory-200 hover:text-gold-300'
-              }`}
+              className={`px-5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 ${activeTab === '360'
+                ? 'bg-gold-500 text-forest-950 shadow-md'
+                : 'text-ivory-200 hover:text-gold-300'
+                }`}
             >
               <RotateCw className="w-3.5 h-3.5" />
               <span>360° Habitats</span>
@@ -306,11 +305,10 @@ export default function VirtualExperience() {
 
             <button
               onClick={() => setActiveTab('sounds')}
-              className={`px-5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 ${
-                activeTab === 'sounds'
-                  ? 'bg-gold-500 text-forest-950 shadow-md'
-                  : 'text-ivory-200 hover:text-gold-300'
-              }`}
+              className={`px-5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 ${activeTab === 'sounds'
+                ? 'bg-gold-500 text-forest-950 shadow-md'
+                : 'text-ivory-200 hover:text-gold-300'
+                }`}
             >
               <Headphones className="w-3.5 h-3.5" />
               <span>Animal Soundboard</span>
@@ -318,11 +316,10 @@ export default function VirtualExperience() {
 
             <button
               onClick={() => setActiveTab('gallery')}
-              className={`px-5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 ${
-                activeTab === 'gallery'
-                  ? 'bg-gold-500 text-forest-950 shadow-md'
-                  : 'text-ivory-200 hover:text-gold-300'
-              }`}
+              className={`px-5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 ${activeTab === 'gallery'
+                ? 'bg-gold-500 text-forest-950 shadow-md'
+                : 'text-ivory-200 hover:text-gold-300'
+                }`}
             >
               <Camera className="w-3.5 h-3.5" />
               <span>Photo Gallery</span>
@@ -334,7 +331,7 @@ export default function VirtualExperience() {
         {activeTab === '360' && (
           <div className="animate-fadeIn">
             <div className="relative rounded-3xl overflow-hidden border border-gold-500/30 shadow-2xl bg-black cursor-grab active:cursor-grabbing">
-              
+
               <canvas
                 ref={canvasRef}
                 onMouseDown={handleMouseDown}
@@ -375,11 +372,10 @@ export default function VirtualExperience() {
                   <button
                     key={p.title}
                     onClick={() => setCurrentPanoIndex(idx)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider backdrop-blur-md transition-all ${
-                      currentPanoIndex === idx
-                        ? 'bg-gold-500 text-forest-950 shadow-md font-bold'
-                        : 'bg-forest-950/80 text-ivory-200 border border-gold-500/30 hover:bg-forest-900'
-                    }`}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider backdrop-blur-md transition-all ${currentPanoIndex === idx
+                      ? 'bg-gold-500 text-forest-950 shadow-md font-bold'
+                      : 'bg-forest-950/80 text-ivory-200 border border-gold-500/30 hover:bg-forest-900'
+                      }`}
                   >
                     Scene {idx + 1}
                   </button>
@@ -399,11 +395,10 @@ export default function VirtualExperience() {
                 return (
                   <div
                     key={item.id}
-                    className={`p-6 rounded-2xl border transition-all duration-300 flex flex-col justify-between ${
-                      isPlayingThis
-                        ? 'bg-forest-900 border-gold-400 shadow-xl shadow-gold-500/20 -translate-y-1'
-                        : 'bg-forest-900/60 border-forest-800/80 hover:border-gold-500/40 hover:bg-forest-900'
-                    }`}
+                    className={`p-6 rounded-2xl border transition-all duration-300 flex flex-col justify-between ${isPlayingThis
+                      ? 'bg-forest-900 border-gold-400 shadow-xl shadow-gold-500/20 -translate-y-1'
+                      : 'bg-forest-900/60 border-forest-800/80 hover:border-gold-500/40 hover:bg-forest-900'
+                      }`}
                   >
                     <div>
                       <div className="flex items-center justify-between mb-3">
@@ -430,11 +425,10 @@ export default function VirtualExperience() {
                     {/* Sound Action Button */}
                     <button
                       onClick={() => handlePlaySound(item)}
-                      className={`w-full py-3 rounded-xl font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-md ${
-                        isPlayingThis
-                          ? 'bg-gold-500 text-forest-950'
-                          : 'bg-forest-800 text-gold-300 hover:bg-gold-500 hover:text-forest-950 border border-gold-500/30'
-                      }`}
+                      className={`w-full py-3 rounded-xl font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-md ${isPlayingThis
+                        ? 'bg-gold-500 text-forest-950'
+                        : 'bg-forest-800 text-gold-300 hover:bg-gold-500 hover:text-forest-950 border border-gold-500/30'
+                        }`}
                     >
                       <Volume2 className={`w-4 h-4 ${isPlayingThis ? 'animate-bounce' : ''}`} />
                       <span>{isPlayingThis ? "Playing Vocalization..." : "Trigger Animal Sound"}</span>
@@ -490,11 +484,11 @@ export default function VirtualExperience() {
 
       {/* Lightbox Modal for Photo Gallery */}
       {selectedPhoto && (
-        <div 
+        <div
           onClick={() => setSelectedPhoto(null)}
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-forest-950/95 backdrop-blur-2xl animate-fadeIn cursor-zoom-out"
         >
-          <div 
+          <div
             onClick={(e) => e.stopPropagation()}
             className="relative max-w-5xl w-full bg-forest-900 border border-gold-500/30 rounded-3xl overflow-hidden shadow-2xl flex flex-col"
           >

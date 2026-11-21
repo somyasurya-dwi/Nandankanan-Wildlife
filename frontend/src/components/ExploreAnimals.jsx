@@ -1,9 +1,8 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { 
   Search, 
   Filter, 
   Compass, 
-  Volume2, 
   Tv, 
   HeartHandshake, 
   X, 
@@ -16,56 +15,168 @@ import {
   Utensils, 
   ShieldAlert, 
   ChevronRight,
+  ChevronDown,
+  RotateCcw,
   ExternalLink
 } from 'lucide-react';
-import { 
-  playTigerRoar, 
-  playLionRoar, 
-  playElephantTrumpet, 
-  playPeafowlCry, 
-  playDeerCall, 
-  playBearGrunt 
-} from '../utils/audioSynthesizer';
 
-export default function ExploreAnimals({ animals, onSponsorAnimal }) {
+export const ANIMAL_CATEGORY_GROUPS = {
+  Mammals: [
+    'Big Cats',
+    'Elephants and Large Mammals',
+    'Deer and Antelopes',
+    'Primates',
+    'Other Mammals'
+  ],
+  Birds: [
+    'Parrots and Parakeets',
+    'Peafowl and Pheasants',
+    'Water Birds',
+    'Birds of Prey',
+    'Other Birds'
+  ],
+  Reptiles: [
+    'Crocodiles',
+    'Snakes',
+    'Lizards',
+    'Turtles and Tortoises'
+  ],
+  'Semi-Aquatic Animals': [
+    'Freshwater Fishes',
+    'Aquatic Mammals',
+    'Amphibians'
+  ],
+  'Aquatic Animals': [
+    'Freshwater Fishes',
+    'Aquatic Mammals',
+    'Amphibians'
+  ]
+};
+
+export default function ExploreAnimals({ animals = [], onSponsorAnimal }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [selectedGroup, setSelectedGroup] = useState('All');
+  const [openDropdown, setOpenDropdown] = useState(null);
   const [selectedStatus, setSelectedStatus] = useState('All');
   const [activeAnimalModal, setActiveAnimalModal] = useState(null);
+  const dropdownRef = useRef(null);
 
-  const categories = ['All', 'Mammals', 'Birds', 'Reptiles', 'Aquatic Animals'];
+  const categories = ['All', 'Mammals', 'Birds', 'Reptiles', 'Semi-Aquatic Animals'];
   const statuses = ['All', 'Critically Endangered', 'Endangered', 'Vulnerable', 'Least Concern'];
 
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setOpenDropdown(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Helper: Retrieve category-appropriate group for an animal
+  const getAnimalGroup = (animal) => {
+    if (!animal?.group) return '';
+    if (animal.group === 'Crocodilians') return 'Crocodiles';
+    return animal.group;
+  };
+
+  // Helper: Get available animal groups and exact counts for any category
+  const getCategoryGroups = (cat) => {
+    if (cat === 'All') return [];
+    const referenceGroups = ANIMAL_CATEGORY_GROUPS[cat] || (cat.toLowerCase().includes('aquatic') ? ANIMAL_CATEGORY_GROUPS['Semi-Aquatic Animals'] : []);
+    const catAnimals = animals.filter((animal) => {
+      if (!animal.category) return false;
+      if (cat === 'Semi-Aquatic Animals' || cat === 'Aquatic Animals') {
+        return animal.category.toLowerCase().includes('aquatic');
+      }
+      return animal.category.toLowerCase() === cat.toLowerCase();
+    });
+
+    const counts = {};
+    catAnimals.forEach((animal) => {
+      const grp = getAnimalGroup(animal);
+      if (grp) counts[grp] = (counts[grp] || 0) + 1;
+    });
+
+    const result = referenceGroups.map((name) => ({
+      name,
+      count: counts[name] || 0
+    }));
+
+    // In case there are extra groups present in animals:
+    Object.keys(counts).forEach(name => {
+      if (!referenceGroups.includes(name)) {
+        result.push({ name, count: counts[name] });
+      }
+    });
+
+    return result;
+  };
+
+  // Filtered animals based on search query, category, animal group, and IUCN status
   const filteredAnimals = useMemo(() => {
     return animals.filter((animal) => {
+      const query = searchQuery.trim().toLowerCase();
       const matchesSearch = 
-        animal.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        animal.scientific_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        animal.habitat.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        animal.diet.toLowerCase().includes(searchQuery.toLowerCase());
+        !query ||
+        animal.name.toLowerCase().includes(query) ||
+        animal.scientific_name.toLowerCase().includes(query) ||
+        animal.habitat.toLowerCase().includes(query) ||
+        animal.diet.toLowerCase().includes(query) ||
+        (animal.group && animal.group.toLowerCase().includes(query));
       
       const matchesCategory = 
         selectedCategory === 'All' || 
-        animal.category.toLowerCase() === selectedCategory.toLowerCase();
+        animal.category.toLowerCase() === selectedCategory.toLowerCase() ||
+        (selectedCategory.toLowerCase().includes('aquatic') && animal.category && animal.category.toLowerCase().includes('aquatic'));
+
+      const animalGroup = getAnimalGroup(animal);
+      const matchesGroup = 
+        selectedCategory === 'All' ||
+        selectedGroup === 'All' || 
+        (animalGroup && animalGroup.toLowerCase() === selectedGroup.toLowerCase());
 
       const matchesStatus = 
         selectedStatus === 'All' || 
         animal.conservation_status.toLowerCase() === selectedStatus.toLowerCase();
 
-      return matchesSearch && matchesCategory && matchesStatus;
+      return matchesSearch && matchesCategory && matchesGroup && matchesStatus;
     });
-  }, [animals, searchQuery, selectedCategory, selectedStatus]);
+  }, [animals, searchQuery, selectedCategory, selectedGroup, selectedStatus]);
 
-  const playAnimalAudio = (audioType) => {
-    switch (audioType) {
-      case 'tiger': playTigerRoar(); break;
-      case 'lion': playLionRoar(); break;
-      case 'elephant': playElephantTrumpet(); break;
-      case 'peafowl': playPeafowlCry(); break;
-      case 'deer': playDeerCall(); break;
-      case 'bear': playBearGrunt(); break;
-      default: playTigerRoar(); break;
-    }
+  const handleSelectAll = () => {
+    setSelectedCategory('All');
+    setSelectedGroup('All');
+    setOpenDropdown(null);
+  };
+
+  // 1. Direct Category Click: selects category and immediately displays animals, never opens dropdown
+  const handleCategorySelect = (cat) => {
+    setSelectedCategory(cat);
+    setSelectedGroup('All');
+    setOpenDropdown(null);
+  };
+
+  // 2. Dropdown Symbol Click: ONLY toggles the dropdown menu for selecting a specific group
+  const handleToggleDropdown = (cat) => {
+    setOpenDropdown((prev) => (prev === cat ? null : cat));
+  };
+
+  const handleGroupSelect = (cat, grpName) => {
+    setSelectedCategory(cat);
+    setSelectedGroup(grpName);
+    setOpenDropdown(null);
+  };
+
+  const handleResetFilters = () => {
+    setSearchQuery('');
+    setSelectedCategory('All');
+    setSelectedGroup('All');
+    setSelectedStatus('All');
+    setOpenDropdown(null);
   };
 
   const getStatusColor = (status) => {
@@ -106,9 +217,9 @@ export default function ExploreAnimals({ animals, onSponsorAnimal }) {
         </div>
 
         {/* Search & Filters Bar */}
-        <div className="bg-[#071D12]/90 rounded-2xl p-5 border border-[#26734D]/50 shadow-2xl backdrop-blur-md mb-12">
+        <div className="relative z-40 bg-[#071D12]/95 rounded-2xl p-5 border border-[#26734D]/50 shadow-2xl backdrop-blur-md mb-12">
           
-          <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
+          <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
             
             {/* Search Input */}
             <div className="relative w-full lg:w-96">
@@ -123,28 +234,149 @@ export default function ExploreAnimals({ animals, onSponsorAnimal }) {
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#F5F4EA]/50 hover:text-[#F5F4EA] text-xs"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#F5F4EA]/50 hover:text-[#F5F4EA] text-xs font-semibold"
                 >
                   Clear
                 </button>
               )}
             </div>
 
-            {/* Category Filter Pills */}
-            <div className="flex items-center gap-1.5 overflow-x-auto w-full lg:w-auto pb-2 lg:pb-0 scrollbar-none">
-              {categories.map((cat) => (
-                <button
-                  key={cat}
-                  onClick={() => setSelectedCategory(cat)}
-                  className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold uppercase tracking-wider whitespace-nowrap transition-all ${
-                    selectedCategory === cat
-                      ? 'bg-[#C8A96B] text-[#123D2B] font-black shadow-lg shadow-[#C8A96B]/25'
-                      : 'bg-[#0B2A1A] text-[#F5F4EA]/80 hover:bg-[#123D2B] border border-[#26734D]/40'
-                  }`}
-                >
-                  {cat}
-                </button>
-              ))}
+            {/* Category Filter Options with Distinct Dropdown Symbols */}
+            <div ref={dropdownRef} className="relative flex items-center gap-1.5 flex-wrap sm:flex-nowrap w-full lg:w-auto">
+              
+              {/* ALL Pill */}
+              <button
+                type="button"
+                onClick={handleSelectAll}
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold uppercase tracking-wider whitespace-nowrap transition-all ${
+                  selectedCategory === 'All'
+                    ? 'bg-[#C8A96B] text-[#123D2B] font-black shadow-lg shadow-[#C8A96B]/25'
+                    : 'bg-[#0B2A1A] text-[#F5F4EA]/80 hover:bg-[#123D2B] border border-[#26734D]/40'
+                }`}
+              >
+                All
+              </button>
+
+              {/* Specific Categories with Separate Label Click & Dropdown Arrow */}
+              {['Mammals', 'Birds', 'Reptiles', 'Semi-Aquatic Animals'].map((cat) => {
+                const isSelected = selectedCategory === cat;
+                const isOpen = openDropdown === cat;
+                const groups = getCategoryGroups(cat);
+                const totalInCat = groups.reduce((acc, g) => acc + g.count, 0);
+
+                return (
+                  <div key={cat} className="relative inline-flex items-center">
+                    
+                    {/* Unified Pill with Split Click Targets */}
+                    <div className={`inline-flex items-center rounded-xl text-xs font-semibold uppercase tracking-wider whitespace-nowrap transition-all border ${
+                      isSelected
+                        ? 'bg-[#C8A96B] text-[#123D2B] border-[#C8A96B] shadow-lg shadow-[#C8A96B]/25'
+                        : 'bg-[#0B2A1A] text-[#F5F4EA]/80 hover:bg-[#123D2B] border border-[#26734D]/40'
+                    }`}>
+                      
+                      {/* 1. Category Name Button: immediately shows that category, does NOT open dropdown */}
+                      <button
+                        type="button"
+                        onClick={() => handleCategorySelect(cat)}
+                        className={`pl-3.5 pr-2 py-1.5 font-bold tracking-wider hover:opacity-85 transition-opacity flex items-center gap-1.5 ${
+                          isSelected ? 'text-[#123D2B] font-black' : 'text-[#F5F4EA]/90'
+                        }`}
+                        title={`Show all ${cat}`}
+                      >
+                        <span>{cat}</span>
+                        {isSelected && selectedGroup !== 'All' && (
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#123D2B]" />
+                        )}
+                      </button>
+
+                      {/* Subtle divider */}
+                      <span className={`w-[1px] h-3.5 self-center ${
+                        isSelected ? 'bg-[#123D2B]/30' : 'bg-[#26734D]/60'
+                      }`} />
+
+                      {/* 2. Dropdown Arrow Button: ONLY opens/closes the dropdown menu */}
+                      <button
+                        type="button"
+                        onClick={() => handleToggleDropdown(cat)}
+                        className={`px-2.5 py-1.5 flex items-center justify-center hover:opacity-80 transition-all rounded-r-xl ${
+                          isOpen 
+                            ? (isSelected ? 'bg-[#b89858]' : 'bg-[#144730]') 
+                            : ''
+                        }`}
+                        aria-label={`Toggle ${cat} sub-groups menu`}
+                        title={`Filter ${cat} by group`}
+                      >
+                        <ChevronDown 
+                          className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                            isOpen ? 'rotate-180' : ''
+                          }`} 
+                        />
+                      </button>
+                    </div>
+
+                    {/* Floating Dropdown Menu: floats cleanly above all content below */}
+                    {isOpen && (
+                      <>
+                        {/* Backdrop to close dropdown cleanly when clicking outside */}
+                        <div 
+                          className="fixed inset-0 z-40 bg-black/30 backdrop-blur-[1px]" 
+                          onClick={() => setOpenDropdown(null)} 
+                        />
+                        <div className={`absolute top-full mt-2.5 ${
+                          cat === 'Semi-Aquatic Animals' || cat === 'Aquatic Animals' || cat === 'Reptiles' ? 'right-0' : 'left-0'
+                        } min-w-[260px] bg-[#071D12]/98 border-2 border-[#C8A96B] rounded-2xl shadow-[0_25px_60px_rgba(0,0,0,0.95)] backdrop-blur-2xl overflow-hidden py-1.5 z-50 animate-fadeIn`}>
+                          
+                          <div className="px-3.5 py-2 border-b border-[#26734D]/40 flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-[#C8A96B]">
+                            <span>Select Animal Group</span>
+                            <span className="text-[10px] text-[#F5F4EA]/60 font-mono">({totalInCat} verified)</span>
+                          </div>
+
+                          <div className="max-h-60 overflow-y-auto py-1">
+                            {/* Option: All [Category] */}
+                            <button
+                              type="button"
+                              onClick={() => handleGroupSelect(cat, 'All')}
+                              className={`w-full text-left px-3.5 py-2 text-xs flex items-center justify-between transition-colors ${
+                                isSelected && selectedGroup === 'All'
+                                  ? 'bg-[#123D2B] text-[#C8A96B] font-bold border-l-2 border-[#C8A96B]'
+                                  : 'text-[#F5F4EA]/90 hover:bg-[#123D2B] hover:text-[#C8A96B]'
+                              }`}
+                            >
+                              <span>All {cat}</span>
+                              <span className="text-[10px] opacity-60 font-mono">({totalInCat})</span>
+                            </button>
+
+                            {/* Individual Animal Groups */}
+                            {groups.map((grp) => (
+                              <button
+                                key={grp.name}
+                                type="button"
+                                onClick={() => handleGroupSelect(cat, grp.name)}
+                                className={`w-full text-left px-3.5 py-2 text-xs flex items-center justify-between transition-colors ${
+                                  isSelected && selectedGroup === grp.name
+                                    ? 'bg-[#123D2B] text-[#C8A96B] font-bold border-l-2 border-[#C8A96B]'
+                                    : 'text-[#F5F4EA]/90 hover:bg-[#123D2B] hover:text-[#C8A96B]'
+                                }`}
+                              >
+                                <span>{grp.name}</span>
+                                <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded ${
+                                  grp.count > 0 
+                                    ? 'bg-[#123D2B] text-[#C8A96B]' 
+                                    : 'text-[#F5F4EA]/30'
+                                }`}>
+                                  ({grp.count})
+                                </span>
+                              </button>
+                            ))}
+                          </div>
+
+                        </div>
+                      </>
+                    )}
+                  </div>
+                );
+              })}
+
             </div>
 
           </div>
@@ -161,7 +393,7 @@ export default function ExploreAnimals({ animals, onSponsorAnimal }) {
                 onClick={() => setSelectedStatus(stat)}
                 className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors ${
                   selectedStatus === stat
-                    ? 'bg-[#C8A96B] text-[#123D2B] font-bold'
+                    ? 'bg-[#C8A96B] text-[#123D2B] font-bold shadow-md shadow-[#C8A96B]/20'
                     : 'text-[#F5F4EA]/70 hover:bg-[#123D2B]'
                 }`}
               >
@@ -172,113 +404,143 @@ export default function ExploreAnimals({ animals, onSponsorAnimal }) {
 
         </div>
 
-        {/* Results Counter */}
-        <div className="flex items-center justify-between text-xs text-[#F5F4EA]/60 font-medium mb-6 px-1">
-          <span>Showing {filteredAnimals.length} species conserved at Nandankanan</span>
-          {filteredAnimals.length === 0 && (
+        {/* Results Counter and Active Filter Pill */}
+        <div className="relative z-20 flex flex-wrap items-center justify-between gap-3 text-xs text-[#F5F4EA]/70 font-medium mb-6 px-1">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span>Showing {filteredAnimals.length} species conserved at Nandankanan</span>
+            {selectedCategory !== 'All' && (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#123D2B] text-[#C8A96B] text-[11px] font-bold border border-[#C8A96B]/30">
+                <span>{selectedCategory}</span>
+                {selectedGroup !== 'All' && (
+                  <>
+                    <span className="text-[#F5F4EA]/40">›</span>
+                    <span className="text-white">{selectedGroup}</span>
+                    <button 
+                      onClick={() => setSelectedGroup('All')}
+                      className="ml-0.5 hover:text-white transition-colors"
+                      title="Clear group filter"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </>
+                )}
+              </span>
+            )}
+          </div>
+          {(selectedCategory !== 'All' || selectedGroup !== 'All' || selectedStatus !== 'All' || searchQuery) && (
             <button 
-              onClick={() => { setSearchQuery(''); setSelectedCategory('All'); setSelectedStatus('All'); }}
-              className="text-[#C8A96B] font-semibold hover:underline"
+              onClick={handleResetFilters}
+              className="text-[#C8A96B] font-semibold hover:underline flex items-center gap-1"
             >
-              Reset all filters
+              <RotateCcw className="w-3 h-3" />
+              <span>Reset all filters</span>
             </button>
           )}
         </div>
 
-        {/* Animal Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredAnimals.map((animal) => (
-            <div
-              key={animal.id}
-              className="group rounded-2xl bg-[#123D2B]/70 border border-[#26734D]/50 hover:border-[#C8A96B]/60 overflow-hidden flex flex-col shadow-xl hover:shadow-2xl hover:shadow-[#C8A96B]/10 hover:-translate-y-1.5 transition-all duration-500"
-            >
-              {/* Image Container */}
-              <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#071D12]">
-                <img
-                  src={animal.photo_url}
-                  alt={animal.name}
-                  className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700"
-                />
+        {/* Animal Cards Grid or Empty State */}
+        {filteredAnimals.length > 0 ? (
+          <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {filteredAnimals.map((animal) => {
+              return (
+                <div
+                  key={animal.id}
+                  className="group rounded-2xl bg-[#123D2B]/70 border border-[#26734D]/50 hover:border-[#C8A96B]/60 overflow-hidden flex flex-col shadow-xl hover:shadow-2xl hover:shadow-[#C8A96B]/10 hover:-translate-y-1.5 transition-all duration-500"
+                >
+                  {/* Image Container */}
+                  <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#071D12]">
+                    <img
+                      src={animal.photo_url}
+                      alt={animal.name}
+                      className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700"
+                    />
 
-                {/* Status and Category Badges */}
-                <div className="absolute top-3 left-3 flex flex-wrap items-center gap-1.5">
-                  <span className="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-[#071D12]/90 text-[#F5F4EA] backdrop-blur-md border border-[#C8A96B]/40">
-                    {animal.category}
-                  </span>
-                  {animal.featured && (
-                    <span className="px-2 py-0.5 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-[#C8A96B] text-[#123D2B] flex items-center gap-1 shadow-md font-bold">
-                      <Sparkles className="w-2.5 h-2.5" />
-                      Featured
-                    </span>
-                  )}
-                </div>
+                    {/* Category Badge on Top-Left */}
+                    <div className="absolute top-3 left-3">
+                      <span className="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-[#071D12]/90 text-[#F5F4EA] backdrop-blur-md border border-[#C8A96B]/40 shadow-sm">
+                        {animal.category}
+                      </span>
+                    </div>
 
-                <div className="absolute top-3 right-3">
-                  <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border backdrop-blur-md ${getStatusColor(animal.conservation_status)}`}>
-                    {animal.conservation_status}
-                  </span>
-                </div>
-
-                {/* Quick Audio Roar Button on Card */}
-                {animal.audio_type && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      playAnimalAudio(animal.audio_type);
-                    }}
-                    className="absolute bottom-3 right-3 p-2.5 rounded-full bg-[#071D12]/90 hover:bg-[#C8A96B] text-[#C8A96B] hover:text-[#123D2B] border border-[#C8A96B]/40 shadow-lg backdrop-blur-md transition-all hover:scale-110"
-                    title={`Listen to ${animal.name} vocalization`}
-                  >
-                    <Volume2 className="w-4 h-4" />
-                  </button>
-                )}
-              </div>
-
-              {/* Card Body */}
-              <div className="p-6 flex-1 flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between text-xs text-[#F5F4EA]/60 mb-1">
-                    <span className="font-editorial italic text-[#C8A96B] font-semibold text-xs">
-                      {animal.scientific_name}
-                    </span>
-                    <span className="flex items-center gap-1 text-[11px] text-[#F5F4EA]/60">
-                      <MapPin className="w-3 h-3 text-[#C8A96B]" />
-                      {animal.habitat.split(',')[0]}
-                    </span>
+                    {/* Conservation Status on Top-Right */}
+                    <div className="absolute top-3 right-3">
+                      <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border backdrop-blur-md shadow-sm ${getStatusColor(animal.conservation_status)}`}>
+                        {animal.conservation_status}
+                      </span>
+                    </div>
                   </div>
 
-                  <h3 className="font-display font-bold text-2xl text-[#F5F4EA] group-hover:text-[#C8A96B] transition-colors">
-                    {animal.name}
-                  </h3>
+                  {/* Card Body */}
+                  <div className="p-6 flex-1 flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center justify-between text-xs text-[#F5F4EA]/60 mb-1">
+                        <span className="font-editorial italic text-[#C8A96B] font-semibold text-xs">
+                          {animal.scientific_name}
+                        </span>
+                        <span className="flex items-center gap-1 text-[11px] text-[#F5F4EA]/60">
+                          <MapPin className="w-3 h-3 text-[#C8A96B]" />
+                          {animal.habitat.split(',')[0]}
+                        </span>
+                      </div>
 
-                  <p className="mt-2.5 text-xs text-[#F5F4EA]/75 line-clamp-3 leading-relaxed">
-                    {animal.short_description}
-                  </p>
+                      {animal.group && (
+                        <div className="mb-2">
+                          <span className="inline-block px-2.5 py-0.5 rounded-md bg-[#071D12]/90 text-[10px] font-bold tracking-wider uppercase text-[#C8A96B] border border-[#26734D]/60 shadow-sm">
+                            {animal.group}
+                          </span>
+                        </div>
+                      )}
+
+                      <h3 className="font-display font-bold text-2xl text-[#F5F4EA] group-hover:text-[#C8A96B] transition-colors">
+                        {animal.name}
+                      </h3>
+
+                      <p className="mt-2.5 text-xs text-[#F5F4EA]/75 line-clamp-3 leading-relaxed">
+                        {animal.short_description}
+                      </p>
+                    </div>
+
+                    {/* Card Action Area */}
+                    <div className="mt-6 pt-4 border-t border-[#26734D]/40 flex items-center justify-between gap-2">
+                      <button
+                        onClick={() => onSponsorAnimal && onSponsorAnimal(animal)}
+                        className="text-xs font-bold text-[#C8A96B] hover:text-white flex items-center gap-1 hover:underline transition-colors"
+                      >
+                        <HeartHandshake className="w-3.5 h-3.5 text-[#C8A96B]" />
+                        <span>Sponsor Animal</span>
+                      </button>
+
+                      <button
+                        onClick={() => setActiveAnimalModal(animal)}
+                        className="px-4 py-2 rounded-xl bg-[#26734D] hover:bg-[#2E7D32] text-[#F5F4EA] font-bold text-xs uppercase tracking-wider transition-all duration-300 flex items-center gap-1 shadow-md hover:shadow-lg border border-[#C8A96B]/30"
+                      >
+                        <span>Explore More</span>
+                        <ChevronRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+
                 </div>
-
-                {/* Card Action Area */}
-                <div className="mt-6 pt-4 border-t border-[#26734D]/40 flex items-center justify-between gap-2">
-                  <button
-                    onClick={() => onSponsorAnimal && onSponsorAnimal(animal)}
-                    className="text-xs font-bold text-[#C8A96B] hover:text-white flex items-center gap-1 hover:underline"
-                  >
-                    <HeartHandshake className="w-3.5 h-3.5 text-[#C8A96B]" />
-                    <span>Sponsor Animal</span>
-                  </button>
-
-                  <button
-                    onClick={() => setActiveAnimalModal(animal)}
-                    className="px-4 py-2 rounded-xl bg-[#26734D] hover:bg-[#2E7D32] text-[#F5F4EA] font-bold text-xs uppercase tracking-wider transition-all duration-300 flex items-center gap-1 shadow-md hover:shadow-lg border border-[#C8A96B]/30"
-                  >
-                    <span>Explore More</span>
-                    <ChevronRight className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
-
+              );
+            })}
+          </div>
+        ) : (
+          <div className="text-center py-16 bg-[#123D2B]/30 border border-[#26734D]/40 rounded-2xl p-8 max-w-lg mx-auto">
+            <div className="w-12 h-12 mx-auto rounded-full bg-[#123D2B] border border-[#C8A96B]/40 flex items-center justify-center text-[#C8A96B] mb-3">
+              <Compass className="w-6 h-6" />
             </div>
-          ))}
-        </div>
+            <h3 className="font-display font-bold text-lg text-[#F5F4EA]">No species recorded yet</h3>
+            <p className="text-xs text-[#F5F4EA]/70 mt-1 max-w-sm mx-auto">
+              No animal records currently match {selectedGroup !== 'All' ? `"${selectedGroup}"` : 'your filters'}. Nandankanan exhibits are continuously updated.
+            </p>
+            <button
+              onClick={handleResetFilters}
+              className="mt-5 px-4 py-2 rounded-xl bg-[#C8A96B] text-[#123D2B] text-xs font-bold uppercase tracking-wider hover:bg-[#d8bc7f] transition-all shadow-md"
+            >
+              Reset Filters
+            </button>
+          </div>
+        )}
 
       </div>
 
@@ -314,6 +576,11 @@ export default function ExploreAnimals({ animals, onSponsorAnimal }) {
                     <span className="px-3 py-1 rounded-md bg-[#123D2B]/90 text-xs font-bold uppercase tracking-wider text-[#C8A96B] border border-[#C8A96B]/40">
                       {activeAnimalModal.category}
                     </span>
+                    {activeAnimalModal.group && (
+                      <span className="px-3 py-1 rounded-md bg-[#071D12]/90 text-xs font-semibold uppercase tracking-wider text-[#F5F4EA]/90 border border-[#26734D]">
+                        Group: {activeAnimalModal.group}
+                      </span>
+                    )}
                     <span className={`px-3 py-1 rounded-md text-xs font-bold uppercase tracking-wider border ${getStatusColor(activeAnimalModal.conservation_status)}`}>
                       IUCN: {activeAnimalModal.conservation_status}
                     </span>
@@ -420,16 +687,8 @@ export default function ExploreAnimals({ animals, onSponsorAnimal }) {
                   </div>
                 )}
 
-                {/* Audio Experience & Sponsorship Actions */}
-                <div className="pt-4 border-t border-[#26734D]/30 flex flex-col sm:flex-row items-center justify-between gap-4">
-                  <button
-                    onClick={() => playAnimalAudio(activeAnimalModal.audio_type)}
-                    className="w-full sm:w-auto px-5 py-3 rounded-xl bg-[#123D2B] hover:bg-[#1B5039] text-[#F5F4EA] hover:text-[#C8A96B] font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 border border-[#26734D]/40"
-                  >
-                    <Volume2 className="w-4 h-4 text-[#C8A96B]" />
-                    <span>Play Animal Sound</span>
-                  </button>
-
+                {/* Sponsorship Actions */}
+                <div className="pt-4 border-t border-[#26734D]/30 flex flex-col sm:flex-row items-center justify-end gap-4">
                   <button
                     onClick={() => {
                       const animal = activeAnimalModal;
@@ -453,4 +712,3 @@ export default function ExploreAnimals({ animals, onSponsorAnimal }) {
     </section>
   );
 }
-

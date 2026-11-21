@@ -121,10 +121,6 @@ export default function LiveStreaming({
                     {camera.status === 'LIVE' && <span className="w-2 h-2 rounded-full bg-white live-indicator" />}
                     {camera.status}
                   </span>
-                  
-                  <span className="px-2 py-0.5 rounded-md bg-forest-950/70 text-[9px] uppercase tracking-wider text-gold-400 border border-gold-500/30 backdrop-blur-md">
-                    DEMO VIDEO
-                  </span>
                 </div>
 
                 {/* Viewer Count */}
