@@ -11,19 +11,13 @@ import {
   Bookmark, 
   Leaf 
 } from 'lucide-react';
-import { useLanguage } from '../context/LanguageContext';
 
 export default function ConservationStories({ stories }) {
-  const { t } = useLanguage();
   const [activeStoryModal, setActiveStoryModal] = useState(null);
 
   return (
-    <section id="conservation-stories" className="pt-10 sm:pt-12 lg:pt-14 pb-10 sm:pb-12 lg:pb-14 bg-[#071D12] text-[#F5F4EA] relative overflow-hidden">
+    <section id="conservation-stories" className="py-24 bg-[#071D12] text-[#F5F4EA] relative overflow-hidden">
       
-      {/* Top Subtle Golden Forest Horizon Separator */}
-      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[#C8A96B]/25 to-transparent pointer-events-none" />
-      <div className="absolute top-0 inset-x-0 h-14 bg-gradient-to-b from-[#05140C]/60 to-transparent pointer-events-none" />
-
       {/* Background Subtle Forest Glow */}
       <div className="absolute top-0 right-1/4 w-96 h-96 bg-[#14532D]/30 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-0 left-10 w-96 h-96 bg-[#2E7D32]/20 rounded-full blur-3xl pointer-events-none" />
@@ -31,7 +25,7 @@ export default function ConservationStories({ stories }) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* Section Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 sm:mb-10 gap-6">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
           <div>
             <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#123D2B]/80 border border-[#C8A96B]/40 mb-3 shadow-md">
               <Leaf className="w-3.5 h-3.5 text-[#C8A96B]" />
@@ -64,7 +58,7 @@ export default function ConservationStories({ stories }) {
           {stories[0] && (
             <div 
               onClick={() => setActiveStoryModal(stories[0])}
-              className="lg:col-span-7 group rounded-3xl bg-[#123D2B]/75 border border-[#26734D]/50 hover:border-[#C8A96B]/60 overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500 cursor-pointer flex flex-col justify-between parallax-card"
+              className="lg:col-span-7 group rounded-3xl bg-[#123D2B]/75 border border-[#26734D]/50 hover:border-[#C8A96B]/60 overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500 cursor-pointer flex flex-col justify-between"
             >
               <div className="relative aspect-[16/10] w-full overflow-hidden bg-[#071D12]">
                 <img
@@ -117,7 +111,7 @@ export default function ConservationStories({ stories }) {
               <div
                 key={story.id}
                 onClick={() => setActiveStoryModal(story)}
-                className="group p-5 rounded-2xl bg-[#123D2B]/75 border border-[#26734D]/50 hover:border-[#C8A96B]/60 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer flex gap-4 items-center parallax-card"
+                className="group p-5 rounded-2xl bg-[#123D2B]/75 border border-[#26734D]/50 hover:border-[#C8A96B]/60 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer flex gap-4 items-center"
               >
                 <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden shrink-0 bg-[#071D12]">
                   <img

@@ -2,7 +2,6 @@ import React, { Component, StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
-import { LanguageProvider } from './context/LanguageContext'
 
 class ErrorBoundary extends Component {
   constructor(props) {
@@ -41,8 +40,6 @@ class ErrorBoundary extends Component {
 
 createRoot(document.getElementById('root')).render(
   <ErrorBoundary>
-    <LanguageProvider>
-      <App />
-    </LanguageProvider>
+    <App />
   </ErrorBoundary>,
 )

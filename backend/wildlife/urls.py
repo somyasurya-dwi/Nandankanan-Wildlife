@@ -8,13 +8,7 @@ from .views import (
     ConservationStoryViewSet,
     park_stats,
     demo_auth,
-    save_frame,
-    register_user,
-    login_user,
-    logout_user,
-    current_user,
-    forgot_password,
-    reset_password
+    save_frame
 )
 
 router = DefaultRouter()
@@ -28,13 +22,6 @@ urlpatterns = [
     path('', include(router.urls)),
     path('stats/', park_stats, name='park-stats'),
     path('auth/', demo_auth, name='demo-auth'),
-    path('auth/register/', register_user, name='auth-register'),
-    path('auth/login/', login_user, name='auth-login'),
-    path('auth/logout/', logout_user, name='auth-logout'),
-    path('auth/me/', current_user, name='auth-me'),
-    path('auth/profile/', current_user, name='auth-profile'),
-    path('auth/forgot-password/', forgot_password, name='auth-forgot-password'),
-    path('auth/reset-password/', reset_password, name='auth-reset-password'),
     path('save_frame/', save_frame, name='save-frame'),
 ]
 

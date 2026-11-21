@@ -32,7 +32,7 @@ export default function SpeciesGridSection({ language, onOpenTickets }) {
   const [selectedStatus, setSelectedStatus] = useState('All');
   const [selectedAnimal, setSelectedAnimal] = useState(null);
 
-  const categories = ['All', 'Mammals', 'Birds', 'Reptiles', 'Semi-Aquatic Animals'];
+  const categories = ['All', 'Mammals', 'Birds', 'Reptiles', 'Aquatic Animals'];
 
   const filteredAnimals = useMemo(() => {
     return INITIAL_ANIMALS.filter((animal) => {
@@ -44,8 +44,7 @@ export default function SpeciesGridSection({ language, onOpenTickets }) {
       
       const matchesCategory = 
         selectedCategory === 'All' || 
-        animal.category.toLowerCase() === selectedCategory.toLowerCase() ||
-        (selectedCategory.toLowerCase().includes('aquatic') && animal.category.toLowerCase().includes('aquatic'));
+        animal.category.toLowerCase() === selectedCategory.toLowerCase();
 
       const matchesStatus = 
         selectedStatus === 'All' || 

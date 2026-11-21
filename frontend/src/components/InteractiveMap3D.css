@@ -1,0 +1,243 @@
+/* ==========================================================================
+   Nandankanan 3D Deep-Zoom Interactive Map (OpenSeadragon / Forest-Themed)
+   ========================================================================== */
+
+.nandankanan-map-wrapper {
+  position: relative;
+  width: 100%;
+  background: #041009;
+  font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif;
+  color: #F5F4EA;
+  user-select: none;
+}
+
+/* OpenSeadragon Container */
+.osd-viewport-container {
+  position: relative;
+  width: 100%;
+  height: 480px;
+  min-height: 440px;
+  background-color: #030c06;
+  border-radius: 1.5rem;
+  overflow: hidden;
+  border: 1px solid rgba(200, 169, 107, 0.3);
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7);
+}
+
+@media (max-width: 640px) {
+  .osd-viewport-container {
+    height: 380px;
+    min-height: 340px;
+  }
+}
+
+.osd-viewport-container:focus {
+  outline: none;
+}
+
+/* Glassmorphism Controls Panel */
+.glass-panel {
+  background: rgba(7, 29, 18, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(200, 169, 107, 0.35);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.55);
+}
+
+/* OpenSeadragon Navigator (Minimap) */
+.osd-viewport-container .navigator {
+  border: 1.5px solid rgba(200, 169, 107, 0.45) !important;
+  border-radius: 0.75rem !important;
+  background: rgba(4, 16, 9, 0.92) !important;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.75) !important;
+  overflow: hidden !important;
+}
+
+.osd-viewport-container .navigator .displayregion {
+  border: 2px solid #34D399 !important;
+  background: rgba(52, 211, 153, 0.22) !important;
+  border-radius: 4px !important;
+}
+
+/* Interactive Enclosure Hotspot Tags */
+.enclosure-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 9999px;
+  background: rgba(7, 29, 18, 0.92);
+  border: 1.5px solid rgba(200, 169, 107, 0.5);
+  color: #F5F4EA;
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+}
+
+.enclosure-tag:hover {
+  transform: translate(-50%, -50%) scale(1.12);
+  background: rgba(10, 42, 25, 0.98);
+  border-color: #C8A96B;
+  box-shadow: 0 6px 24px rgba(200, 169, 107, 0.45);
+}
+
+.enclosure-tag.tag-primary {
+  border-color: #F59E0B;
+  background: rgba(24, 38, 18, 0.94);
+}
+
+.enclosure-tag.tag-active {
+  background: #C8A96B;
+  color: #071D12;
+  border-color: #F5F4EA;
+  transform: translate(-50%, -50%) scale(1.18);
+  box-shadow: 0 0 25px rgba(200, 169, 107, 0.8), 0 8px 30px rgba(0, 0, 0, 0.8);
+  z-index: 100 !important;
+}
+
+.enclosure-tag.tag-active .tag-emoji {
+  transform: scale(1.2);
+}
+
+.enclosure-tag.tag-active .tag-title {
+  color: #071D12;
+  font-weight: 800;
+}
+
+/* Enclosure Highlight Aura (when clicked) */
+.enclosure-aura {
+  position: absolute;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  border: 2.5px solid #C8A96B;
+  background: radial-gradient(circle, rgba(200, 169, 107, 0.25) 0%, transparent 70%);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  animation: pulse-aura 2.2s infinite ease-in-out;
+}
+
+@keyframes pulse-aura {
+  0% {
+    transform: translate(-50%, -50%) scale(0.85);
+    opacity: 0.85;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.35);
+    opacity: 0.25;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(0.85);
+    opacity: 0.85;
+  }
+}
+
+/* Zoom Controls Button */
+.zoom-btn {
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1.15rem;
+  color: #C8A96B;
+  background: rgba(7, 29, 18, 0.92);
+  border: 1px solid rgba(200, 169, 107, 0.4);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.zoom-btn:hover {
+  background: #C8A96B;
+  color: #071D12;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(200, 169, 107, 0.4);
+}
+
+.zoom-btn:active {
+  transform: translateY(0);
+}
+
+/* Slide-In Details Drawer */
+.enclosure-drawer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: clamp(310px, 32%, 420px);
+  background: linear-gradient(165deg, rgba(4, 16, 9, 0.98) 0%, rgba(7, 29, 18, 0.97) 100%);
+  border-left: 1.5px solid rgba(200, 169, 107, 0.35);
+  backdrop-filter: blur(20px);
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  box-shadow: -15px 0 50px rgba(0, 0, 0, 0.75);
+  animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Quick Select Habitat Strip */
+.quick-habitat-card {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0.9rem;
+  border-radius: 0.85rem;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(200, 169, 107, 0.18);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.quick-habitat-card:hover {
+  background: rgba(200, 169, 107, 0.12);
+  border-color: rgba(200, 169, 107, 0.5);
+  transform: translateY(-2px);
+}
+
+.quick-habitat-card.card-selected {
+  background: rgba(200, 169, 107, 0.22);
+  border-color: #C8A96B;
+  box-shadow: 0 4px 18px rgba(200, 169, 107, 0.25);
+}
+
+/* Custom Scrollbars */
+.custom-scrollbar::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(7, 29, 18, 0.4);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(200, 169, 107, 0.35);
+  border-radius: 9999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(200, 169, 107, 0.6);
+}

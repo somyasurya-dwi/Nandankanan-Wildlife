@@ -106,12 +106,8 @@ export default function ConservationSection({ language }) {
     <section 
       id="conservation" 
       ref={sectionRef} 
-      className="pt-10 sm:pt-12 lg:pt-14 pb-10 sm:pb-12 lg:pb-14 bg-[#0B2A1A] text-[#F4F1E8] relative z-20 overflow-hidden"
+      className="py-28 bg-[#0B2A1A] text-[#F4F1E8] relative z-20 overflow-hidden"
     >
-      {/* Top Subtle Golden Forest Horizon Separator */}
-      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[#C8A96B]/25 to-transparent pointer-events-none" />
-      <div className="absolute top-0 inset-x-0 h-14 bg-gradient-to-b from-[#071D12]/50 to-transparent pointer-events-none" />
-
       {/* Background Studio Light Accents */}
       <div className="absolute top-1/2 left-0 w-[500px] h-[500px] bg-[#14532D]/40 rounded-full blur-3xl pointer-events-none -translate-y-1/2" />
       <div className="absolute bottom-0 right-0 w-[600px] h-[400px] bg-[#2E7D32]/20 rounded-full blur-3xl pointer-events-none" />
@@ -119,7 +115,7 @@ export default function ConservationSection({ language }) {
       <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 relative z-10">
         
         {/* Section Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 sm:mb-10 gap-6">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-20 gap-6">
           <div>
             <div className="inline-flex items-center gap-2 mb-3">
               <span className="w-2.5 h-2.5 rounded-full bg-[#F28C1B]" />
@@ -143,9 +139,9 @@ export default function ConservationSection({ language }) {
         </div>
 
         {/* Count-Up Metrics Strip */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-10">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-20">
           
-          <div className="p-5 sm:p-7 rounded-2xl sm:rounded-3xl bg-[#14532D]/30 border border-white/10 backdrop-blur-md">
+          <div className="p-8 rounded-3xl bg-[#14532D]/30 border border-white/10 backdrop-blur-md">
             <span className="text-4xl sm:text-6xl font-serif font-bold text-[#F28C1B] block mb-2 font-mono">
               {stats.hectares}
             </span>
@@ -157,7 +153,7 @@ export default function ConservationSection({ language }) {
             </p>
           </div>
 
-          <div className="p-5 sm:p-7 rounded-2xl sm:rounded-3xl bg-[#14532D]/30 border border-white/10 backdrop-blur-md">
+          <div className="p-8 rounded-3xl bg-[#14532D]/30 border border-white/10 backdrop-blur-md">
             <span className="text-4xl sm:text-6xl font-serif font-bold text-white block mb-2 font-mono">
               {stats.species}+
             </span>
@@ -169,7 +165,7 @@ export default function ConservationSection({ language }) {
             </p>
           </div>
 
-          <div className="p-5 sm:p-7 rounded-2xl sm:rounded-3xl bg-[#14532D]/30 border border-white/10 backdrop-blur-md">
+          <div className="p-8 rounded-3xl bg-[#14532D]/30 border border-white/10 backdrop-blur-md">
             <span className="text-4xl sm:text-6xl font-serif font-bold text-[#A7D7A9] block mb-2 font-mono">
               {stats.whiteTigers}+
             </span>
@@ -181,7 +177,7 @@ export default function ConservationSection({ language }) {
             </p>
           </div>
 
-          <div className="p-5 sm:p-7 rounded-2xl sm:rounded-3xl bg-[#14532D]/30 border border-white/10 backdrop-blur-md">
+          <div className="p-8 rounded-3xl bg-[#14532D]/30 border border-white/10 backdrop-blur-md">
             <span className="text-4xl sm:text-6xl font-serif font-bold text-[#F28C1B] block mb-2 font-mono">
               {stats.gharials}+
             </span>

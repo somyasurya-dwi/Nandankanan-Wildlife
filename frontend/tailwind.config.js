@@ -9,36 +9,15 @@ export default {
       colors: {
         forest: {
           950: '#071810',
-          900: '#071D12', // Deep forest background
-          850: '#0B2A1A', // Card / panel forest
-          800: '#123D2B', // Primary forest green
+          900: '#0B2A1A', // Dark forest green
+          800: '#14532D', // Primary forest green
           700: '#1B6537',
-          600: '#26734D', // Emerald accent
-          500: '#2E7D32', // Mid green
-          400: '#4CAF50',
+          600: '#2E7D32', // Mid green
+          500: '#388E3C',
+          400: '#66BB6A',
           300: '#A7D7A9', // Soft green
           100: '#Dcedd8',
           50: '#F0F7EF',
-        },
-        gold: {
-          50: '#FAF6EE',
-          100: '#F4ECD8',
-          200: '#E9DBB7',
-          300: '#DFCA99',
-          400: '#D4B87A',
-          500: '#C8A96B', // Signature Nandankanan Gold
-          600: '#B89652',
-          700: '#947539',
-          800: '#715728',
-          900: '#4E3A19',
-        },
-        ivory: {
-          50: '#FAF9F4',
-          100: '#F5F4EA', // Signature Ivory
-          200: '#ECE9D8',
-          300: '#DFDABF',
-          400: '#CFC8A3',
-          500: '#B8AF85',
         },
         cream: {
           50: '#FAF8F3',
@@ -50,6 +29,24 @@ export default {
           orange: '#F28C1B', // Key accent button
           hover: '#E07D10',
           amber: '#E5A836',
+        },
+        gold: {
+          50: '#FDFBF7',
+          100: '#FAF4E8',
+          200: '#F3E5C8',
+          300: '#E5C98F',
+          400: '#D4AF37',
+          500: '#C8A96B',
+          600: '#A88B4D',
+          700: '#876D36',
+          800: '#675225',
+          900: '#483818',
+        },
+        ivory: {
+          50: '#FAF9F5',
+          100: '#F5F4EA',
+          200: '#EAE8D5',
+          300: '#DDDABF',
         },
         charcoal: {
           900: '#111612',
@@ -64,9 +61,6 @@ export default {
         serif: ['"Instrument Serif"', '"Playfair Display"', 'Georgia', 'serif'],
         editorial: ['"Playfair Display"', '"Instrument Serif"', 'Georgia', 'serif'],
         sans: ['"Inter"', '"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
-        odia: ['"Noto Sans Oriya"', 'sans-serif'],
-        hindi: ['"Noto Sans Devanagari"', 'sans-serif'],
-        bengali: ['"Noto Sans Bengali"', 'sans-serif'],
       },
       animation: {
         'pulse-subtle': 'pulseSubtle 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',

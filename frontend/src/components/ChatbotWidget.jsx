@@ -16,33 +16,15 @@ export default function ChatbotWidget({ language, onOpenTickets }) {
   const [input, setInput] = useState('');
   const messagesEndRef = useRef(null);
 
-  const getGreeting = () => {
-    switch (language) {
-      case 'or': return 'ନମସ୍କାର! ମୁଁ ନନ୍ଦନକାନନ ଭର୍ଚୁଆଲ ସହାୟକ। ଆପଣଙ୍କୁ ପରିଦର୍ଶନ, ସଫାରୀ କିମ୍ବା ବନ୍ୟପ୍ରାଣୀ ସମ୍ପର୍କରେ କି ସାହାଯ୍ୟ କରିପାରିବି?';
-      case 'hi': return 'नमस्ते! मैं नंदनकानन वर्चुअल सहायक हूँ। आपकी यात्रा, सफारी टिकट या वन्यजीवों से जुड़े किस विषय में सहायता करूँ?';
-      case 'bn': return 'নমস্কার! আমি নন্দনকানন ভার্চুয়াল সহকারী। আপনার সফর, সাফারি বুকিং বা বন্যপ্রাণী সম্পর্কিত কী তথ্য জানতে চান?';
-      default: return 'Namaskar! I am your Nandankanan Sanctuary Assistant. How may I assist your visit, safari booking, or wildlife inquiry today?';
-    }
-  };
-
   const [messages, setMessages] = useState([
     {
       id: 1,
       sender: 'bot',
-      text: getGreeting()
+      text: language === 'odia' 
+        ? 'ନମସ୍କାର! ମୁଁ ନନ୍ଦନକାନନ ଭର୍ଚୁଆଲ ସହାୟକ। ଆପଣଙ୍କୁ ପରିଦର୍ଶନ, ସଫାରୀ କିମ୍ବା ବନ୍ୟପ୍ରାଣୀ ସମ୍ପର୍କରେ କି ସାହାଯ୍ୟ କରିପାରିବି?'
+        : 'Namaskar! I am your Nandankanan Sanctuary Assistant. How may I assist your visit, safari booking, or wildlife inquiry today?'
     }
   ]);
-
-  // Update greeting when language changes
-  useEffect(() => {
-    setMessages([
-      {
-        id: Date.now(),
-        sender: 'bot',
-        text: getGreeting()
-      }
-    ]);
-  }, [language]);
 
   const quickPrompts = [
     { label: '🕒 Visiting Hours & Closed Days', q: 'What are the visiting hours?' },
@@ -105,7 +87,7 @@ export default function ChatbotWidget({ language, onOpenTickets }) {
   }, [messages, isOpen]);
 
   return (
-    <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50">
+    <div className="fixed bottom-6 right-6 z-50">
       
       {/* Floating Trigger Button */}
       {!isOpen && (
@@ -125,7 +107,7 @@ export default function ChatbotWidget({ language, onOpenTickets }) {
 
       {/* Floating Chat Modal (Deep Forest Styled) */}
       {isOpen && (
-        <div className="w-[calc(100vw-2rem)] sm:w-[390px] max-w-[390px] h-[480px] sm:h-[520px] max-h-[80vh] rounded-3xl bg-[#071D12] border border-[#2E7D32]/50 shadow-2xl flex flex-col overflow-hidden animate-scaleUp text-[#F4F1E8]">
+        <div className="w-[360px] sm:w-[400px] h-[520px] rounded-3xl bg-[#071D12] border border-[#2E7D32]/50 shadow-2xl flex flex-col overflow-hidden animate-scaleUp text-[#F4F1E8]">
           
           {/* Header */}
           <div className="p-4 bg-[#0B2A1A] text-white flex items-center justify-between border-b border-[#2E7D32]/40">

@@ -18,14 +18,12 @@ import {
   ChevronRight,
   Info
 } from 'lucide-react';
-import { useLanguage } from '../context/LanguageContext';
 
 export default function LiveStreaming({ 
   cameras, 
   activeModalCamera: externalActiveModalCamera, 
   setActiveModalCamera: externalSetActiveModalCamera 
 }) {
-  const { t, getAnimalName } = useLanguage();
   const [internalActiveModalCamera, setInternalActiveModalCamera] = useState(null);
   const activeModalCamera = externalActiveModalCamera !== undefined ? externalActiveModalCamera : internalActiveModalCamera;
   const setActiveModalCamera = externalSetActiveModalCamera || setInternalActiveModalCamera;
@@ -52,12 +50,8 @@ export default function LiveStreaming({
   };
 
   return (
-    <section id="live-wildlife" className="pt-6 sm:pt-8 lg:pt-10 pb-10 sm:pb-12 lg:pb-14 bg-[#071810] text-ivory-50 relative overflow-hidden">
+    <section id="live-wildlife" className="py-24 bg-forest-950 text-ivory-50 relative overflow-hidden">
       
-      {/* Top Subtle Forest Mist Horizon Divider */}
-      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[#C8A96B]/25 to-transparent pointer-events-none" />
-      <div className="absolute top-0 inset-x-0 h-16 bg-gradient-to-b from-[#071D12]/50 to-transparent pointer-events-none" />
-
       {/* Background Ambience Elements */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-forest-800/20 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-96 h-96 bg-gold-600/10 rounded-full blur-3xl pointer-events-none" />
@@ -65,9 +59,9 @@ export default function LiveStreaming({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* Section Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 sm:mb-8 gap-6">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
           <div>
-            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full glass-badge mb-2.5">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full glass-badge mb-3">
               <span className="w-2.5 h-2.5 rounded-full bg-red-500 live-indicator" />
               <span className="text-[11px] font-semibold tracking-[0.2em] uppercase text-gold-300">
                 Continuous Stream Network
@@ -76,21 +70,21 @@ export default function LiveStreaming({
             <h2 className="font-display font-black text-3xl sm:text-5xl lg:text-6xl tracking-wide text-ivory-50">
               THE WILD, <span className="text-gold-400">LIVE</span>
             </h2>
-            <p className="mt-2.5 text-ivory-200/80 max-w-xl text-sm sm:text-base font-light">
+            <p className="mt-3 text-ivory-200/80 max-w-xl text-sm sm:text-base font-light">
               Watch real-time animal observation feeds from across Nandankanan’s 437-hectare forest enclosures and sanctuary wetlands.
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            <div className="bg-forest-900/80 border border-gold-500/25 rounded-xl px-4 py-2 flex items-center gap-2.5 text-xs text-ivory-200 backdrop-blur-md shadow-sm">
+            <div className="bg-forest-900/80 border border-gold-500/20 rounded-xl px-4 py-2.5 flex items-center gap-3 text-xs text-ivory-200 backdrop-blur-md">
               <Signal className="w-4 h-4 text-emerald-400 animate-pulse" />
-              <span className="font-medium">6 High-Definition Habitat Feeds Active</span>
+              <span>6 High-Definition Habitat Feeds Active</span>
             </div>
           </div>
         </div>
 
         {/* Demo Mode Notice Banner */}
-        <div className="mb-6 sm:mb-8 p-3.5 rounded-2xl bg-[#0B2A1A]/70 border border-gold-500/20 backdrop-blur-md flex items-start gap-3 shadow-md">
+        <div className="mb-10 p-4 rounded-2xl bg-forest-900/60 border border-gold-500/20 backdrop-blur-md flex items-start gap-3">
           <Info className="w-5 h-5 text-gold-400 shrink-0 mt-0.5" />
           <div className="text-xs text-ivory-200/90 leading-relaxed">
             <strong className="text-gold-300 uppercase tracking-wider font-semibold">Sanctuary Live Feeds Note:</strong>{' '}
@@ -100,11 +94,11 @@ export default function LiveStreaming({
         </div>
 
         {/* 6 Camera Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-7">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {cameras.map((camera) => (
             <div
               key={camera.id}
-              className="group rounded-2xl bg-[#092215]/85 border border-[#26734D]/50 hover:border-[#C8A96B]/60 transition-all duration-300 overflow-hidden flex flex-col shadow-xl hover:shadow-[0_12px_32px_rgba(7,29,18,0.7)] hover:-translate-y-1"
+              className="group rounded-2xl bg-forest-900/70 border border-forest-700/60 hover:border-gold-500/50 transition-all duration-500 overflow-hidden flex flex-col shadow-xl hover:shadow-2xl hover:shadow-gold-500/10 hover:-translate-y-1.5"
             >
               {/* Thumbnail Container */}
               <div className="relative aspect-video w-full overflow-hidden bg-forest-950">
@@ -115,22 +109,26 @@ export default function LiveStreaming({
                 />
 
                 {/* Dark gradient overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-forest-950/90 via-forest-950/20 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-forest-950 via-forest-950/20 to-transparent" />
 
                 {/* Live / Offline Status Badge */}
                 <div className="absolute top-3.5 left-3.5 flex items-center gap-2">
-                  <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold tracking-widest uppercase flex items-center gap-1.5 shadow-md ${
+                  <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold tracking-widest uppercase flex items-center gap-1.5 ${
                     camera.status === 'LIVE'
-                      ? 'bg-red-600/95 text-white backdrop-blur-md shadow-red-600/30'
+                      ? 'bg-red-600/90 text-white backdrop-blur-md shadow-lg shadow-red-600/40'
                       : 'bg-zinc-700/80 text-zinc-300'
                   }`}>
                     {camera.status === 'LIVE' && <span className="w-2 h-2 rounded-full bg-white live-indicator" />}
                     {camera.status}
                   </span>
+                  
+                  <span className="px-2 py-0.5 rounded-md bg-forest-950/70 text-[9px] uppercase tracking-wider text-gold-400 border border-gold-500/30 backdrop-blur-md">
+                    DEMO VIDEO
+                  </span>
                 </div>
 
                 {/* Viewer Count */}
-                <div className="absolute top-3.5 right-3.5 flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-forest-950/85 backdrop-blur-md text-[11px] font-medium text-ivory-200 border border-white/10 shadow-md">
+                <div className="absolute top-3.5 right-3.5 flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-forest-950/80 backdrop-blur-md text-[11px] font-medium text-ivory-200 border border-forest-700/50">
                   <Eye className="w-3.5 h-3.5 text-gold-400" />
                   <span>{camera.viewer_count?.toLocaleString()} watching</span>
                 </div>
@@ -146,20 +144,21 @@ export default function LiveStreaming({
               </div>
 
               {/* Card Body */}
-              <div className="p-5 sm:p-6 flex-1 flex flex-col justify-between">
+              <div className="p-6 flex-1 flex flex-col justify-between">
                 <div>
-                  <div className="flex items-center justify-between text-xs text-gold-400 font-medium mb-1.5">
-                    <span className="flex items-center gap-1.5">
-                      <MapPin className="w-3.5 h-3.5 text-gold-400" />
+                  <div className="flex items-center justify-between text-xs text-gold-400 font-medium mb-1">
+                    <span className="flex items-center gap-1">
+                      <MapPin className="w-3.5 h-3.5 text-gold-400/80" />
                       {camera.habitat_name}
                     </span>
+                    <span className="text-[11px] text-ivory-300/60 font-mono">1080p 30fps</span>
                   </div>
 
                   <h3 className="font-display font-bold text-xl text-ivory-50 group-hover:text-gold-300 transition-colors">
-                    {getAnimalName({ name: camera.animal_name }) || camera.animal_name}
+                    {camera.animal_name}
                   </h3>
 
-                  <p className="mt-2 text-xs text-ivory-200/75 line-clamp-2 leading-relaxed">
+                  <p className="mt-2 text-xs text-ivory-200/70 line-clamp-2 leading-relaxed">
                     {camera.description || `Live observation stream observing ${camera.animal_name} in its naturalized sanctuary enclosure.`}
                   </p>
                 </div>
@@ -172,10 +171,10 @@ export default function LiveStreaming({
 
                   <button
                     onClick={() => handleOpenLiveModal(camera)}
-                    className="btn-primary text-xs uppercase tracking-wider px-3.5 py-1.5"
+                    className="px-4 py-2 rounded-xl bg-forest-800 hover:bg-gold-500 text-ivory-50 hover:text-forest-950 font-bold text-xs uppercase tracking-wider transition-all duration-300 flex items-center gap-1.5 border border-gold-500/30 hover:border-gold-400 shadow-md group-hover:shadow-gold-500/20"
                   >
-                    <Tv className="w-3.5 h-3.5 text-[#C8A96B]" />
-                    <span>{t('live.watchModal') || 'Watch Live'}</span>
+                    <Tv className="w-3.5 h-3.5" />
+                    <span>Watch Live</span>
                   </button>
                 </div>
               </div>

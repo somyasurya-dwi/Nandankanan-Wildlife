@@ -14,7 +14,7 @@ import {
 
 export default function Footer() {
   return (
-    <footer id="footer" className="bg-forest-950 text-ivory-50 border-t border-gold-500/20 pt-12 pb-10 relative overflow-hidden">
+    <footer id="footer" className="bg-forest-950 text-ivory-50 border-t border-gold-500/20 pt-16 pb-12 relative overflow-hidden">
       
       {/* Background Subtle Gradient */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-px bg-gradient-to-r from-transparent via-gold-500/40 to-transparent" />
