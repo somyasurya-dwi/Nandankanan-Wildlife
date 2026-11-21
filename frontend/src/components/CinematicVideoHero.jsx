@@ -179,28 +179,36 @@ export default function CinematicVideoHero({ onExploreClick, onMapClick, onWatch
       <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-8 sm:pt-12">
         <div className="max-w-3xl">
           
-          {/* Bilingual Crest Badge: English + Odia Official Header */}
-          <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-[#0B2A1A]/85 border border-[#C8A96B]/50 shadow-xl backdrop-blur-md mb-6">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-[11px] sm:text-xs font-mono font-bold tracking-widest uppercase text-[#C8A96B]">
-              {t('hero.badge')}
-            </span>
-            <span className="text-white/40">|</span>
-            <span className="text-xs sm:text-sm font-odia font-bold text-[#F5F4EA] tracking-wide">
-              ନନ୍ଦନକାନନ ପ୍ରାଣୀ ଉଦ୍ୟାନ
-            </span>
+          {/* Top Odia Tagline matching 1st pic */}
+          <div className="text-xl sm:text-2xl md:text-3xl font-odia font-bold text-[#C8A96B] tracking-wide mb-3 drop-shadow-md">
+            {language === 'or' ? (t('hero.odiaTagline') || 'WHERE THE WILD FINDS IT\'S HOME') : (t('hero.odiaTagline') || 'ଯେଉଁଠି ବନ୍ୟଜୀବନ ପାଏ ଆଶ୍ରୟ')}
           </div>
 
-          {/* Editorial Grand Typography */}
-          <h1 className="font-display font-black text-4xl sm:text-6xl md:text-7xl lg:text-8xl tracking-tight leading-[0.95] text-[#F5F4EA] drop-shadow-2xl mb-4">
-            {t('hero.titleLine1')}{' '}
-            <span className="font-editorial italic font-normal text-[#C8A96B] block sm:inline">
-              {t('hero.titleLine2')}
-            </span>
+          {/* Editorial Grand Typography matching 1st pic */}
+          <h1 className="font-display font-black text-4xl sm:text-6xl md:text-7xl lg:text-[5.25rem] tracking-tight leading-[1.04] text-[#F5F4EA] drop-shadow-2xl mb-5">
+            {language === 'en' ? (
+              <>
+                WHERE THE <br />
+                WILD <br />
+                <span className="text-[#C8A96B] font-editorial italic font-normal tracking-normal drop-shadow-lg">
+                  FINDS IT'S HOME
+                </span>
+              </>
+            ) : (
+              <>
+                {t('hero.englishHeadingLine1')} <br />
+                <span className="text-[#C8A96B] font-editorial italic font-normal tracking-normal drop-shadow-lg">
+                  {t('hero.englishHeadingLine2')}
+                </span>
+              </>
+            )}
           </h1>
 
-          {/* Description Paragraph */}
-          <p className="text-sm sm:text-base md:text-lg text-[#F5F4EA]/90 font-light leading-relaxed max-w-2xl mb-8 drop-shadow-md">
+          {/* Dual Description Paragraphs matching 1st pic */}
+          <p className="text-base sm:text-lg md:text-xl text-[#F5F4EA]/90 max-w-2xl font-light leading-relaxed mb-3 drop-shadow">
+            {t('hero.subtitle')}
+          </p>
+          <p className="text-xs sm:text-sm md:text-[15px] text-[#A6C6AF] max-w-2xl font-normal leading-relaxed mb-6 drop-shadow-sm">
             {t('hero.shortIntro')}
           </p>
 
