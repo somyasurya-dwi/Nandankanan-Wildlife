@@ -96,3 +96,7 @@ screenshot*.png
 ehthumbs.db
 Thumbs.db
 Desktop.ini
+
+
+backend/envv/
+cloudflared.exe
