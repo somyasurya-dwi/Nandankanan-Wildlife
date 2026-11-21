@@ -20,6 +20,7 @@ import Footer from './components/Footer';
 import ChatbotWidget from './components/ChatbotWidget';
 import TicketBookingModal from './components/TicketBookingModal';
 import AuthModal from './components/AuthModal';
+import SignInPage from './components/SignInPage';
 import AdminDashboard from './components/AdminDashboard';
 
 // Mock Data
@@ -35,6 +36,19 @@ gsap.registerPlugin(ScrollTrigger);
 
 export default function App() {
   const { language, t } = useLanguage();
+
+  const isAuthHash = (hash) => {
+    return hash === '#signin' || 
+           hash === '#login' || 
+           hash === '#register' || 
+           hash === '#forgot-password' || 
+           hash.startsWith('#reset-password');
+  };
+
+  const [currentPage, setCurrentPage] = useState(() => {
+    return (typeof window !== 'undefined' && isAuthHash(window.location.hash)) ? 'signin' : 'sanctuary';
+  });
+
   const [isLoaded, setIsLoaded] = useState(false);
   const [activeSection, setActiveSection] = useState('hero');
   const [ticketModalOpen, setTicketModalOpen] = useState(false);
@@ -48,8 +62,70 @@ export default function App() {
   const [sponsorAnimal, setSponsorAnimal] = useState(INITIAL_ANIMALS[0]);
   const [scrollProgress, setScrollProgress] = useState(0);
 
+  // Session Persistence: Verify stored token on initial load
+  useEffect(() => {
+    const token = localStorage.getItem('nandankanan_token');
+    const cachedUser = localStorage.getItem('nandankanan_user');
+    if (cachedUser) {
+      try { setCurrentUser(JSON.parse(cachedUser)); } catch (e) {}
+    }
+    if (token) {
+      fetch('/api/auth/me/', {
+        headers: { 
+          'Authorization': `Token ${token}` 
+        }
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.user) {
+          setCurrentUser(data.user);
+          localStorage.setItem('nandankanan_user', JSON.stringify(data.user));
+        } else {
+          localStorage.removeItem('nandankanan_token');
+          localStorage.removeItem('nandankanan_user');
+          setCurrentUser(null);
+        }
+      })
+      .catch(() => {});
+    }
+  }, []);
+
+  // Handle Hash Changes for Page Navigation
+  useEffect(() => {
+    const handleHash = () => {
+      const hash = window.location.hash || '';
+      if (isAuthHash(hash)) {
+        setCurrentPage('signin');
+      } else if (currentPage === 'signin' && !isAuthHash(hash)) {
+        setCurrentPage('sanctuary');
+      }
+    };
+    window.addEventListener('hashchange', handleHash);
+    return () => window.removeEventListener('hashchange', handleHash);
+  }, [currentPage]);
+
+  // Logout Handler
+  const handleLogout = async () => {
+    const token = localStorage.getItem('nandankanan_token');
+    if (token) {
+      try {
+        await fetch('/api/auth/logout/', {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Token ${token}` 
+          }
+        });
+      } catch (err) {}
+    }
+    localStorage.removeItem('nandankanan_token');
+    localStorage.removeItem('nandankanan_user');
+    setCurrentUser(null);
+  };
+
   // Track global scroll progress for top viewport indicator
   useEffect(() => {
+    if (currentPage !== 'sanctuary') return;
     const handleScroll = () => {
       const totalScroll = window.scrollY || document.documentElement.scrollTop;
       const windowHeight = document.documentElement.scrollHeight - window.innerHeight;
@@ -59,10 +135,12 @@ export default function App() {
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [currentPage]);
 
   // Initialize Lenis Smooth Scroll & Synchronize with GSAP ScrollTrigger
   useEffect(() => {
+    if (currentPage !== 'sanctuary') return;
+
     const lenis = new Lenis({
       duration: 1.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
@@ -93,7 +171,7 @@ export default function App() {
       gsap.ticker.remove(updateLenis);
       lenis.destroy();
     };
-  }, []);
+  }, [currentPage]);
 
   const handleSponsorAnimal = (animal) => {
     setSponsorAnimal(animal);
@@ -116,6 +194,24 @@ export default function App() {
     }
   };
 
+  // Full-page SignIn/SignUp screen
+  if (currentPage === 'signin') {
+    return (
+      <SignInPage 
+        onNavigateHome={() => {
+          window.location.hash = '';
+          setCurrentPage('sanctuary');
+        }}
+        onAuthSuccess={(user) => {
+          setCurrentUser(user);
+          window.location.hash = '';
+          setCurrentPage('sanctuary');
+        }}
+        currentUser={currentUser}
+      />
+    );
+  }
+
   return (
     <div 
       id="tiger-scroll-container" 
@@ -134,7 +230,7 @@ export default function App() {
       <Navbar 
         onOpenAuth={() => setAuthModalOpen(true)}
         currentUser={currentUser}
-        onLogout={() => setCurrentUser(null)}
+        onLogout={handleLogout}
         onOpenAdmin={() => setAdminOpen(true)}
         activeSection={activeSection}
         onSectionChange={setActiveSection}
@@ -276,10 +372,18 @@ export default function App() {
       {authModalOpen && (
         <AuthModal 
           isOpen={authModalOpen}
-          onClose={() => setAuthModalOpen(false)}
+          onClose={() => {
+            setAuthModalOpen(false);
+            if (window.location.hash === '#signin' || window.location.hash === '#login') {
+              window.history.replaceState(null, '', window.location.pathname);
+            }
+          }}
           onSuccess={(user) => {
             setCurrentUser(user);
             setAuthModalOpen(false);
+            if (window.location.hash === '#signin' || window.location.hash === '#login') {
+              window.history.replaceState(null, '', window.location.pathname);
+            }
           }}
         />
       )}
