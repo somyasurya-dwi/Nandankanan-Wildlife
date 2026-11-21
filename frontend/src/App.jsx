@@ -41,6 +41,13 @@ export default function App() {
   
   // Active Camera Modal for Live Wildlife Streaming
   const [activeModalCamera, setActiveModalCamera] = useState(null);
+  // Highlighted & inline playing camera triggered from Chatbot or user
+  const [highlightedCameraId, setHighlightedCameraId] = useState(null);
+  const [inlinePlayingCameraId, setInlinePlayingCameraId] = useState(null);
+
+  // Active Marker for 3D Interactive Map triggered from Chatbot or UI
+  const [activeMapMarker, setActiveMapMarker] = useState(null);
+
   // Preselected animal for sponsorship portal
   const [sponsorAnimal, setSponsorAnimal] = useState(INITIAL_ANIMALS[0]);
 
@@ -92,6 +99,62 @@ export default function App() {
     }
   };
 
+  const handleLiveCamFromChatbot = (camera) => {
+    const targetCam = camera || (INITIAL_CAMERAS && INITIAL_CAMERAS[0]);
+    const camId = targetCam?.id || 1;
+
+    // 1. Immediately launch the dedicated live video stream modal so the video plays on screen
+    setActiveModalCamera(targetCam);
+
+    // 2. Highlight and activate inline live video in the Live Section
+    setHighlightedCameraId(camId);
+    setInlinePlayingCameraId(camId);
+
+    // 3. Smooth scroll to the Live Section ("THE WILD, LIVE")
+    const liveSection = document.getElementById('live-wildlife');
+    if (liveSection) {
+      liveSection.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // 4. Focus and center the specific camera card
+    setTimeout(() => {
+      const card = document.getElementById(`camera-card-${camId}`);
+      if (card) {
+        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 450);
+  };
+
+  const handleShowAnimalOnMap = (markerOrId) => {
+    let target = null;
+    if (typeof markerOrId === 'object' && markerOrId !== null) {
+      target = INITIAL_MARKERS.find(m => m.id === markerOrId.id) || markerOrId;
+    } else if (typeof markerOrId === 'number') {
+      target = INITIAL_MARKERS.find(m => m.id === markerOrId);
+    } else if (typeof markerOrId === 'string') {
+      const q = markerOrId.toLowerCase();
+      target = INITIAL_MARKERS.find(m => 
+        (m.animal_slug && m.animal_slug.toLowerCase().includes(q)) ||
+        (m.animal_name && m.animal_name.toLowerCase().includes(q)) ||
+        (m.title && m.title.toLowerCase().includes(q))
+      );
+    }
+    if (!target) target = INITIAL_MARKERS[0];
+
+    // Trigger active marker update so 3D map swoops, tightly zooms, and isolates this animal's region
+    setActiveMapMarker({
+      ...target,
+      _focusId: Date.now(),
+      _isolate: true
+    });
+
+    // Suddenly scroll directly down to the 3D map viewport
+    const mapBox = document.getElementById('zoo-map-viewport') || document.getElementById('interactive-map');
+    if (mapBox) {
+      mapBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  };
+
   return (
     <div 
       id="tiger-scroll-container" 
@@ -127,11 +190,15 @@ export default function App() {
           cameras={INITIAL_CAMERAS}
           activeModalCamera={activeModalCamera}
           setActiveModalCamera={setActiveModalCamera}
+          highlightedCameraId={highlightedCameraId}
+          inlinePlayingCameraId={inlinePlayingCameraId}
+          setInlinePlayingCameraId={setInlinePlayingCameraId}
         />
 
         {/* 5. Interactive Moveable Zoo Map with Click-to-Stream Animal Habitats */}
         <InteractiveMap 
           markers={INITIAL_MARKERS}
+          activeMarkerProp={activeMapMarker}
           onOpenLiveCam={(camera) => setActiveModalCamera(camera)}
         />
 
@@ -173,6 +240,9 @@ export default function App() {
       <ChatbotWidget 
         language="english"
         onOpenTickets={() => setTicketModalOpen(true)}
+        onOpenLiveCam={handleLiveCamFromChatbot}
+        onShowOnMap={handleShowAnimalOnMap}
+        isLiveModalOpen={Boolean(activeModalCamera)}
       />
 
       {/* 14. Online Fast-Track Ticket Booking Modal with Instant QR Pass */}

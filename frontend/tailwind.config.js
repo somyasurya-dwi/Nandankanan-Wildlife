@@ -7,6 +7,32 @@ export default {
   theme: {
     extend: {
       colors: {
+        gold: {
+          50: '#FDFBF7',
+          100: '#F9F4E8',
+          200: '#F0E4C8',
+          300: '#E4D1A3',
+          400: '#D5BC7E',
+          500: '#C8A96B', // Official Sanctuary Gold
+          600: '#B08E4E',
+          700: '#8C6E35',
+          800: '#695123',
+          900: '#473616',
+          950: '#2A1F0B',
+        },
+        ivory: {
+          50: '#FAF9F5',
+          100: '#F5F4EA',
+          200: '#EAE7D5',
+          300: '#DBD7BD',
+          400: '#C4BF9E',
+          500: '#AAA480',
+          600: '#88825F',
+          700: '#686345',
+          800: '#49452F',
+          900: '#2E2B1B',
+          950: '#17150B',
+        },
         forest: {
           950: '#071810',
           900: '#0B2A1A', // Dark forest green
