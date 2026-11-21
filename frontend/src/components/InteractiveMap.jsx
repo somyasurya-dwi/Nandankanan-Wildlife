@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import L from 'leaflet';
+import ThreeZooMap from './ThreeZooMap';
+import { INITIAL_ANIMALS } from '../data/mockData';
 import {
   MapPin,
   Navigation,
@@ -28,10 +30,16 @@ import {
   ZoomIn,
   ZoomOut,
   Crosshair,
-  Footprints
+  Footprints,
+  RotateCcw
 } from 'lucide-react';
 
-export default function InteractiveMap({ markers = [], onSelectAnimalBySlug, onOpenLiveCam }) {
+export default function InteractiveMap({ 
+  markers = [], 
+  onSelectAnimalBySlug, 
+  onOpenLiveCam,
+  activeMarkerProp = null
+}) {
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const markersGroupRef = useRef(null);
@@ -39,11 +47,14 @@ export default function InteractiveMap({ markers = [], onSelectAnimalBySlug, onO
 
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [activeMarker, setActiveMarker] = useState(markers && markers.length > 0 ? markers[0] : null);
-  const [mapStyle, setMapStyle] = useState('illustrated'); // 'illustrated' (default, official map) | 'satellite'
+  const [mapStyle, setMapStyle] = useState('3d'); // '3d' (Default Google Earth 3D) | 'illustrated' | 'satellite'
   const [isMuted, setIsMuted] = useState(true);
   const [isPlaying, setIsPlaying] = useState(true);
   const [isZoomedIn, setIsZoomedIn] = useState(false);
   const [isFullscreenMap, setIsFullscreenMap] = useState(false);
+  const [isDoubleScreen, setIsDoubleScreen] = useState(false);
+  const [isolateMarkerId, setIsolateMarkerId] = useState(null);
+  const [focusTrigger, setFocusTrigger] = useState(0);
 
   // Exact center of Nandankanan's animal enclosures (for satellite mode)
   const NANDANKANAN_CENTER = [20.4020, 85.8190];
@@ -69,32 +80,58 @@ export default function InteractiveMap({ markers = [], onSelectAnimalBySlug, onO
     }
   }, [markers]);
 
+  // Find corresponding animal scientific record for comprehensive species identification
+  const identifiedAnimal = activeMarker
+    ? INITIAL_ANIMALS.find(
+        (a) => a.slug === activeMarker.animal_slug || a.name.toLowerCase() === (activeMarker.animal_name || activeMarker.title).toLowerCase()
+      )
+    : null;
+
   // Focus on a particular animal: zooms in to show the enclosure and the place around it, and autoplays stream
-  const focusOnAnimal = useCallback((marker) => {
-    if (!marker || !mapInstanceRef.current) return;
+  const focusOnAnimal = useCallback((marker, isolate = false) => {
+    if (!marker) return;
     setActiveMarker(marker);
     setIsPlaying(true);
     setIsZoomedIn(true);
 
-    const isIllustrated = (mapStyle === 'illustrated');
-    if (isIllustrated) {
-      const markerPosition = [
-        marker.map_y !== undefined ? marker.map_y : 260,
-        marker.map_x !== undefined ? marker.map_x : 500
-      ];
-      // Zoom in to 1.25 to show the animal enclosure and the surrounding paths, trees, and nearby exhibits
-      mapInstanceRef.current.setView(markerPosition, 1.25, { animate: true, duration: 1.0 });
+    if (isolate || marker._isolate) {
+      setIsolateMarkerId(marker.id);
     } else {
-      mapInstanceRef.current.setView([marker.latitude, marker.longitude], 17, { animate: true, duration: 1.0 });
+      setIsolateMarkerId(null);
+    }
+    setFocusTrigger(Date.now());
+
+    if (mapStyle !== '3d' && mapInstanceRef.current) {
+      const isIllustrated = (mapStyle === 'illustrated');
+      if (isIllustrated) {
+        const markerPosition = [
+          marker.map_y !== undefined ? marker.map_y : 260,
+          marker.map_x !== undefined ? marker.map_x : 500
+        ];
+        mapInstanceRef.current.setView(markerPosition, 1.25, { animate: true, duration: 1.0 });
+      } else {
+        mapInstanceRef.current.setView([marker.latitude, marker.longitude], 17, { animate: true, duration: 1.0 });
+      }
     }
   }, [mapStyle]);
 
-  // Render Markers on Map
+  // Synchronize external active marker triggered from Chatbot or external UI
+  useEffect(() => {
+    if (activeMarkerProp) {
+      setMapStyle('3d');
+      focusOnAnimal(activeMarkerProp, Boolean(activeMarkerProp._isolate));
+    }
+  }, [activeMarkerProp, focusOnAnimal]);
+
+  // Render Markers on Leaflet Map (for 2D modes)
   const renderMarkers = useCallback((map, markersGroup, isIllustrated) => {
     markersGroup.clearLayers();
 
     const filtered = markers.filter(
-      (m) => selectedCategory === 'all' || m.category === selectedCategory
+      (m) => {
+        if (isolateMarkerId) return m.id === isolateMarkerId;
+        return selectedCategory === 'all' || m.category === selectedCategory;
+      }
     );
 
     filtered.forEach((marker) => {
@@ -202,7 +239,6 @@ export default function InteractiveMap({ markers = [], onSelectAnimalBySlug, onO
         popupAnchor: [0, -62]
       });
 
-      // Target position: [y, x] in illustrated CRS.Simple; [lat, lon] in satellite mode
       const markerPosition = isIllustrated
         ? [marker.map_y !== undefined ? marker.map_y : 260, marker.map_x !== undefined ? marker.map_x : 500]
         : [marker.latitude, marker.longitude];
@@ -212,20 +248,27 @@ export default function InteractiveMap({ markers = [], onSelectAnimalBySlug, onO
         bubblingMouseEvents: true
       });
 
-      // Click Event on Marker: Select marker, zoom in to show the place around it, and start live video
       leafletMarker.on('click', () => {
         focusOnAnimal(marker);
       });
 
       markersGroup.addLayer(leafletMarker);
     });
-  }, [markers, selectedCategory, activeMarker, focusOnAnimal]);
+  }, [markers, selectedCategory, activeMarker, focusOnAnimal, isolateMarkerId]);
 
-  // Initialize Map Instance (adapting to mapStyle)
+  // Initialize Leaflet Map Instance (adapting to mapStyle)
   useEffect(() => {
+    // If in 3D mode, clean up Leaflet map
+    if (mapStyle === '3d') {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
+      return;
+    }
+
     if (!mapContainerRef.current) return;
 
-    // Clean up previous map if exists
     if (mapInstanceRef.current) {
       mapInstanceRef.current.remove();
       mapInstanceRef.current = null;
@@ -235,7 +278,6 @@ export default function InteractiveMap({ markers = [], onSelectAnimalBySlug, onO
     const isIllustrated = (mapStyle === 'illustrated');
 
     if (isIllustrated) {
-      // Illustrated Tourist Map using official illustrated zoo map
       map = L.map(mapContainerRef.current, {
         crs: L.CRS.Simple,
         minZoom: -0.75,
@@ -252,11 +294,9 @@ export default function InteractiveMap({ markers = [], onSelectAnimalBySlug, onO
         maxBoundsViscosity: 0.7
       });
 
-      // Overlay the official illustrated zoo map
-      L.imageOverlay('/images/nandankanan_zoo_map.jpg', ILLUSTRATED_BOUNDS).addTo(map);
+      L.imageOverlay('/images/nandankanan_zoo_map_4k.jpg', ILLUSTRATED_BOUNDS).addTo(map);
       map.fitBounds(ILLUSTRATED_BOUNDS, { padding: [10, 10] });
     } else {
-      // Satellite Imagery Map
       map = L.map(mapContainerRef.current, {
         center: NANDANKANAN_CENTER,
         zoom: 15,
@@ -281,7 +321,6 @@ export default function InteractiveMap({ markers = [], onSelectAnimalBySlug, onO
     const markersGroup = L.layerGroup().addTo(map);
     markersGroupRef.current = markersGroup;
 
-    // Render Markers for this mode
     renderMarkers(map, markersGroup, isIllustrated);
 
     return () => {
@@ -292,7 +331,7 @@ export default function InteractiveMap({ markers = [], onSelectAnimalBySlug, onO
     };
   }, [mapStyle, selectedCategory, renderMarkers]);
 
-  // Zoom and Pan Handlers
+  // Zoom and Pan Handlers (for Leaflet 2D)
   const handleZoomIn = () => {
     if (mapInstanceRef.current) mapInstanceRef.current.zoomIn();
   };
@@ -303,11 +342,13 @@ export default function InteractiveMap({ markers = [], onSelectAnimalBySlug, onO
 
   // Reset View to See ALL Animals Across Full Park
   const handleShowAllAnimals = () => {
-    if (!mapInstanceRef.current) return;
     setIsZoomedIn(false);
-    if (mapStyle === 'illustrated') {
+    setSelectedCategory('all');
+    setIsolateMarkerId(null);
+    setFocusTrigger(Date.now());
+    if (mapStyle === 'illustrated' && mapInstanceRef.current) {
       mapInstanceRef.current.fitBounds(ILLUSTRATED_BOUNDS, { animate: true, padding: [10, 10] });
-    } else {
+    } else if (mapStyle === 'satellite' && mapInstanceRef.current) {
       mapInstanceRef.current.setView(NANDANKANAN_CENTER, 15, { animate: true });
     }
   };
@@ -343,33 +384,80 @@ export default function InteractiveMap({ markers = [], onSelectAnimalBySlug, onO
             </div>
 
             <h2 className="font-display font-black text-3xl sm:text-5xl tracking-wide text-ivory-50">
-              EXPLORE ALL ANIMALS <span className="text-gold-400">ON THE ZOO MAP</span>
+              EXPLORE ALL ANIMALS <span className="text-gold-400">ON THE 3D MAP</span>
             </h2>
 
             <p className="mt-3 text-ivory-200/80 text-sm sm:text-base max-w-2xl font-light">
-              See all animals across Nandankanan’s official tourist map.
-              Click any animal to <strong>start its live stream video</strong> and <strong>zoom in to explore the place around its habitat</strong>.
+              Experience Nandankanan in <strong>3D Google Earth-class terrain</strong>. Click any animal to <strong>identify the species</strong>, activate the 3D habitat beacon, swoop the 3D camera into its enclosure, and stream live habitat observation feeds.
             </p>
           </div>
 
-          {/* Map Controls: View Toggle & Show All Animals Button */}
-          <div className="flex items-center gap-2.5">
-            <button
-              onClick={() => setMapStyle(mapStyle === 'illustrated' ? 'satellite' : 'illustrated')}
-              className="px-4 py-2.5 rounded-xl bg-forest-800/90 hover:bg-forest-700 text-ivory-100 border border-gold-500/30 text-xs font-semibold uppercase tracking-wider flex items-center gap-2 transition-all shadow-lg backdrop-blur-md"
-              title="Toggle between Illustrated Guide Map and Satellite View"
-            >
-              <Layers className="w-4 h-4 text-gold-400" />
-              <span>{mapStyle === 'illustrated' ? "🛰️ Switch to Satellite" : "🗺️ Illustrated Zoo Map"}</span>
-            </button>
+          {/* Map Controls: 3D Google Earth / 2D Illustrated / Satellite Mode Switcher */}
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex items-center gap-1.5 p-1.5 rounded-2xl bg-forest-950/95 border border-[#C8A96B]/40 backdrop-blur-md shadow-2xl">
+              <button
+                onClick={() => setMapStyle('3d')}
+                className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-2 transition-all ${
+                  mapStyle === '3d'
+                    ? 'bg-[#C8A96B] text-[#071810] shadow-lg shadow-[#C8A96B]/30 ring-2 ring-[#C8A96B]'
+                    : 'text-[#FAF9F5] hover:text-[#C8A96B] hover:bg-forest-900/70'
+                }`}
+                title="Interactive 3D Google Earth Terrain Perspective"
+              >
+                <span className="text-sm">🌍</span>
+                <span className="font-extrabold tracking-wide">3D GOOGLE EARTH</span>
+                <span className={`px-1.5 py-0.5 rounded text-[9px] font-black ${
+                  mapStyle === '3d' ? 'bg-[#071810] text-[#C8A96B]' : 'bg-[#C8A96B]/20 text-[#C8A96B]'
+                }`}>HD</span>
+              </button>
+
+              <button
+                onClick={() => setMapStyle('illustrated')}
+                className={`px-3.5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all ${
+                  mapStyle === 'illustrated'
+                    ? 'bg-[#C8A96B] text-[#071810] shadow-md ring-2 ring-[#C8A96B]'
+                    : 'text-[#FAF9F5] hover:text-[#C8A96B] hover:bg-forest-900/70'
+                }`}
+                title="Official 2D Illustrated Sanctuary Guide Map"
+              >
+                <span className="text-sm">🗺️</span>
+                <span>2D MAP</span>
+              </button>
+
+              <button
+                onClick={() => setMapStyle('satellite')}
+                className={`px-3.5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all ${
+                  mapStyle === 'satellite'
+                    ? 'bg-[#C8A96B] text-[#071810] shadow-md ring-2 ring-[#C8A96B]'
+                    : 'text-[#FAF9F5] hover:text-[#C8A96B] hover:bg-forest-900/70'
+                }`}
+                title="Topographic Satellite World Imagery"
+              >
+                <span className="text-sm">🛰️</span>
+                <span>SATELLITE</span>
+              </button>
+            </div>
 
             <button
               onClick={handleShowAllAnimals}
-              className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-400 hover:to-gold-500 text-forest-950 text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-lg"
-              title="Zoom out to see all animals across the full park"
+              className="px-4 py-2.5 rounded-xl bg-forest-800/90 hover:bg-forest-700 text-[#FAF9F5] border border-[#C8A96B]/40 text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-lg backdrop-blur-md"
+              title="Reset view to see all animals across the full park"
             >
-              <Navigation className="w-4 h-4" />
-              <span>Show All Animals</span>
+              <Navigation className="w-4 h-4 text-[#C8A96B]" />
+              <span>SHOW ALL</span>
+            </button>
+
+            <button
+              onClick={() => setIsDoubleScreen(!isDoubleScreen)}
+              className={`px-4 py-2.5 rounded-xl border text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-lg backdrop-blur-md ${
+                isDoubleScreen
+                  ? 'bg-[#C8A96B] text-[#071810] border-[#C8A96B] shadow-[#C8A96B]/30 ring-2 ring-[#C8A96B]'
+                  : 'bg-forest-800/90 hover:bg-forest-700 text-[#FAF9F5] border-[#C8A96B]/40'
+              }`}
+              title="Toggle Double Screen (Full Width Cinema Mode)"
+            >
+              <Maximize2 className="w-4 h-4 text-[#C8A96B]" />
+              <span>{isDoubleScreen ? "◫ SPLIT VIEW" : "📐 DOUBLE SCREEN"}</span>
             </button>
           </div>
         </div>
@@ -379,7 +467,10 @@ export default function InteractiveMap({ markers = [], onSelectAnimalBySlug, onO
           {categories.map((cat) => (
             <button
               key={cat.key}
-              onClick={() => setSelectedCategory(cat.key)}
+              onClick={() => {
+                setSelectedCategory(cat.key);
+                setIsolateMarkerId(null);
+              }}
               className={`px-4 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider whitespace-nowrap transition-all ${selectedCategory === cat.key
                   ? 'bg-gold-500 text-forest-950 font-bold shadow-md shadow-gold-500/20'
                   : 'bg-forest-950/80 text-ivory-200 hover:bg-forest-800 border border-forest-700/60'
@@ -394,7 +485,7 @@ export default function InteractiveMap({ markers = [], onSelectAnimalBySlug, onO
         <div className="mb-6 flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
           <span className="text-[11px] font-bold text-gold-400 uppercase tracking-widest shrink-0 flex items-center gap-1 mr-1">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Select Animal:</span>
+            <span>Identify Animal:</span>
           </span>
           {markers.map((m) => {
             const isCurrent = activeMarker && activeMarker.id === m.id;
@@ -414,113 +505,114 @@ export default function InteractiveMap({ markers = [], onSelectAnimalBySlug, onO
           })}
         </div>
 
-        {/* Main Grid: Illustrated Map Box (8 Cols) + Live Video Feed Panel (4 Cols) */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Main Grid: 3D/2D Map Box (8 Cols or Full Width when Double Screen) + Live Video Feed Panel */}
+        <div className={isDoubleScreen ? "flex flex-col gap-8" : "grid grid-cols-1 lg:grid-cols-12 gap-6 items-start"}>
 
-          {/* Map View Box (Span 7-8 Cols) */}
-          <div className={`lg:col-span-7 xl:col-span-8 relative rounded-3xl overflow-hidden zoo-map-frame bg-forest-950 transition-all ${isFullscreenMap ? 'fixed inset-4 z-50 rounded-2xl shadow-2xl' : ''
+          {/* Map View Box (Span 12 when Double Screen, or Span 7-8 Cols) */}
+          <div 
+            id="zoo-map-viewport"
+            className={`${isDoubleScreen ? "w-full" : "lg:col-span-7 xl:col-span-8"} relative rounded-3xl overflow-hidden zoo-map-frame bg-forest-950 transition-all ${isFullscreenMap ? 'fixed inset-4 z-50 rounded-2xl shadow-2xl' : ''
             }`}>
 
-            {/* Movable Leaflet Container */}
-            <div
-              ref={mapContainerRef}
-              className="w-full h-[540px] sm:h-[640px] z-10 map-canvas-interactive zoo-map-container"
-              style={{ background: '#0B2419' }}
-            />
-
-            {/* Top Navigation & Status Pill */}
-            <div className="absolute top-4 left-4 z-20 pointer-events-none bg-forest-950/90 backdrop-blur-md px-3.5 py-1.5 rounded-xl border border-gold-500/30 text-xs text-ivory-100 flex items-center gap-2 shadow-xl">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="font-mono text-gold-300 font-semibold text-xs">
-                {activeMarker ? `Enclosure: ${activeMarker.animal_name || activeMarker.title}` : 'All Sanctuary Exhibits'}
-              </span>
-              <span className="text-[10px] text-ivory-300 hidden sm:inline">| Click any animal to zoom into its habitat</span>
-            </div>
-
-            {/* Official Nandankanan Logo Badge (Top Right of Map) */}
-            <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
-              {isZoomedIn && (
-                <button
-                  onClick={handleShowAllAnimals}
-                  className="px-3.5 py-1.5 rounded-xl bg-forest-950/90 hover:bg-forest-900 border border-gold-400 text-gold-300 hover:text-gold-200 text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-xl backdrop-blur-md transition-all animate-fadeIn"
-                >
-                  <Navigation className="w-3.5 h-3.5" />
-                  <span>🌐 Show Entire Zoo Map</span>
-                </button>
-              )}
-              
-              <div className="bg-white/95 backdrop-blur-md p-1.5 sm:p-2 rounded-2xl shadow-xl border border-black/10 flex items-center gap-2 pointer-events-auto">
-                <img 
-                  src="/images/nandankanan_logo.png" 
-                  alt="Nandankanan Official Logo" 
-                  className="h-7 sm:h-9 w-auto object-contain"
+            {/* Render 3D Google Earth WebGL canvas OR 2D Leaflet Container */}
+            {mapStyle === '3d' ? (
+              <ThreeZooMap
+                markers={markers}
+                activeMarker={activeMarker}
+                onSelectMarker={focusOnAnimal}
+                selectedCategory={selectedCategory}
+                onOpenLiveCam={onOpenLiveCam}
+                isolateMarkerId={isolateMarkerId}
+                focusTrigger={focusTrigger}
+                onResetIsolate={() => setIsolateMarkerId(null)}
+              />
+            ) : (
+              <>
+                <div
+                  ref={mapContainerRef}
+                  className="w-full h-[680px] sm:h-[800px] lg:h-[880px] z-10 map-canvas-interactive zoo-map-container"
+                  style={{ background: '#0B2419' }}
                 />
-              </div>
-            </div>
 
-            {/* Floating Sleek Glass Controls (Bottom Right) */}
-            <div className="absolute bottom-4 right-4 z-20 flex items-center gap-1.5 bg-forest-950/90 backdrop-blur-md p-1.5 rounded-2xl border border-gold-500/30 shadow-2xl">
-              <button
-                onClick={handleZoomIn}
-                className="p-2 rounded-xl bg-forest-900/80 hover:bg-forest-800 text-ivory-100 hover:text-gold-400 transition-colors shadow-sm"
-                title="Zoom In"
-                aria-label="Zoom in"
-              >
-                <Plus className="w-4 h-4" />
-              </button>
+                {/* 2D Mode Status Pill */}
+                <div className="absolute top-4 left-4 z-20 pointer-events-none bg-forest-950/90 backdrop-blur-md px-3.5 py-1.5 rounded-xl border border-gold-500/30 text-xs text-ivory-100 flex items-center gap-2 shadow-xl">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="font-mono text-gold-300 font-semibold text-xs">
+                    {activeMarker ? `Enclosure: ${activeMarker.animal_name || activeMarker.title}` : 'All Sanctuary Exhibits'}
+                  </span>
+                  <span className="text-[10px] text-ivory-300 hidden sm:inline">| Click any animal to zoom into its habitat</span>
+                </div>
 
-              <button
-                onClick={handleZoomOut}
-                className="p-2 rounded-xl bg-forest-900/80 hover:bg-forest-800 text-ivory-100 hover:text-gold-400 transition-colors shadow-sm"
-                title="Zoom Out"
-                aria-label="Zoom out"
-              >
-                <Minus className="w-4 h-4" />
-              </button>
+                {/* 2D Zoom Controls */}
+                <div className="absolute bottom-4 right-4 z-20 flex items-center gap-1.5 bg-forest-950/90 backdrop-blur-md p-1.5 rounded-2xl border border-gold-500/30 shadow-2xl">
+                  <button
+                    onClick={handleZoomIn}
+                    className="p-2 rounded-xl bg-forest-900/80 hover:bg-forest-800 text-ivory-100 hover:text-gold-400 transition-colors shadow-sm"
+                    title="Zoom In"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={handleZoomOut}
+                    className="p-2 rounded-xl bg-forest-900/80 hover:bg-forest-800 text-ivory-100 hover:text-gold-400 transition-colors shadow-sm"
+                    title="Zoom Out"
+                  >
+                    <Minus className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={handleShowAllAnimals}
+                    className="p-2 rounded-xl bg-forest-900/80 hover:bg-forest-800 text-gold-400 transition-colors shadow-sm"
+                    title="Show All"
+                  >
+                    <Navigation className="w-4 h-4" />
+                  </button>
+                </div>
+              </>
+            )}
 
-              <button
-                onClick={handleShowAllAnimals}
-                className="p-2 rounded-xl bg-forest-900/80 hover:bg-forest-800 text-gold-400 transition-colors shadow-sm"
-                title="View All Animals (Zoom Out)"
-                aria-label="View All Animals"
-              >
-                <Navigation className="w-4 h-4" />
-              </button>
+            {/* Double Screen Toggle Button on Map Frame */}
+            <button
+              onClick={() => setIsDoubleScreen(!isDoubleScreen)}
+              className={`absolute top-4 right-16 z-20 p-2.5 rounded-2xl border transition-all shadow-xl backdrop-blur-md ${
+                isDoubleScreen
+                  ? 'bg-[#C8A96B] text-[#071810] border-[#C8A96B] shadow-lg shadow-[#C8A96B]/30'
+                  : 'bg-forest-950/90 hover:bg-forest-900 border-[#C8A96B]/40 text-[#C8A96B]'
+              }`}
+              title={isDoubleScreen ? "Return to Split Screen" : "Double Screen Width"}
+            >
+              <Maximize2 className="w-4 h-4" />
+            </button>
 
-              <button
-                onClick={() => setIsFullscreenMap(!isFullscreenMap)}
-                className="p-2 rounded-xl bg-forest-900/80 hover:bg-forest-800 text-gold-400 transition-colors shadow-sm"
-                title={isFullscreenMap ? "Exit Fullscreen" : "Fullscreen Map"}
-                aria-label="Toggle Fullscreen"
-              >
-                {isFullscreenMap ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
-              </button>
-            </div>
-
-            {/* Bottom Left Legend */}
-            <div className="absolute bottom-4 left-4 z-20 pointer-events-none hidden sm:flex items-center gap-3 bg-forest-950/90 backdrop-blur-md px-3.5 py-1.5 rounded-xl border border-white/10 text-[11px] text-ivory-200">
-              <span className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-sm" />
-                <span>Safaris</span>
-              </span>
-              <span className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-sm" />
-                <span>Enclosures</span>
-              </span>
-              <span className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-sky-400 shadow-sm" />
-                <span>Kanjia Lake</span>
-              </span>
-            </div>
+            {/* Fullscreen Map Toggle (Top Far-Right) */}
+            <button
+              onClick={() => setIsFullscreenMap(!isFullscreenMap)}
+              className="absolute top-4 right-4 z-20 p-2.5 rounded-2xl bg-forest-950/90 hover:bg-forest-900 border border-gold-500/40 text-gold-300 hover:text-gold-200 transition-all shadow-xl backdrop-blur-md"
+              title={isFullscreenMap ? "Exit Fullscreen" : "Fullscreen Map"}
+            >
+              {isFullscreenMap ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+            </button>
           </div>
 
-          {/* Right Cols: Active Animal Live Video Stream Card & "The Place Around It" */}
-          <div className="lg:col-span-5 xl:col-span-4 bg-forest-950/95 border border-gold-500/30 rounded-3xl p-5 sm:p-6 backdrop-blur-xl shadow-2xl flex flex-col justify-between min-h-[540px] sm:min-h-[640px]">
+          {/* Right Cols / Bottom Section: Active Animal Live Video Stream Card & "SPECIES IDENTIFIED" Dossier */}
+          <div className={`${isDoubleScreen ? "w-full" : "lg:col-span-5 xl:col-span-4"} bg-forest-950/95 border border-gold-500/30 rounded-3xl p-5 sm:p-6 backdrop-blur-xl shadow-2xl flex flex-col justify-between min-h-[680px] sm:min-h-[800px] lg:min-h-[880px]`}>
             {activeMarker ? (
-              <div className="animate-fadeIn flex flex-col justify-between h-full">
+              <div className="animate-fadeIn flex flex-col justify-between h-full space-y-4">
                 <div>
+                  {/* "SPECIES IDENTIFIED" TOP HUD BADGE */}
+                  <div className="flex items-center justify-between mb-2 pb-2 border-b border-forest-800/80">
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                      <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-400">
+                        SPECIES IDENTIFIED
+                      </span>
+                    </div>
+                    <span className="text-[10px] font-mono text-gold-300">
+                      ID: #{activeMarker.id} • 3D BEACON LOCKED
+                    </span>
+                  </div>
+
                   {/* LIVE VIDEO STREAM FOR SELECTED ANIMAL */}
-                  <div className="relative aspect-[16/10] w-full rounded-2xl overflow-hidden mb-4 border border-gold-500/40 bg-black shadow-2xl group">
+                  <div className="relative aspect-[16/10] w-full rounded-2xl overflow-hidden mb-3 border border-gold-500/40 bg-black shadow-2xl group">
                     <video
                       ref={sideVideoRef}
                       key={activeMarker.id + (activeMarker.stream_url || '')}
@@ -589,26 +681,57 @@ export default function InteractiveMap({ markers = [], onSelectAnimalBySlug, onO
                     </div>
                   </div>
 
-                  {/* Header info */}
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-gold-500/20 text-gold-300 border border-gold-500/30">
-                      {activeMarker.badge_text || activeMarker.category.replace('_', ' ')}
-                    </span>
-                    <span className="text-[10px] text-ivory-300 font-mono">
-                      Grid Exhibit #{activeMarker.id}
-                    </span>
+                  {/* IDENTIFIED SPECIES SCIENTIFIC PROFILE */}
+                  <div className="mb-2">
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <h3 className="font-display font-black text-xl sm:text-2xl text-ivory-50">
+                        {activeMarker.animal_name || activeMarker.title}
+                      </h3>
+                      {identifiedAnimal?.conservation_status && (
+                        <span className={`px-2 py-0.5 rounded text-[9.5px] font-bold uppercase tracking-wider border shrink-0 ${
+                          identifiedAnimal.conservation_status.toLowerCase().includes('endangered')
+                            ? 'bg-red-500/20 text-red-300 border-red-500/40'
+                            : identifiedAnimal.conservation_status.toLowerCase().includes('vulnerable')
+                            ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+                            : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                        }`}>
+                          {identifiedAnimal.conservation_status}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Scientific Name */}
+                    {identifiedAnimal?.scientific_name && (
+                      <p className="text-xs text-gold-300/90 italic font-serif mb-2">
+                        Taxonomy: {identifiedAnimal.scientific_name}
+                      </p>
+                    )}
+
+                    <p className="text-xs text-ivory-200/80 leading-relaxed line-clamp-2 mb-3">
+                      {activeMarker.description}
+                    </p>
+
+                    {/* Scientific Metric Telemetry Strip */}
+                    {identifiedAnimal && (
+                      <div className="grid grid-cols-3 gap-1.5 p-2 rounded-xl bg-forest-900/70 border border-forest-800 text-[10px] mb-3">
+                        <div className="text-center">
+                          <span className="text-ivory-400 text-[9px] block uppercase font-mono">Diet</span>
+                          <span className="text-gold-300 font-bold truncate block">{identifiedAnimal.diet?.split('(')[0]?.trim() || 'Custom'}</span>
+                        </div>
+                        <div className="text-center border-x border-forest-800">
+                          <span className="text-ivory-400 text-[9px] block uppercase font-mono">Weight</span>
+                          <span className="text-ivory-100 font-bold truncate block">{identifiedAnimal.weight_range || 'N/A'}</span>
+                        </div>
+                        <div className="text-center">
+                          <span className="text-ivory-400 text-[9px] block uppercase font-mono">Lifespan</span>
+                          <span className="text-emerald-300 font-bold truncate block">{identifiedAnimal.lifespan || 'N/A'}</span>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
-                  <h3 className="font-display font-bold text-xl sm:text-2xl text-ivory-50 mb-1">
-                    {activeMarker.title}
-                  </h3>
-
-                  <p className="text-xs text-ivory-200/80 leading-relaxed mb-3 line-clamp-2">
-                    {activeMarker.description}
-                  </p>
-
                   {/* "THE PLACE AROUND IT" Dedicated Geographic Context Card */}
-                  <div className="p-3.5 rounded-2xl bg-forest-900/90 border border-gold-500/25 space-y-2 text-xs mb-4">
+                  <div className="p-3 rounded-2xl bg-forest-900/90 border border-gold-500/25 space-y-1.5 text-xs">
                     <div className="flex items-center gap-1.5 text-gold-300 font-bold uppercase tracking-wider text-[10px]">
                       <MapPin className="w-3.5 h-3.5 text-gold-400" />
                       <span>The Place Around This Habitat:</span>
@@ -619,19 +742,19 @@ export default function InteractiveMap({ markers = [], onSelectAnimalBySlug, onO
                     </p>
 
                     {activeMarker.nearby_landmarks && (
-                      <div className="pt-2 border-t border-forest-800/80 flex items-start gap-1.5 text-[10px] text-ivory-300/80">
+                      <div className="pt-1.5 border-t border-forest-800/80 flex items-start gap-1.5 text-[10px] text-ivory-300/80">
                         <Footprints className="w-3 h-3 text-gold-400 shrink-0 mt-0.5" />
-                        <span><strong>Nearby Landmarks:</strong> {activeMarker.nearby_landmarks}</span>
+                        <span><strong>Nearby:</strong> {activeMarker.nearby_landmarks}</span>
                       </div>
                     )}
                   </div>
                 </div>
 
                 {/* Actions */}
-                <div className="space-y-2.5 pt-1">
+                <div className="space-y-2 pt-2">
                   <button
                     onClick={() => onOpenLiveCam && onOpenLiveCam(activeMarker)}
-                    className="w-full py-3 rounded-xl bg-gradient-to-r from-red-600 via-red-500 to-amber-500 hover:from-red-500 hover:to-amber-400 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-red-600/30 transition-all flex items-center justify-center gap-2 group"
+                    className="w-full py-2.5 rounded-xl bg-gradient-to-r from-red-600 via-red-500 to-amber-500 hover:from-red-500 hover:to-amber-400 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-red-600/30 transition-all flex items-center justify-center gap-2 group"
                   >
                     <Tv className="w-4 h-4 animate-pulse" />
                     <span>Watch Fullscreen Live Stream</span>
