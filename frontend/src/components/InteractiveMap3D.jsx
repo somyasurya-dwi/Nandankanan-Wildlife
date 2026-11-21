@@ -23,7 +23,14 @@ function mapToNormalized(map_x, map_y) {
 // 5 Priority Safaris highlighted upfront
 const PRIMARY_SAFARIS = ['Royal Bengal Tiger', 'White Tiger', 'Asiatic Lion', 'Asian Elephant', 'Sloth Bear', 'Spotted Deer'];
 
-export default function InteractiveMap3D({ markers = [], onSelectAnimalBySlug, onOpenLiveCam, embedded = false }) {
+export default function InteractiveMap3D({ 
+  markers = [], 
+  activeMarker: parentActiveMarker,
+  onSelectAnimalBySlug, 
+  onOpenLiveCam, 
+  onSelectMarker,
+  embedded = false 
+}) {
   const osdContainerRef  = useRef(null);
   const viewerRef        = useRef(null);
   const overlaysRef      = useRef([]);
@@ -164,6 +171,9 @@ export default function InteractiveMap3D({ markers = [], onSelectAnimalBySlug, o
   /* ─────────────────────────── SELECT & ZOOM TO ENCLOSURE ─────────────────────────── */
   const handleSelectEnclosure = useCallback((marker) => {
     setActiveMarker(marker);
+    if (onSelectMarker) {
+      onSelectMarker(marker);
+    }
     setNavigationTip(null);
     const viewer = viewerRef.current;
     if (!viewer || !viewer.viewport) return;
@@ -204,7 +214,23 @@ export default function InteractiveMap3D({ markers = [], onSelectAnimalBySlug, o
       placement: OpenSeadragon.Placement.CENTER,
     });
     auraOverlayRef.current = aura;
-  }, []);
+  }, [onSelectMarker]);
+
+  /* ── Sync with parent active marker ── */
+  useEffect(() => {
+    if (parentActiveMarker === undefined) return;
+    if (parentActiveMarker === null) {
+      setActiveMarker(null);
+      setNavigationTip(null);
+      if (auraOverlayRef.current && viewerRef.current) {
+        viewerRef.current.removeOverlay(auraOverlayRef.current);
+        auraOverlayRef.current = null;
+      }
+      overlaysRef.current.forEach((el) => el.classList.remove('tag-active'));
+    } else if (parentActiveMarker && (!activeMarker || activeMarker.id !== parentActiveMarker.id)) {
+      handleSelectEnclosure(parentActiveMarker);
+    }
+  }, [parentActiveMarker, handleSelectEnclosure, activeMarker]);
 
   /* ── Navigate Here (Deep Enclosure Zoom + Route Advice) ── */
   const handleNavigateHere = () => {
@@ -323,7 +349,7 @@ export default function InteractiveMap3D({ markers = [], onSelectAnimalBySlug, o
           </div>
 
           {/* ── Top-Right Quick Safari Jump Buttons ── */}
-          <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
+          <div className={`absolute top-4 ${embedded ? 'right-16' : 'right-4'} z-20 flex items-center gap-2`}>
             <div className="glass-panel p-1.5 rounded-xl hidden md:flex items-center gap-1.5">
               <span className="text-[10px] text-[#C8A96B] font-bold uppercase tracking-wider px-2">Safaris:</span>
               {[
@@ -380,8 +406,8 @@ export default function InteractiveMap3D({ markers = [], onSelectAnimalBySlug, o
             </button>
           </div>
 
-          {/* ── Interactive Animal Enclosure Slide-Over Drawer ── */}
-          {activeMarker && (
+          {/* ── Interactive Animal Enclosure Slide-Over Drawer (Standalone only) ── */}
+          {!embedded && activeMarker && (
             <div className="enclosure-drawer custom-scrollbar">
               {/* Photo Banner */}
               <div className="relative h-48 shrink-0 overflow-hidden bg-black/40">
