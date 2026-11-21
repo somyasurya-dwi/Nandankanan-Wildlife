@@ -272,3 +272,13 @@
 .sound-bar-2 { animation: waveBounce 1.1s ease-in-out 0.15s infinite; }
 .sound-bar-3 { animation: waveBounce 0.9s ease-in-out 0.3s infinite; }
 .sound-bar-4 { animation: waveBounce 1.2s ease-in-out 0.2s infinite; }
+
+/* Continuous Vertical News Ticker Animation */
+@keyframes scrollUpNews {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-50%);
+  }
+}

@@ -45,13 +45,14 @@ export default function Navbar({
   };
 
   const navLinks = [
-    { name: 'Live Cameras', href: '#live-wildlife' },
+    { name: 'Live View', href: '#live-wildlife' },
     { name: 'Zoo Map', href: '#interactive-map' },
     { name: 'Species', href: '#explore-animals' },
     { name: 'Virtual Tour', href: '#virtual-experience' },
     { name: 'Stories', href: '#conservation-stories' },
     { name: 'Plan Visit', href: '#plan-visit' },
     { name: 'Adopt', href: '#sponsorship-portal' },
+    { name: 'Notice & News', href: '#news-notice' },
   ];
 
   return (
@@ -81,12 +82,12 @@ export default function Navbar({
           </a>
 
           {/* Desktop Nav Links */}
-          <div className="hidden lg:flex items-center space-x-1 lg:space-x-3 xl:space-x-4">
+          <div className="hidden lg:flex items-center space-x-0.5 lg:space-x-1.5 xl:space-x-2.5">
             {navLinks.map((link) => (
               <a
                 key={link.name}
                 href={link.href}
-                className={`px-3 py-1.5 text-xs font-semibold tracking-wider uppercase transition-all duration-200 rounded-lg whitespace-nowrap ${
+                className={`px-2.5 py-1.5 text-xs font-semibold tracking-wider uppercase transition-all duration-200 rounded-lg whitespace-nowrap ${
                   activeSection === link.href.replace('#', '')
                     ? 'text-[#C8A96B] font-bold bg-[#123D2B]'
                     : 'text-[#F5F4EA]/85 hover:text-[#C8A96B] hover:bg-[#123D2B]/50'
