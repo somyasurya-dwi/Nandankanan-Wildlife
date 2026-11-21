@@ -686,6 +686,17 @@ html.highlight-links a {
   text-decoration-thickness: 2.5px !important;
 }
 
+/* Continuous Vertical News Ticker Animation */
+@keyframes scrollUpNews {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-50%);
+  }
+}
+
+
 
 
 
