@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import Lenis from 'lenis';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -12,13 +12,11 @@ import InteractiveMap from './components/InteractiveMap';
 import ExploreAnimals from './components/ExploreAnimals';
 import VirtualExperience from './components/VirtualExperience';
 import ConservationStories from './components/ConservationStories';
-import PlanVisitSection from './components/PlanVisitSection';
 import SponsorshipPortal from './components/SponsorshipPortal';
 import ConservationSection from './components/ConservationSection';
 import ParallaxSectionBreak from './components/ParallaxSectionBreak';
 import Footer from './components/Footer';
 import ChatbotWidget from './components/ChatbotWidget';
-import TicketBookingModal from './components/TicketBookingModal';
 import AuthModal from './components/AuthModal';
 import SignInPage from './components/SignInPage';
 import AdminDashboard from './components/AdminDashboard';
@@ -50,8 +48,14 @@ export default function App() {
   });
 
   const [isLoaded, setIsLoaded] = useState(false);
-  const [activeSection, setActiveSection] = useState('hero');
-  const [ticketModalOpen, setTicketModalOpen] = useState(false);
+  // Dynamic active section initialized from route hash or default 'hero' without hardcoded lock
+  const [activeSection, setActiveSection] = useState(() => {
+    if (typeof window !== 'undefined' && window.location.hash) {
+      const hash = window.location.hash.replace('#', '');
+      if (hash) return hash;
+    }
+    return 'hero';
+  });
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [adminOpen, setAdminOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
@@ -144,6 +148,8 @@ export default function App() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [currentPage]);
 
+  const lenisRef = useRef(null);
+
   // Initialize Lenis Smooth Scroll & Synchronize with GSAP ScrollTrigger
   useEffect(() => {
     if (currentPage !== 'sanctuary') return;
@@ -157,6 +163,8 @@ export default function App() {
       wheelMultiplier: 1.0,
       touchMultiplier: 2.0,
     });
+    lenisRef.current = lenis;
+    if (typeof window !== 'undefined') window.__lenis = lenis;
 
     lenis.on('scroll', ScrollTrigger.update);
 
@@ -176,23 +184,39 @@ export default function App() {
     return () => {
       clearTimeout(timer);
       gsap.ticker.remove(updateLenis);
+      lenisRef.current = null;
+      if (typeof window !== 'undefined') window.__lenis = null;
       lenis.destroy();
     };
   }, [currentPage]);
 
-  const handleSponsorAnimal = (animal) => {
-    setSponsorAnimal(animal);
-    const el = document.getElementById('sponsorship-portal');
-    if (el) {
-      const header = document.querySelector('header');
-      const headerOffset = header ? header.offsetHeight : 120;
+  // Universal accurate smooth scroll accounting for sticky navbar offset
+  const scrollToTarget = (targetId) => {
+    setActiveSection(targetId);
+    const el = document.getElementById(targetId);
+    if (!el) return;
+
+    const header = document.querySelector('header');
+    const headerHeight = header ? header.offsetHeight : 95;
+
+    if (lenisRef.current) {
+      lenisRef.current.scrollTo(el, {
+        offset: -headerHeight,
+        duration: 1.2,
+        immediate: false
+      });
+    } else {
       const elementPosition = el.getBoundingClientRect().top + window.scrollY;
       window.scrollTo({
-        top: Math.max(0, elementPosition - headerOffset + 2),
+        top: Math.max(0, elementPosition - headerHeight),
         behavior: 'smooth'
       });
-      setActiveSection('sponsorship-portal');
     }
+  };
+
+  const handleSponsorAnimal = (animal) => {
+    setSponsorAnimal(animal);
+    scrollToTarget('sponsorship-portal');
   };
 
   const handleOpenLiveModalFromHero = () => {
@@ -304,19 +328,8 @@ export default function App() {
         
         {/* 3. Full-Screen Cinematic Royal Bengal Tiger Hero Section (Bilingual Odia + English & Official Logo Crest) */}
         <CinematicVideoHero 
-          onExploreClick={() => {
-            const el = document.getElementById('explore-animals');
-            if (el) {
-              const header = document.querySelector('header');
-              const headerOffset = header ? header.offsetHeight : 120;
-              const elementPosition = el.getBoundingClientRect().top + window.scrollY;
-              window.scrollTo({
-                top: Math.max(0, elementPosition - headerOffset + 2),
-                behavior: 'smooth'
-              });
-              setActiveSection('explore-animals');
-            }
-          }}
+          onExploreClick={() => scrollToTarget('explore-animals')}
+          onMapClick={() => scrollToTarget('interactive-map')}
           onWatchLiveClick={handleOpenLiveModalFromHero}
         />
 
@@ -347,6 +360,7 @@ export default function App() {
           ]}
           ctaText="Explore Illustrated Zoo Map"
           ctaHref="#interactive-map"
+          onCtaClick={() => scrollToTarget('interactive-map')}
         />
 
         {/* 5. Interactive Moveable Zoo Map with Click-to-Stream Animal Habitats */}
@@ -382,19 +396,7 @@ export default function App() {
           ]}
           ctaText="Become an Animal Guardian"
           ctaHref="#sponsorship-portal"
-          onCtaClick={() => {
-            const el = document.getElementById('sponsorship-portal');
-            if (el) {
-              const header = document.querySelector('header');
-              const headerOffset = header ? header.offsetHeight : 120;
-              const elementPosition = el.getBoundingClientRect().top + window.scrollY;
-              window.scrollTo({
-                top: Math.max(0, elementPosition - headerOffset + 2),
-                behavior: 'smooth'
-              });
-              setActiveSection('sponsorship-portal');
-            }
-          }}
+          onCtaClick={() => scrollToTarget('sponsorship-portal')}
         />
 
         {/* 8. Editorial Conservation Stories: "EVERY LIFE HAS A STORY" */}
@@ -405,13 +407,7 @@ export default function App() {
         {/* 9. Scientific Conservation Impact & Metric Count-Up Counters */}
         <ConservationSection language={language} />
 
-        {/* 10. Plan Your Visit: Timings, Ticket Prices, How to Reach, FAQs Accordion */}
-        <PlanVisitSection 
-          language={language}
-          onOpenTickets={() => setTicketModalOpen(true)}
-        />
-
-        {/* 11. Virtual Animal Guardianship / Adoption Portal with Live Certificate */}
+        {/* 10. Virtual Animal Guardianship / Adoption Portal with Live Certificate */}
         <SponsorshipPortal 
           animals={INITIAL_ANIMALS}
           preSelectedAnimal={sponsorAnimal}
@@ -419,23 +415,15 @@ export default function App() {
 
       </main>
 
-      {/* 12. Sanctuary Footer with Verified Info, Social SVG Links, and Credits */}
+      {/* 11. Sanctuary Footer with Verified Info, Social SVG Links, and Credits */}
       <Footer />
 
-      {/* 13. Floating "Ask Nandankanan" AI Assistant Widget */}
+      {/* 12. Floating "Ask Nandankanan" AI Assistant Widget */}
       <ChatbotWidget 
         language={language}
-        onOpenTickets={() => setTicketModalOpen(true)}
         onOpenLiveCam={handleLiveCamFromChatbot}
         onShowOnMap={handleShowAnimalOnMap}
         isLiveModalOpen={Boolean(activeModalCamera)}
-      />
-
-      {/* 14. Online Fast-Track Ticket Booking Modal with Instant QR Pass */}
-      <TicketBookingModal 
-        isOpen={ticketModalOpen}
-        onClose={() => setTicketModalOpen(false)}
-        language={language}
       />
 
       {/* 15. User Authentication Modal */}
