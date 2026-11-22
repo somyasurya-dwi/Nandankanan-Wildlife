@@ -38,18 +38,37 @@ class SubscriptionManager {
     if (!animal) return 'tiger';
     if (typeof animal === 'string') {
       const s = animal.toLowerCase().trim();
+      if (s.includes('white') && s.includes('tiger')) return 'white-tiger';
       if (s.includes('tiger')) return 'tiger';
       if (s.includes('lion')) return 'lion';
       if (s.includes('elephant')) return 'elephant';
       if (s.includes('bear')) return 'bear';
-      if (s.includes('deer')) return 'deer';
+      if (s.includes('deer') || s.includes('chital')) return 'deer';
       if (s.includes('bird') || s.includes('peafowl') || s.includes('aviary')) return 'birds';
+      if (s.includes('pangolin')) return 'pangolin';
+      if (s.includes('gharial') || s.includes('crocodile')) return 'gharial';
+      if (s.includes('cobra') || s.includes('snake')) return 'king-cobra';
+      if (s.includes('turtle') || s.includes('flapshell')) return 'turtle';
+      if (s.includes('openbill') || s.includes('openbell') || s.includes('anastomus')) return 'asian-openbill';
       return s.replace(/[^a-z0-9_-]/g, '-');
     }
     if (animal.slug) return this.normalizeAnimalKey(animal.slug);
     if (animal.animal_name) return this.normalizeAnimalKey(animal.animal_name);
     if (animal.id) {
-      const map = { 1: 'tiger', 2: 'lion', 3: 'elephant', 4: 'bear', 5: 'deer', 6: 'birds' };
+      const map = { 
+        1: 'tiger', 
+        2: 'lion', 
+        3: 'elephant', 
+        4: 'deer', 
+        5: 'bear', 
+        6: 'birds',
+        7: 'white-tiger',
+        8: 'pangolin',
+        9: 'gharial',
+        10: 'king-cobra',
+        11: 'turtle',
+        12: 'asian-openbill'
+      };
       if (map[animal.id]) return map[animal.id];
     }
     return 'tiger';

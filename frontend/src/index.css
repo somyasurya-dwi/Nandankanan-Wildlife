@@ -711,6 +711,75 @@ html.highlight-links a {
   }
 }
 
+/* =========================================================================
+   SUPPRESS BROWSER NATIVE PICTURE-IN-PICTURE BUTTONS & CONTROLS (Edge/Chrome)
+   ========================================================================= */
+video::-webkit-media-controls-picture-in-picture-button {
+  display: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+}
+
+video::-webkit-media-controls-enclosure {
+  overflow: hidden !important;
+}
+
+/* =========================================================================
+   INNOVATIVE LIVE REACTION INTERACTIONS: COMBOS, CHARGING & FLOATING COUNTERS
+   ========================================================================= */
+@keyframes comboPop {
+  0% {
+    transform: scale(0.65) translateY(4px);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.22) translateY(-2px);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-comboPop {
+  animation: comboPop 0.28s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes floatNumber {
+  0% {
+    transform: translateY(0) scale(0.85);
+    opacity: 1;
+  }
+  70% {
+    transform: translateY(-28px) scale(1.15);
+    opacity: 0.95;
+  }
+  100% {
+    transform: translateY(-46px) scale(0.9);
+    opacity: 0;
+  }
+}
+
+.animate-floatNumber {
+  animation: floatNumber 0.85s ease-out forwards;
+}
+
+@keyframes pulseGlowAura {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(200, 169, 107, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 22px rgba(200, 169, 107, 0.75);
+  }
+}
+
+.animate-pulseGlowAura {
+  animation: pulseGlowAura 2s ease-in-out infinite;
+}
+
+
 
 
 

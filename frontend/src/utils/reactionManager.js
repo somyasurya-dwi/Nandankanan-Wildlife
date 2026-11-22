@@ -52,17 +52,71 @@ export const ANIMAL_REACTIONS = {
     { id: 'green_earth_tree', name: 'Green Earth', iconKey: 'tree', emoji: '🌳', initialCount: 2620, effect: 'forest_shimmer' },
     { id: 'nature_heart', name: 'Nature', iconKey: 'heart_green', emoji: '💚', initialCount: 2980, effect: 'emerald_glow' },
     { id: 'wonderful', name: 'Wonderful', iconKey: 'sparkles', emoji: '✨', initialCount: 3740, effect: 'sparkle' }
+  ],
+  'white-bengal-tiger': [
+    { id: 'white_tiger_love', name: 'White Tiger Pride', iconKey: 'white_tiger', emoji: '🐅', initialCount: 3890, effect: 'roar_trail' },
+    { id: 'love', name: 'Love', iconKey: 'heart_red', emoji: '❤️', initialCount: 4420, effect: 'heart_burst' },
+    { id: 'majestic', name: 'Majestic Glow', iconKey: 'sparkles', emoji: '✨', initialCount: 3120, effect: 'sparkle' },
+    { id: 'paw_prints', name: 'Paw Prints', iconKey: 'paw', emoji: '🐾', initialCount: 2150, effect: 'paw_step' },
+    { id: 'meat_appreciation', name: 'Feast Meat', iconKey: 'meat', emoji: '🥩', initialCount: 2380, effect: 'sizzle' },
+    { id: 'exciting', name: 'Exciting', iconKey: 'fire', emoji: '🔥', initialCount: 3450, effect: 'fire_ember' }
+  ],
+  'indian-pangolin': [
+    { id: 'pangolin_love', name: 'Pangolin Love', iconKey: 'pangolin', emoji: '🤎', initialCount: 2640, effect: 'care_glow' },
+    { id: 'nature', name: 'Forest Habitat', iconKey: 'leaf', emoji: '🌿', initialCount: 2890, effect: 'leaf_drift' },
+    { id: 'support', name: 'Conservation Care', iconKey: 'heart_green', emoji: '💚', initialCount: 3370, effect: 'emerald_glow' },
+    { id: 'paw_prints', name: 'Claw Dig', iconKey: 'paw', emoji: '🐾', initialCount: 1980, effect: 'paw_step' },
+    { id: 'cute', name: 'Gentle Snout', iconKey: 'cute_face', emoji: '🥰', initialCount: 3120, effect: 'cute_bubbles' },
+    { id: 'sparkles', name: 'Precious Soul', iconKey: 'sparkles', emoji: '✨', initialCount: 2540, effect: 'sparkle' }
+  ],
+  'gharial': [
+    { id: 'gharial_love', name: 'Gharial Honor', iconKey: 'gharial', emoji: '🐊', initialCount: 2780, effect: 'splash_ripple' },
+    { id: 'water_love', name: 'River Basin', iconKey: 'water_drop', emoji: '💧', initialCount: 3820, effect: 'splash_ripple' },
+    { id: 'nature', name: 'Wetland Shore', iconKey: 'leaf', emoji: '🌿', initialCount: 2240, effect: 'leaf_drift' },
+    { id: 'love', name: 'Love', iconKey: 'heart_red', emoji: '❤️', initialCount: 3010, effect: 'heart_burst' },
+    { id: 'applause', name: 'Sanctuary Salute', iconKey: 'applause', emoji: '👏', initialCount: 2190, effect: 'cheer_waves' },
+    { id: 'exciting', name: 'Wild Wonder', iconKey: 'fire', emoji: '🔥', initialCount: 2470, effect: 'fire_ember' }
+  ],
+  'king-cobra': [
+    { id: 'king_cobra_respect', name: 'Cobra Majesty', iconKey: 'king_cobra', emoji: '🐍', initialCount: 3480, effect: 'golden_rays' },
+    { id: 'royal_crown', name: 'Serpent King', iconKey: 'crown', emoji: '👑', initialCount: 4210, effect: 'golden_rays' },
+    { id: 'fire', name: 'Hypnotic Aura', iconKey: 'fire', emoji: '🔥', initialCount: 3690, effect: 'fire_ember' },
+    { id: 'love', name: 'Respect', iconKey: 'heart_red', emoji: '❤️', initialCount: 2840, effect: 'heart_burst' },
+    { id: 'nature', name: 'Rainforest Den', iconKey: 'leaf', emoji: '🌿', initialCount: 2160, effect: 'leaf_drift' },
+    { id: 'sparkles', name: 'Mystic Gaze', iconKey: 'sparkles', emoji: '✨', initialCount: 3310, effect: 'sparkle' }
+  ],
+  'indian-flapshell-turtle': [
+    { id: 'turtle_love', name: 'Turtle Peace', iconKey: 'flapshell_turtle', emoji: '🐢', initialCount: 2590, effect: 'gentle_wave' },
+    { id: 'water_love', name: 'Lotus Waters', iconKey: 'water_drop', emoji: '💧', initialCount: 3670, effect: 'splash_ripple' },
+    { id: 'support', name: 'Gentle Support', iconKey: 'heart_green', emoji: '💚', initialCount: 3180, effect: 'emerald_glow' },
+    { id: 'cute', name: 'Cute Shell', iconKey: 'cute_face', emoji: '🥰', initialCount: 2950, effect: 'cute_bubbles' },
+    { id: 'nature', name: 'Lily Haven', iconKey: 'leaf', emoji: '🌿', initialCount: 2420, effect: 'leaf_drift' },
+    { id: 'sparkles', name: 'Serenity', iconKey: 'sparkles', emoji: '✨', initialCount: 2810, effect: 'sparkle' }
+  ],
+  'asian-openbill': [
+    { id: 'openbill_flight', name: 'Openbill Flight', iconKey: 'asian_openbill', emoji: '🦩', initialCount: 2950, effect: 'feather_drift' },
+    { id: 'water_love', name: 'Kanjia Shallows', iconKey: 'water_drop', emoji: '💧', initialCount: 3820, effect: 'splash_ripple' },
+    { id: 'nature', name: 'Lake Heronry', iconKey: 'leaf', emoji: '🌿', initialCount: 2680, effect: 'leaf_drift' },
+    { id: 'support', name: 'Wetland Protection', iconKey: 'heart_green', emoji: '💚', initialCount: 3410, effect: 'emerald_glow' },
+    { id: 'love', name: 'Stork Love', iconKey: 'heart_red', emoji: '❤️', initialCount: 3120, effect: 'heart_burst' },
+    { id: 'sparkles', name: 'Canopy Majesty', iconKey: 'sparkles', emoji: '✨', initialCount: 2790, effect: 'sparkle' }
   ]
 };
 
 // Extended catalog for the Expandable Reaction Picker
 export const ALL_REACTIONS_CATALOG = [
   { id: 'tiger_love', name: 'Tiger Love', iconKey: 'tiger', emoji: '🐯', category: 'animals' },
+  { id: 'white_tiger_love', name: 'White Tiger Pride', iconKey: 'white_tiger', emoji: '🐅', category: 'animals' },
   { id: 'lion_pride', name: 'Lion Pride', iconKey: 'lion', emoji: '🦁', category: 'animals' },
   { id: 'elephant_love', name: 'Elephant Love', iconKey: 'elephant', emoji: '🐘', category: 'animals' },
   { id: 'deer_love', name: 'Deer Love', iconKey: 'deer', emoji: '🦌', category: 'animals' },
   { id: 'bear_love', name: 'Bear Love', iconKey: 'bear', emoji: '🐻', category: 'animals' },
   { id: 'bird_love', name: 'Bird Love', iconKey: 'peacock', emoji: '🦚', category: 'animals' },
+  { id: 'pangolin_love', name: 'Pangolin Care', iconKey: 'pangolin', emoji: '🤎', category: 'animals' },
+  { id: 'gharial_love', name: 'Gharial Honor', iconKey: 'gharial', emoji: '🐊', category: 'animals' },
+  { id: 'king_cobra_respect', name: 'Cobra Majesty', iconKey: 'king_cobra', emoji: '🐍', category: 'animals' },
+  { id: 'turtle_love', name: 'Flapshell Turtle', iconKey: 'flapshell_turtle', emoji: '🐢', category: 'animals' },
+  { id: 'openbill_flight', name: 'Asian Openbill', iconKey: 'asian_openbill', emoji: '🦩', category: 'animals' },
   { id: 'paw_prints', name: 'Paw Prints', iconKey: 'paw', emoji: '🐾', category: 'animals' },
 
   { id: 'leaf', name: 'Forest Leaf', iconKey: 'leaf', emoji: '🌿', category: 'nature' },
@@ -99,12 +153,18 @@ class ReactionManager {
     const slug = (animal.slug || '').toLowerCase();
     const name = (animal.animal_name || animal.name || '').toLowerCase();
 
+    if (slug.includes('white') || name.includes('white')) return 'white-bengal-tiger';
     if (slug.includes('tiger') || name.includes('tiger')) return 'royal-bengal-tiger';
     if (slug.includes('lion') || name.includes('lion')) return 'asiatic-lion';
     if (slug.includes('elephant') || name.includes('elephant')) return 'asian-elephant';
     if (slug.includes('deer') || name.includes('deer') || slug.includes('chital')) return 'spotted-deer';
     if (slug.includes('bear') || name.includes('bear')) return 'sloth-bear';
+    if (slug.includes('openbill') || name.includes('openbill') || slug.includes('openbell') || name.includes('openbell') || slug.includes('anastomus')) return 'asian-openbill';
     if (slug.includes('bird') || name.includes('bird') || slug.includes('peacock') || name.includes('peafowl')) return 'birds';
+    if (slug.includes('pangolin') || name.includes('pangolin')) return 'indian-pangolin';
+    if (slug.includes('gharial') || name.includes('gharial') || slug.includes('crocodile') || name.includes('crocodile')) return 'gharial';
+    if (slug.includes('cobra') || name.includes('cobra') || slug.includes('snake') || name.includes('snake')) return 'king-cobra';
+    if (slug.includes('turtle') || name.includes('turtle') || slug.includes('flapshell') || name.includes('flapshell')) return 'indian-flapshell-turtle';
 
     return 'royal-bengal-tiger';
   }

@@ -349,6 +349,328 @@ export default function Realistic3DIcon({ iconKey, size = 28, className = '', ef
           </svg>
         );
 
+      case 'white_tiger':
+        return (
+          <svg viewBox="0 0 64 64" width={pixelSize} height={pixelSize} className="overflow-visible">
+            <defs>
+              <radialGradient id="wt_head" cx="38%" cy="32%" r="65%">
+                <stop offset="0%" stopColor="#FFFFFF" />
+                <stop offset="45%" stopColor="#F4F6F8" />
+                <stop offset="85%" stopColor="#D8DEE4" />
+                <stop offset="100%" stopColor="#9CA3AF" />
+              </radialGradient>
+              <radialGradient id="wt_ear" cx="40%" cy="35%" r="60%">
+                <stop offset="0%" stopColor="#FFA69E" />
+                <stop offset="65%" stopColor="#E26D5C" />
+                <stop offset="100%" stopColor="#7F1D1D" />
+              </radialGradient>
+              <radialGradient id="wt_blue_eye" cx="35%" cy="35%" r="65%">
+                <stop offset="0%" stopColor="#90E0EF" />
+                <stop offset="45%" stopColor="#00B4D8" />
+                <stop offset="85%" stopColor="#0077B6" />
+                <stop offset="100%" stopColor="#03045E" />
+              </radialGradient>
+              <linearGradient id="wt_muzzle" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#FFFFFF" />
+                <stop offset="100%" stopColor="#E5E7EB" />
+              </linearGradient>
+            </defs>
+            <g filter="url(#shadow_3d)">
+              {/* Ears */}
+              <circle cx="15" cy="18" r="9" fill="#374151" />
+              <circle cx="15" cy="18" r="6" fill="url(#wt_ear)" />
+              <path d="M10 13 Q15 9 20 15 Z" fill="#1F2937" />
+
+              <circle cx="49" cy="18" r="9" fill="#374151" />
+              <circle cx="49" cy="18" r="6" fill="url(#wt_ear)" />
+              <path d="M44 15 Q49 9 54 13 Z" fill="#1F2937" />
+
+              {/* Head Base */}
+              <circle cx="32" cy="34" r="23" fill="url(#wt_head)" />
+              <ellipse cx="32" cy="32" rx="22.5" ry="21" fill="none" stroke="#FFFFFF" strokeWidth="0.8" opacity="0.85" />
+
+              {/* Sepia/Charcoal Stripes */}
+              <path d="M32 12 L30 19 L32 21 L34 19 Z" fill="#2E2A27" />
+              <path d="M26 14 L28 20 L25 21 Z" fill="#2E2A27" />
+              <path d="M38 14 L36 20 L39 21 Z" fill="#2E2A27" />
+              <path d="M10 30 Q17 29 19 32 Q16 34 10 33 Z" fill="#2E2A27" />
+              <path d="M54 30 Q47 29 45 32 Q48 34 54 33 Z" fill="#2E2A27" />
+              <path d="M12 36 Q19 37 20 40 Q16 41 11 39 Z" fill="#2E2A27" />
+              <path d="M52 36 Q45 37 44 40 Q48 41 53 39 Z" fill="#2E2A27" />
+
+              {/* White Muzzle */}
+              <ellipse cx="27" cy="42" rx="7.5" ry="5.5" fill="url(#wt_muzzle)" />
+              <ellipse cx="37" cy="42" rx="7.5" ry="5.5" fill="url(#wt_muzzle)" />
+              <ellipse cx="32" cy="47" rx="5" ry="3.5" fill="url(#wt_muzzle)" />
+
+              {/* Sapphire Blue Eyes */}
+              <ellipse cx="23" cy="29" rx="4.2" ry="4.8" fill="url(#wt_blue_eye)" stroke="#1F2937" strokeWidth="0.8" />
+              <ellipse cx="41" cy="29" rx="4.2" ry="4.8" fill="url(#wt_blue_eye)" stroke="#1F2937" strokeWidth="0.8" />
+              <ellipse cx="23" cy="29" rx="1.8" ry="3.8" fill="#030712" />
+              <ellipse cx="41" cy="29" rx="1.8" ry="3.8" fill="#030712" />
+              <circle cx="21.8" cy="27.5" r="1.3" fill="#FFFFFF" />
+              <circle cx="39.8" cy="27.5" r="1.3" fill="#FFFFFF" />
+
+              {/* Rose Nose */}
+              <path d="M29 37 Q32 36 35 37 Q33 41 32 42 Q31 41 29 37 Z" fill="#F472B6" />
+              <ellipse cx="32" cy="38" rx="2.5" ry="1.2" fill="#FBCFE8" />
+
+              {/* Mouth & Whisker Dots */}
+              <path d="M32 42 L32 45 M32 45 Q28 47 25 45 M32 45 Q36 47 39 45" fill="none" stroke="#374151" strokeWidth="1.2" strokeLinecap="round" />
+              <circle cx="24" cy="41" r="0.8" fill="#374151" />
+              <circle cx="27" cy="43" r="0.8" fill="#374151" />
+              <circle cx="40" cy="41" r="0.8" fill="#374151" />
+              <circle cx="37" cy="43" r="0.8" fill="#374151" />
+            </g>
+          </svg>
+        );
+
+      case 'pangolin':
+        return (
+          <svg viewBox="0 0 64 64" width={pixelSize} height={pixelSize} className="overflow-visible">
+            <defs>
+              <radialGradient id="pango_body" cx="40%" cy="30%" r="70%">
+                <stop offset="0%" stopColor="#F59E0B" />
+                <stop offset="40%" stopColor="#D97706" />
+                <stop offset="85%" stopColor="#92400E" />
+                <stop offset="100%" stopColor="#451A03" />
+              </radialGradient>
+              <linearGradient id="pango_scale" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#FDE68A" />
+                <stop offset="60%" stopColor="#D97706" />
+                <stop offset="100%" stopColor="#78350F" />
+              </linearGradient>
+            </defs>
+            <g filter="url(#shadow_3d)">
+              {/* Scaled Curled Body Dome */}
+              <ellipse cx="34" cy="36" rx="22" ry="19" fill="url(#pango_body)" />
+              <path d="M16 46 Q24 54 36 53 Q48 52 52 44" fill="none" stroke="#78350F" strokeWidth="3" strokeLinecap="round" />
+
+              {/* Overlapping Armored Keratin Scales */}
+              <path d="M22 26 Q27 22 32 26 Q27 30 22 26 Z" fill="url(#pango_scale)" stroke="#78350F" strokeWidth="0.8" />
+              <path d="M30 24 Q36 19 42 24 Q36 28 30 24 Z" fill="url(#pango_scale)" stroke="#78350F" strokeWidth="0.8" />
+              <path d="M19 33 Q25 29 31 33 Q25 38 19 33 Z" fill="url(#pango_scale)" stroke="#78350F" strokeWidth="0.8" />
+              <path d="M28 32 Q35 27 42 32 Q35 37 28 32 Z" fill="url(#pango_scale)" stroke="#78350F" strokeWidth="0.8" />
+              <path d="M39 31 Q45 26 51 31 Q45 36 39 31 Z" fill="url(#pango_scale)" stroke="#78350F" strokeWidth="0.8" />
+              <path d="M24 40 Q31 36 38 40 Q31 45 24 40 Z" fill="url(#pango_scale)" stroke="#78350F" strokeWidth="0.8" />
+              <path d="M35 39 Q42 35 49 39 Q42 44 35 39 Z" fill="url(#pango_scale)" stroke="#78350F" strokeWidth="0.8" />
+
+              {/* Tapered Snout Head */}
+              <path d="M20 32 Q12 30 8 34 Q13 41 21 38 Z" fill="#D97706" stroke="#78350F" strokeWidth="0.8" />
+              <circle cx="8" cy="34" r="1.6" fill="#1C1917" />
+
+              {/* Gentle Eye */}
+              <circle cx="15" cy="33" r="2.2" fill="#1C1917" />
+              <circle cx="14.4" cy="32.4" r="0.8" fill="#FFFFFF" />
+
+              {/* Front Digging Claw */}
+              <path d="M18 43 Q14 47 11 46 Q16 42 19 41 Z" fill="#92400E" stroke="#451A03" strokeWidth="0.8" />
+            </g>
+          </svg>
+        );
+
+      case 'gharial':
+      case 'crocodile':
+        return (
+          <svg viewBox="0 0 64 64" width={pixelSize} height={pixelSize} className="overflow-visible">
+            <defs>
+              <radialGradient id="gharial_skin" cx="35%" cy="30%" r="65%">
+                <stop offset="0%" stopColor="#4ADE80" />
+                <stop offset="35%" stopColor="#15803D" />
+                <stop offset="80%" stopColor="#14532D" />
+                <stop offset="100%" stopColor="#052E16" />
+              </radialGradient>
+              <radialGradient id="gharial_eye" cx="35%" cy="35%" r="65%">
+                <stop offset="0%" stopColor="#FEF08A" />
+                <stop offset="50%" stopColor="#EAB308" />
+                <stop offset="100%" stopColor="#713F12" />
+              </radialGradient>
+            </defs>
+            <g filter="url(#shadow_3d)">
+              {/* Armored Reptilian Head Base */}
+              <ellipse cx="42" cy="32" rx="14" ry="16" fill="url(#gharial_skin)" />
+
+              {/* Elongated Gharial Slender Snout */}
+              <path d="M42 27 L10 29 Q6 32 10 35 L42 37 Z" fill="url(#gharial_skin)" stroke="#052E16" strokeWidth="0.8" />
+
+              {/* Bulbous Ghara Snout Tip (Male Characteristic) */}
+              <circle cx="9" cy="32" r="3.2" fill="#166534" stroke="#052E16" strokeWidth="0.6" />
+              <ellipse cx="9" cy="31" rx="1.5" ry="0.8" fill="#4ADE80" opacity="0.6" />
+
+              {/* Interlocking White Needler Teeth */}
+              <path d="M14 28 L15 31 L16 28 L18 31 L20 28 L23 31 L26 28 L30 31 L34 28" stroke="#FFFFFF" strokeWidth="1" strokeLinecap="round" />
+              <path d="M14 36 L15 33 L16 36 L18 33 L20 36 L23 33 L26 36 L30 33 L34 36" stroke="#FFFFFF" strokeWidth="1" strokeLinecap="round" />
+
+              {/* Dorsal Scutes / Scaly Ridges */}
+              <circle cx="48" cy="24" r="3" fill="#14532D" />
+              <circle cx="53" cy="28" r="2.8" fill="#14532D" />
+              <circle cx="53" cy="36" r="2.8" fill="#14532D" />
+              <circle cx="48" cy="40" r="3" fill="#14532D" />
+
+              {/* Raised Amber Reptile Eye with Slit Pupil */}
+              <ellipse cx="40" cy="23" rx="4.5" ry="4.5" fill="url(#gharial_eye)" stroke="#052E16" strokeWidth="0.8" />
+              <ellipse cx="40" cy="23" rx="1.2" ry="3.5" fill="#022C22" />
+              <circle cx="39" cy="21.5" r="1.1" fill="#FFFFFF" />
+            </g>
+          </svg>
+        );
+
+      case 'king_cobra':
+      case 'cobra':
+        return (
+          <svg viewBox="0 0 64 64" width={pixelSize} height={pixelSize} className="overflow-visible">
+            <defs>
+              <radialGradient id="cobra_hood" cx="40%" cy="30%" r="70%">
+                <stop offset="0%" stopColor="#475569" />
+                <stop offset="35%" stopColor="#1E293B" />
+                <stop offset="80%" stopColor="#0F172A" />
+                <stop offset="100%" stopColor="#020617" />
+              </radialGradient>
+              <linearGradient id="cobra_chevron" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#FCD34D" />
+                <stop offset="60%" stopColor="#D97706" />
+                <stop offset="100%" stopColor="#78350F" />
+              </linearGradient>
+              <radialGradient id="cobra_eye" cx="35%" cy="35%" r="65%">
+                <stop offset="0%" stopColor="#FBBF24" />
+                <stop offset="70%" stopColor="#B45309" />
+                <stop offset="100%" stopColor="#451A03" />
+              </radialGradient>
+            </defs>
+            <g filter="url(#shadow_3d)">
+              {/* Flared Royal Cobra Hood */}
+              <ellipse cx="32" cy="35" rx="20" ry="18" fill="url(#cobra_hood)" />
+              <ellipse cx="32" cy="35" rx="19.5" ry="17.5" fill="none" stroke="#C8A96B" strokeWidth="0.8" opacity="0.6" />
+
+              {/* Distinctive Chevron / Spectacle Markings */}
+              <path d="M22 28 Q32 36 42 28 Q32 40 22 28 Z" fill="url(#cobra_chevron)" stroke="#451A03" strokeWidth="0.6" />
+              <circle cx="26" cy="31" r="2.2" fill="#0F172A" />
+              <circle cx="38" cy="31" r="2.2" fill="#0F172A" />
+
+              {/* Upright Neck & Head */}
+              <ellipse cx="32" cy="22" rx="9" ry="12" fill="url(#cobra_hood)" stroke="#020617" strokeWidth="0.8" />
+              <path d="M28 32 L27 54 Q32 57 37 54 L36 32 Z" fill="url(#cobra_hood)" />
+
+              {/* Crown / Brow Scales */}
+              <path d="M27 16 Q32 13 37 16 L35 20 Q32 18 29 20 Z" fill="#C8A96B" opacity="0.85" />
+
+              {/* Glowing Amber Eyes with Slit Pupils */}
+              <ellipse cx="27" cy="21" rx="2.8" ry="3.2" fill="url(#cobra_eye)" stroke="#020617" strokeWidth="0.6" />
+              <ellipse cx="37" cy="21" rx="2.8" ry="3.2" fill="url(#cobra_eye)" stroke="#020617" strokeWidth="0.6" />
+              <ellipse cx="27" cy="21" rx="0.8" ry="2.5" fill="#000000" />
+              <ellipse cx="37" cy="21" rx="0.8" ry="2.5" fill="#000000" />
+              <circle cx="26.4" cy="20" r="0.7" fill="#FFFFFF" />
+              <circle cx="36.4" cy="20" r="0.7" fill="#FFFFFF" />
+
+              {/* Sinuous Forked Tongue */}
+              <path d="M32 30 L32 36 M32 36 L29 39 M32 36 L35 39" fill="none" stroke="#DC2626" strokeWidth="1.2" strokeLinecap="round" />
+            </g>
+          </svg>
+        );
+
+      case 'flapshell_turtle':
+      case 'turtle':
+        return (
+          <svg viewBox="0 0 64 64" width={pixelSize} height={pixelSize} className="overflow-visible">
+            <defs>
+              <radialGradient id="turtle_shell" cx="40%" cy="30%" r="65%">
+                <stop offset="0%" stopColor="#A3E635" />
+                <stop offset="35%" stopColor="#65A30D" />
+                <stop offset="75%" stopColor="#3F6212" />
+                <stop offset="100%" stopColor="#1A2E05" />
+              </radialGradient>
+              <linearGradient id="turtle_rim" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#FACC15" />
+                <stop offset="100%" stopColor="#A16207" />
+              </linearGradient>
+            </defs>
+            <g filter="url(#shadow_3d)">
+              {/* Paddle Flippers & Tail */}
+              <ellipse cx="14" cy="24" rx="7" ry="4" fill="#4D7C0F" transform="rotate(-30 14 24)" />
+              <ellipse cx="50" cy="24" rx="7" ry="4" fill="#4D7C0F" transform="rotate(30 50 24)" />
+              <ellipse cx="16" cy="46" rx="6" ry="3.5" fill="#3F6212" transform="rotate(35 16 46)" />
+              <ellipse cx="48" cy="46" rx="6" ry="3.5" fill="#3F6212" transform="rotate(-35 48 46)" />
+              <path d="M32 54 L30 59 L34 59 Z" fill="#3F6212" />
+
+              {/* Gentle Rounded Head */}
+              <ellipse cx="32" cy="14" rx="7" ry="9" fill="#65A30D" stroke="#1A2E05" strokeWidth="0.8" />
+              {/* Yellow Spots on Head */}
+              <circle cx="28" cy="12" r="1.2" fill="#FACC15" />
+              <circle cx="36" cy="12" r="1.2" fill="#FACC15" />
+
+              {/* Friendly Turtle Eyes */}
+              <circle cx="28" cy="14" r="2.2" fill="#1C1917" />
+              <circle cx="36" cy="14" r="2.2" fill="#1C1917" />
+              <circle cx="27.3" cy="13.3" r="0.8" fill="#FFFFFF" />
+              <circle cx="35.3" cy="13.3" r="0.8" fill="#FFFFFF" />
+
+              {/* Domed Olive Carapace (Shell) with Flexible Cutaneous Rim */}
+              <ellipse cx="32" cy="35" rx="20" ry="19" fill="url(#turtle_rim)" />
+              <ellipse cx="32" cy="35" rx="18.5" ry="17.5" fill="url(#turtle_shell)" stroke="#1A2E05" strokeWidth="0.8" />
+
+              {/* Shell Pattern Scutes */}
+              <path d="M32 23 L25 29 L27 38 L32 43 L37 38 L39 29 Z" fill="none" stroke="#CA8A04" strokeWidth="1" opacity="0.75" />
+              <circle cx="32" cy="33" r="2.5" fill="#FACC15" opacity="0.6" />
+              <circle cx="23" cy="35" r="1.8" fill="#FACC15" opacity="0.6" />
+              <circle cx="41" cy="35" r="1.8" fill="#FACC15" opacity="0.6" />
+            </g>
+          </svg>
+        );
+
+      case 'asian_openbill':
+      case 'openbill':
+        return (
+          <svg viewBox="0 0 64 64" width={pixelSize} height={pixelSize} className="overflow-visible">
+            <defs>
+              <radialGradient id="openbill_head" cx="35%" cy="30%" r="65%">
+                <stop offset="0%" stopColor="#FFFFFF" />
+                <stop offset="45%" stopColor="#F1F5F9" />
+                <stop offset="85%" stopColor="#CBD5E1" />
+                <stop offset="100%" stopColor="#94A3B8" />
+              </radialGradient>
+              <linearGradient id="openbill_bill_upper" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#E2E8F0" />
+                <stop offset="50%" stopColor="#94A3B8" />
+                <stop offset="100%" stopColor="#475569" />
+              </linearGradient>
+              <linearGradient id="openbill_bill_lower" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#CBD5E1" />
+                <stop offset="50%" stopColor="#64748B" />
+                <stop offset="100%" stopColor="#334155" />
+              </linearGradient>
+              <radialGradient id="openbill_eye" cx="35%" cy="35%" r="65%">
+                <stop offset="0%" stopColor="#FEF08A" />
+                <stop offset="60%" stopColor="#EAB308" />
+                <stop offset="100%" stopColor="#713F12" />
+              </radialGradient>
+            </defs>
+            <g filter="url(#shadow_3d)">
+              {/* Sleek Stork Neck & Head Base */}
+              <path d="M38 56 Q38 38 42 28 Q44 18 36 14 Q28 12 25 20 Q22 28 26 56 Z" fill="url(#openbill_head)" />
+              <ellipse cx="33" cy="20" rx="9" ry="8" fill="url(#openbill_head)" stroke="#CBD5E1" strokeWidth="0.8" />
+              
+              {/* Black Flight Feather Wing Tips at Back */}
+              <path d="M36 40 Q44 46 48 56 L36 56 Z" fill="#1E293B" opacity="0.9" />
+
+              {/* Reddish Bare Orbital Skin around Eye */}
+              <ellipse cx="29" cy="18" rx="4" ry="3.5" fill="#F87171" opacity="0.85" />
+
+              {/* Piercing Amber Eye */}
+              <circle cx="29" cy="18" r="2.2" fill="url(#openbill_eye)" stroke="#451A03" strokeWidth="0.5" />
+              <circle cx="29" cy="18" r="1.1" fill="#0F172A" />
+              <circle cx="28.4" cy="17.4" r="0.7" fill="#FFFFFF" />
+
+              {/* Iconic Openbill Mandibles with Distinctive Feeding Gap */}
+              {/* Upper Arched Mandible */}
+              <path d="M25 17 Q15 13 6 22 Q12 18 25 21 Z" fill="url(#openbill_bill_upper)" stroke="#334155" strokeWidth="0.7" />
+              {/* Lower Decurved Mandible leaving unmistakable gaping gap */}
+              <path d="M25 22 Q14 28 6 23 Q15 23 25 25 Z" fill="url(#openbill_bill_lower)" stroke="#1E293B" strokeWidth="0.7" />
+              {/* Bill base keratin plate */}
+              <path d="M24 16 L27 23 L24 25 Z" fill="#64748B" />
+            </g>
+          </svg>
+        );
+
       /* =========================================================================
          2. HEARTS & LOVE (Red Love, Green Support, Heart Hands, Heart Eyes)
          ========================================================================= */
