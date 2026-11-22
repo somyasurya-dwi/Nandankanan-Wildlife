@@ -16,6 +16,7 @@ import {
   Layers
 } from 'lucide-react';
 import { subscriptionManager } from '../utils/subscriptionManager';
+import Realistic3DIcon from './reactions/Realistic3DIcon';
 
 export default function SubscriptionModal({ 
   isOpen, 
@@ -211,8 +212,15 @@ export default function SubscriptionModal({
           </div>
 
           {/* Main Title Required by User */}
-          <h2 className="text-xl sm:text-2xl font-display font-bold text-white tracking-wide leading-tight">
-            Enjoy Unlimited {targetAnimalName} Live Streaming!
+          <h2 className="text-xl sm:text-2xl font-display font-bold text-white tracking-wide leading-tight flex items-center gap-2">
+            <span className="shrink-0 flex items-center justify-center">
+              {animal?.iconKey ? (
+                <Realistic3DIcon iconKey={animal.iconKey} size={28} className="drop-shadow-md" />
+              ) : (
+                <span>{animal?.emoji || '🐾'}</span>
+              )}
+            </span>
+            <span>Enjoy Unlimited {targetAnimalName} Live Streaming!</span>
           </h2>
 
           {/* Subtitle Required by User */}

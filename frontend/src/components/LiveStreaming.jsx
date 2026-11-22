@@ -14,6 +14,7 @@ import {
 import { useLanguage } from '../context/LanguageContext';
 import LiveCameraPlayer from './LiveCameraPlayer';
 import { subscriptionManager } from '../utils/subscriptionManager';
+import Realistic3DIcon from './reactions/Realistic3DIcon';
 
 export default function LiveStreaming({ 
   cameras, 
@@ -172,7 +173,7 @@ export default function LiveStreaming({
           <div className="flex flex-wrap items-center gap-3">
             <div className="bg-forest-900/80 border border-gold-500/25 rounded-xl px-4 py-2 flex items-center gap-2.5 text-xs text-ivory-200 backdrop-blur-md shadow-sm">
               <Signal className="w-4 h-4 text-emerald-400 animate-pulse" />
-              <span className="font-medium">6 High-Definition Habitat Feeds Active</span>
+              <span className="font-medium">{cameras?.length || 11} High-Definition Habitat Feeds Active</span>
             </div>
           </div>
         </div>
@@ -299,7 +300,13 @@ export default function LiveStreaming({
                     </div>
 
                     <h3 className="font-display font-bold text-xl text-ivory-50 group-hover:text-gold-300 transition-colors flex items-center gap-2">
-                      <span>{camera.emoji || '🐾'}</span>
+                      <span className="shrink-0 flex items-center justify-center">
+                        {camera.iconKey ? (
+                          <Realistic3DIcon iconKey={camera.iconKey} size={24} className="drop-shadow-sm" />
+                        ) : (
+                          <span>{camera.emoji || '🐾'}</span>
+                        )}
+                      </span>
                       <span>{getAnimalName ? getAnimalName({ name: camera.animal_name }) || camera.animal_name : camera.animal_name}</span>
                     </h3>
 

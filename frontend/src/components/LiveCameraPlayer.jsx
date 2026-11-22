@@ -41,14 +41,12 @@ import {
   ZoomOut,
   RefreshCw,
   Loader2,
-  Plus,
   Flame
 } from 'lucide-react';
 import { MultiCameraTracker } from '../utils/multiCameraTracker';
 import { walletManager } from '../utils/walletManager';
 import { subscriptionManager } from '../utils/subscriptionManager';
 import Realistic3DIcon from './reactions/Realistic3DIcon';
-import ExpandableReactionPicker from './reactions/ExpandableReactionPicker';
 import { reactionManager } from '../utils/reactionManager';
 import SubscriptionModal from './SubscriptionModal';
 import ContributionModal from './ContributionModal';
@@ -102,6 +100,41 @@ const ANIMAL_LAYOUT_CONFIG = {
     viewTag: 'High-Detail Aviary View',
     description: 'High-resolution aviary layout with multi-level optical zoom for plumage and behavioral inspection.',
     supportsZoom: true
+  },
+  white_tiger: {
+    focalPosition: 'center 48%',
+    layoutTitle: 'White Tiger Heritage Landscape',
+    viewTag: 'High-Fidelity Habitat Vista',
+    description: 'Preserving full-body white tiger posture, shaded pool & bamboo groves.',
+    supportsZoom: true
+  },
+  pangolin: {
+    focalPosition: 'center 50%',
+    layoutTitle: 'Burrow & Conservation Mound Framing',
+    viewTag: 'Infrared Conservation View',
+    description: 'High-detail enclosure framing tracking foraging scales and mound excavation.',
+    supportsZoom: true
+  },
+  gharial: {
+    focalPosition: 'center 50%',
+    layoutTitle: 'Subsurface & River Bank Panorama',
+    viewTag: 'Aquatic Wetland Vista',
+    description: 'Wide riverbank and water pool perspective highlighting basking gharials.',
+    supportsZoom: true
+  },
+  king_cobra: {
+    focalPosition: 'center 46%',
+    layoutTitle: 'Terrarium & Canopy Optical Detail',
+    viewTag: 'Macro Rainforest View',
+    description: 'Macro telephoto tracking keeping the serpent hood, coils, and terrarium in focus.',
+    supportsZoom: true
+  },
+  flapshell_turtle: {
+    focalPosition: 'center 52%',
+    layoutTitle: 'Wetland Lily Waters Framing',
+    viewTag: 'Gentle Aquatic View',
+    description: 'Calm water surface and lotus pad layout tracking flapshell swimming movements.',
+    supportsZoom: true
   }
 };
 
@@ -127,13 +160,18 @@ export default function LiveCameraPlayer({
   onSelectAnimal,
   onClose
 }) {
-  const isTiger = animal?.slug === 'royal-bengal-tiger' || animal?.id === 1;
+  const isWhiteTiger = animal?.slug === 'white-bengal-tiger' || animal?.id === 7 || (animal?.animal_name?.toLowerCase().includes('white') && animal?.animal_name?.toLowerCase().includes('tiger'));
+  const isTiger = (animal?.slug === 'royal-bengal-tiger' || animal?.id === 1 || (animal?.animal_name?.toLowerCase().includes('tiger') && !animal?.animal_name?.toLowerCase().includes('white'))) && !isWhiteTiger;
   const isLion = animal?.slug === 'asiatic-lion' || animal?.id === 2;
   const isElephant = animal?.slug === 'asian-elephant' || animal?.id === 3 || animal?.animal_name?.toLowerCase().includes('elephant');
   const isDeer = animal?.slug === 'spotted-deer' || animal?.id === 4;
   const isBear = animal?.slug === 'sloth-bear' || animal?.id === 5 || animal?.animal_name?.toLowerCase().includes('bear');
   const isBird = animal?.slug === 'birds' || animal?.id === 6 || animal?.animal_name?.toLowerCase().includes('bird');
-  const hasMultiCam = Boolean(animal?.cameras && animal.cameras.length >= 3) || isTiger || isLion || isElephant || isDeer || isBear || isBird;
+  const isPangolin = animal?.slug === 'indian-pangolin' || animal?.id === 8 || animal?.animal_name?.toLowerCase().includes('pangolin');
+  const isGharial = animal?.slug === 'gharial' || animal?.id === 9 || animal?.animal_name?.toLowerCase().includes('gharial') || animal?.animal_name?.toLowerCase().includes('crocodile');
+  const isCobra = animal?.slug === 'king-cobra' || animal?.id === 10 || animal?.animal_name?.toLowerCase().includes('cobra');
+  const isTurtle = animal?.slug === 'indian-flapshell-turtle' || animal?.id === 11 || animal?.animal_name?.toLowerCase().includes('turtle') || animal?.animal_name?.toLowerCase().includes('flapshell');
+  const hasMultiCam = Boolean(animal?.cameras && animal.cameras.length >= 3) || isTiger || isWhiteTiger || isLion || isElephant || isDeer || isBear || isBird || isPangolin || isGharial || isCobra || isTurtle;
 
   // Selected camera feed being viewed in main video player (1, 2, or 3)
   const [selectedAngleId, setSelectedAngleId] = useState(1);
@@ -286,7 +324,7 @@ export default function LiveCameraPlayer({
   const [autoTrackingEnabled, setAutoTrackingEnabled] = useState(true);
 
   // Active Animal Layout Configuration
-  const activeAnimalKey = isTiger ? 'tiger' : isLion ? 'lion' : isElephant ? 'elephant' : isDeer ? 'deer' : isBear ? 'bear' : 'birds';
+  const activeAnimalKey = isWhiteTiger ? 'white_tiger' : isTiger ? 'tiger' : isLion ? 'lion' : isElephant ? 'elephant' : isDeer ? 'deer' : isBear ? 'bear' : isBird ? 'birds' : isPangolin ? 'pangolin' : isGharial ? 'gharial' : isCobra ? 'king_cobra' : isTurtle ? 'flapshell_turtle' : 'tiger';
   const layoutConfig = ANIMAL_LAYOUT_CONFIG[activeAnimalKey] || ANIMAL_LAYOUT_CONFIG.tiger;
 
   // Actual Stream Quality & Technical Metrics
@@ -833,10 +871,11 @@ export default function LiveCameraPlayer({
   // =========================================================================
   // DYNAMIC ANIMAL-SPECIFIC REACTION SYSTEM WITH REALISTIC 3D ICONS
   // =========================================================================
-  // Adjustable Reaction Dock Size: 'normal' (responsive standard) | 'compact' (slim) | 'mini' (collapsed pill)
+  // Adjustable Reaction Dock Size: 'normal' (expanded dock) | 'mini' (collapsed pill) — 2-State Toggle
   const [reactDockSize, setReactDockSize] = useState(() => {
     try {
-      return localStorage.getItem('nandankanan_react_size') || 'normal';
+      const saved = localStorage.getItem('nandankanan_react_size');
+      return saved === 'mini' ? 'mini' : 'normal';
     } catch {
       return 'normal';
     }
@@ -844,7 +883,7 @@ export default function LiveCameraPlayer({
 
   const toggleReactDockSize = useCallback(() => {
     setReactDockSize(prev => {
-      const next = prev === 'normal' ? 'compact' : prev === 'compact' ? 'mini' : 'normal';
+      const next = prev === 'normal' ? 'mini' : 'normal';
       try {
         localStorage.setItem('nandankanan_react_size', next);
       } catch { }
@@ -875,7 +914,6 @@ export default function LiveCameraPlayer({
   const [floatingBadges, setFloatingBadges] = useState([]);
   const [chargingReactionId, setChargingReactionId] = useState(null);
   const [chargeProgress, setChargeProgress] = useState(0);
-  const [isPickerOpen, setIsPickerOpen] = useState(false);
 
   const comboTimerRef = useRef(null);
   const chargeIntervalRef = useRef(null);
@@ -1350,7 +1388,13 @@ export default function LiveCameraPlayer({
               </span>
               <div className="min-w-0 truncate">
                 <div className="flex items-center gap-1.5 sm:gap-2">
-                  <span className="text-lg sm:text-xl shrink-0">{animal?.emoji || '🐅'}</span>
+                  <span className="shrink-0 flex items-center justify-center">
+                    {animal?.iconKey ? (
+                      <Realistic3DIcon iconKey={animal.iconKey} size={28} className="drop-shadow-md" />
+                    ) : (
+                      <span className="text-lg sm:text-xl">{animal?.emoji || '🐅'}</span>
+                    )}
+                  </span>
                   <h3 className="font-serif font-bold text-sm sm:text-base md:text-xl text-[#F5F4EA] truncate">
                     {animal?.animal_name}
                   </h3>
@@ -1482,6 +1526,7 @@ export default function LiveCameraPlayer({
                     className="w-full h-full transition-all duration-300 object-cover"
                   >
                     <source src={animal?.stream_url || animal?.continuous_stream_url || (isElephant ? "/videos/elephant_live.webm" : isBird ? "/videos/birds_live.webm" : isBear ? "/videos/bear_continuous_surveillance_1080p.webm" : isDeer ? "/videos/deer_live.webm" : isLion ? "/videos/lion_live.webm" : "/videos/tiger_walking_1080p.webm")} type="video/webm" />
+                    <source src={animal?.continuous_stream_mp4 || animal?.stream_mp4 || (animal?.stream_url || animal?.continuous_stream_url || '').replace('.webm', '.mp4')} type="video/mp4" />
                   </video>
                 </div>
               )}
@@ -1526,8 +1571,12 @@ export default function LiveCameraPlayer({
                       <Radar className="w-3.5 h-3.5 text-emerald-400 animate-spin" />
                     </div>
                     <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2">
-                      <span className="font-bold text-[#C8A96B] flex items-center gap-1">
-                        <span>{animal?.emoji || '🐾'}</span>
+                      <span className="font-bold text-[#C8A96B] flex items-center gap-1.5">
+                        {animal?.iconKey ? (
+                          <Realistic3DIcon iconKey={animal.iconKey} size={18} className="shrink-0 inline-block align-middle" />
+                        ) : (
+                          <span>{animal?.emoji || '🐾'}</span>
+                        )}
                         <span>{animal?.animal_name || 'Animal'}</span>
                       </span>
                       <span className="hidden sm:inline text-white/40">•</span>
@@ -1810,19 +1859,17 @@ export default function LiveCameraPlayer({
                 ))}
               </div>
 
-              {/* Centered Dynamic Floating Glassmorphism Reaction Dock with Realistic 3D Icons & Adjustable Sizing */}
+              {/* Right-Aligned Floating Glassmorphism Reaction Dock with Realistic 3D Icons & Adjustable Sizing */}
               {!isFullscreen && (reactDockSize === 'mini' ? (
-                <div className="absolute bottom-11 sm:bottom-12 md:bottom-12.5 inset-x-0 mx-auto w-fit z-20 pointer-events-auto animate-fadeIn">
+                <div className="absolute bottom-11 sm:bottom-12 md:bottom-12.5 right-3 sm:right-5 md:right-6 z-20 pointer-events-auto animate-fadeIn">
                   <button
                     type="button"
-                    onClick={() => setReactDockSize('normal')}
+                    onClick={toggleReactDockSize}
                     className="px-2.5 py-1 rounded-full bg-black/85 hover:bg-black/95 backdrop-blur-xl border border-[#C8A96B]/50 hover:border-[#C8A96B] shadow-2xl flex items-center gap-1.5 text-xs font-mono text-[#F5F4EA] transition-all cursor-pointer group hover:scale-105 active:scale-95"
                     title="Expand Reaction Dock"
                     aria-label="Expand Reaction Dock"
                   >
                     <Sparkles className="w-3.5 h-3.5 text-[#C8A96B] animate-pulse" />
-                    <span className="text-[11px] font-bold text-[#C8A96B]">React</span>
-                    <span className="w-1 h-1 rounded-full bg-white/40" />
                     <Realistic3DIcon
                       iconKey={activeReactions[0]?.iconKey || 'heart'}
                       size={14}
@@ -1834,10 +1881,7 @@ export default function LiveCameraPlayer({
                   </button>
                 </div>
               ) : (
-                <div className={`absolute bottom-11 sm:bottom-12 md:bottom-12.5 inset-x-0 mx-auto w-fit max-w-[96%] z-20 flex flex-col items-center pointer-events-auto origin-bottom ${reactDockSize === 'compact'
-                  ? 'scale-75 xs:scale-80 sm:scale-85 md:scale-90'
-                  : 'scale-75 xs:scale-80 sm:scale-85 md:scale-90 lg:scale-95 xl:scale-100'
-                  }`}>
+                <div className="absolute bottom-11 sm:bottom-12 md:bottom-12.5 right-3 sm:right-5 md:right-6 w-fit max-w-[calc(100%-1.5rem)] z-20 flex flex-col items-end pointer-events-auto origin-bottom-right scale-75 xs:scale-80 sm:scale-85 md:scale-90 lg:scale-95 xl:scale-100">
 
                   {/* Multi-Tap Combo Streak Escalation Badge */}
                   {comboLabel && (
@@ -1854,7 +1898,7 @@ export default function LiveCameraPlayer({
                     {floatingBadges.map((badge) => (
                       <div
                         key={badge.id}
-                        className="absolute bottom-1 inset-x-0 mx-auto w-fit pointer-events-none animate-floatNumber font-mono font-black select-none z-30"
+                        className="absolute bottom-1 right-8 pointer-events-none animate-floatNumber font-mono font-black select-none z-30"
                         style={{ transform: `translateX(${badge.offset}px)` }}
                       >
                         <span className={`px-2 py-0.5 rounded-full text-[10px] shadow-xl ${
@@ -1869,15 +1913,16 @@ export default function LiveCameraPlayer({
                   </div>
 
                   {/* Glassmorphic Reaction Dock with Jewel Glows & Hold-to-Charge Ring */}
-                  <div className={`flex items-center justify-center rounded-2xl bg-black/80 backdrop-blur-2xl border border-white/20 shadow-2xl transition-all duration-200 hover:scale-[1.01] overflow-x-auto scrollbar-none ${
-                    reactDockSize === 'compact'
-                      ? 'px-1.5 sm:px-2 py-0.5'
-                      : 'px-1.5 sm:px-2.5 py-0.5 sm:py-1'
-                  }`}>
-                    <span className="text-[10px] font-mono uppercase tracking-wider text-[#C8A96B] font-semibold mr-1 sm:mr-1.5 flex items-center gap-1 shrink-0">
+                  <div className="flex items-center justify-center rounded-2xl bg-black/80 backdrop-blur-2xl border border-white/20 shadow-2xl transition-all duration-200 hover:scale-[1.01] overflow-x-auto scrollbar-none px-1.5 sm:px-2.5 py-0.5 sm:py-1">
+                    <button
+                      type="button"
+                      onClick={toggleReactDockSize}
+                      className="p-1 rounded-xl text-[#C8A96B] hover:text-white hover:bg-white/10 mr-0.5 sm:mr-1 flex items-center justify-center shrink-0 cursor-pointer transition-colors"
+                      title="Minimize Reaction Dock (Click to collapse)"
+                      aria-label="Minimize Reaction Dock"
+                    >
                       <Sparkles className="w-3 h-3 text-[#C8A96B]" />
-                      <span className="hidden sm:inline">React:</span>
-                    </span>
+                    </button>
                     <div className="flex items-center gap-1 sm:gap-1.5">
                       {activeReactions.map((item) => {
                         const isHot = item.id === popularReactionId;
@@ -1893,11 +1938,7 @@ export default function LiveCameraPlayer({
                             onPointerUp={() => handlePointerUp(item)}
                             onPointerLeave={handlePointerLeave}
                             onContextMenu={(e) => e.preventDefault()}
-                            className={`group relative flex items-center gap-1 sm:gap-1.5 rounded-xl transition-all duration-150 cursor-pointer select-none shrink-0 overflow-hidden ${
-                              reactDockSize === 'compact'
-                                ? 'px-1.5 py-0.5'
-                                : 'px-1.5 sm:px-2 py-0.5 sm:py-1'
-                            } ${
+                            className={`group relative flex items-center gap-1 sm:gap-1.5 rounded-xl transition-all duration-150 cursor-pointer select-none shrink-0 overflow-hidden px-1.5 sm:px-2 py-0.5 sm:py-1 ${
                               isHot
                                 ? 'bg-[#C8A96B]/25 border border-[#C8A96B]/80 shadow-[0_0_15px_rgba(200,169,107,0.45)] ring-1 ring-[#C8A96B]/50'
                                 : 'bg-white/5 hover:bg-white/15 border border-white/10 hover:border-[#C8A96B]/40 hover:shadow-[0_0_12px_rgba(200,169,107,0.25)]'
@@ -1916,40 +1957,25 @@ export default function LiveCameraPlayer({
 
                             <Realistic3DIcon
                               iconKey={item.iconKey}
-                              size={reactDockSize === 'compact' ? 14 : 17}
+                              size={17}
                               className={`relative z-10 transition-transform ${isCharging ? 'animate-pulse scale-120' : 'group-hover:scale-115'}`}
                             />
-                            <span className={`relative z-10 font-mono font-medium leading-none ${
-                              reactDockSize === 'compact' ? 'text-[8.5px]' : 'text-[9px] sm:text-[10px]'
-                            } ${isHot ? 'text-[#C8A96B] font-bold' : 'text-white/80 group-hover:text-white'}`}>
+                            <span className={`relative z-10 font-mono font-medium leading-none text-[9px] sm:text-[10px] ${
+                              isHot ? 'text-[#C8A96B] font-bold' : 'text-white/80 group-hover:text-white'
+                            }`}>
                               {countStr}
                             </span>
                           </button>
                         );
                       })}
 
-                      {/* Expandable Reaction Picker Drawer (+) Button */}
-                      <button
-                        type="button"
-                        onClick={() => setIsPickerOpen(prev => !prev)}
-                        className={`p-1 sm:p-1.5 rounded-xl border transition-all duration-200 cursor-pointer flex items-center justify-center shrink-0 ml-0.5 hover:scale-110 active:scale-95 ${
-                          isPickerOpen
-                            ? 'bg-[#C8A96B] text-[#071D12] border-[#C8A96B] shadow-[0_0_15px_rgba(200,169,107,0.7)]'
-                            : 'border-white/15 bg-white/5 hover:bg-[#C8A96B]/20 text-[#C8A96B] hover:border-[#C8A96B]/60'
-                        }`}
-                        title="More Wildlife Reactions & Stickers (+)"
-                        aria-label="More Reactions"
-                      >
-                        <Plus className="w-3 h-3 text-[#C8A96B]" />
-                      </button>
-
-                      {/* Size Adjuster Button (Toggle Normal / Compact / Mini) */}
+                      {/* Size Adjuster Button (Toggle Normal / Mini - 2 States) */}
                       <button
                         type="button"
                         onClick={toggleReactDockSize}
                         className="p-1 sm:p-1.5 rounded-xl border border-white/10 hover:border-[#C8A96B]/50 bg-white/5 hover:bg-white/15 text-[#C8A96B] transition-all duration-200 cursor-pointer flex items-center justify-center shrink-0 ml-0.5"
-                        title={`Adjust React Size: Current is ${reactDockSize.toUpperCase()} (Click to toggle Normal / Compact / Mini)`}
-                        aria-label="Adjust React Dock Size"
+                        title={reactDockSize === 'normal' ? "Minimize Reaction Dock (Click to collapse)" : "Expand Reaction Dock (Click to expand)"}
+                        aria-label="Toggle React Dock Size"
                       >
                         {reactDockSize === 'normal' ? (
                           <Minimize2 className="w-3 h-3 text-[#C8A96B]" />
@@ -1961,17 +1987,6 @@ export default function LiveCameraPlayer({
                   </div>
                 </div>
               ))}
-
-              {/* Full Wildlife Reaction & Sticker Picker Modal */}
-              <ExpandableReactionPicker
-                isOpen={isPickerOpen}
-                onClose={() => setIsPickerOpen(false)}
-                onSelectReaction={(item) => {
-                  handleSendReaction(item);
-                }}
-                currentAnimal={animal}
-                reactionCounts={reactionCounts}
-              />
 
               {/* Bottom Organized Video Controls Bar */}
               <div className="absolute bottom-0 inset-x-0 px-2 sm:px-4 py-1.5 sm:py-2.5 bg-gradient-to-t from-black/95 via-black/75 to-transparent flex items-center justify-between gap-1.5 sm:gap-2 z-20">
