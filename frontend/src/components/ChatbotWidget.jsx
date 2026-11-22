@@ -1,4 +1,4 @@
-﻿import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
   X, 
   Send, 
@@ -517,7 +517,7 @@ export default function ChatbotWidget({
                     {currentContent.title}
                   </h4>
                   <span className="px-1.5 py-0.5 text-[8px] font-black font-mono uppercase tracking-wider bg-[#F28C1B]/20 text-[#F28C1B] border border-[#F28C1B]/40 rounded-full flex items-center gap-1">
-                    <Sparkles className="w-2.5 h-2.5" />
+                    <Compass className="w-2.5 h-2.5" />
                     {currentContent.badge}
                   </span>
                 </div>
@@ -719,7 +719,7 @@ export default function ChatbotWidget({
                 onChange={(e) => setInput(e.target.value)}
                 className="w-full pl-8 pr-3.5 py-2 rounded-xl bg-[#071D12] border border-[#2E7D32]/40 text-xs text-white placeholder:text-[#A7D7A9]/40 focus:outline-none focus:border-[#C8A96B] transition-colors"
               />
-              <Sparkles className="w-3.5 h-3.5 text-[#C8A96B]/70 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <Compass className="w-3.5 h-3.5 text-[#C8A96B]/70 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             </div>
             <button
               type="submit"

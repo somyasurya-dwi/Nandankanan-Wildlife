@@ -311,23 +311,8 @@ export default function CinematicVideoHero({ onExploreClick, onMapClick, onWatch
           })}
         </div>
 
-        {/* Video Control Buttons: Audio Roar + Play/Pause + Mute/Unmute */}
+        {/* Video Control Buttons: Play/Pause + Mute/Unmute */}
         <div className="flex items-center gap-1 pl-1.5 sm:pl-2 border-l border-white/10">
-          
-          {/* Roar Button */}
-          <button
-            onClick={handleRoar}
-            className={`p-1.5 rounded-lg text-xs transition-all cursor-pointer ${
-              isRoaring 
-                ? 'bg-[#C8A96B] text-[#071D12] scale-105 shadow-[0_0_12px_#C8A96B]' 
-                : 'bg-[#123D2B]/80 text-[#C8A96B] hover:bg-[#1B6537]'
-            }`}
-            title="Hear Animal Call"
-            aria-label="Hear Animal Roar"
-          >
-            <Sparkles className="w-3.5 h-3.5" />
-          </button>
-
           <button
             onClick={togglePlay}
             className="p-1.5 rounded-lg bg-[#123D2B]/80 text-[#F5F4EA] hover:text-[#C8A96B] hover:bg-[#1B6537] transition-colors cursor-pointer"

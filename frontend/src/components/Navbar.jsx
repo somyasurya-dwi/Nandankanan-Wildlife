@@ -218,14 +218,20 @@ export default function Navbar({
       if (el) observer.observe(el);
     });
 
-    // Handle scroll events with rAF for instant feedback on rapid trackpad/mousewheel scrolling
+    // Handle scroll events with rAF for instant feedback without layout thrashing
     let scrollTicking = false;
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
+      const scrolled = window.scrollY > 20;
+      setIsScrolled((prev) => (prev === scrolled ? prev : scrolled));
       if (scrollTicking) return;
       scrollTicking = true;
       window.requestAnimationFrame(() => {
-        evaluateActiveSection();
+        if (window.scrollY < 80) {
+          if (activeSection !== 'hero') {
+            setActiveSection('hero');
+            if (onSectionChange) onSectionChange('hero');
+          }
+        }
         scrollTicking = false;
       });
     };
@@ -242,6 +248,11 @@ export default function Navbar({
 
   // Smooth Navigation Click Handler with Dynamic Sticky Header Offset
   const handleNavClick = (e, link) => {
+    // Notify any open modals (such as the animal details modal) to close cleanly on navigation
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('close-animal-modal'));
+    }
+
     if (link.onClick) {
       e.preventDefault();
       link.onClick();

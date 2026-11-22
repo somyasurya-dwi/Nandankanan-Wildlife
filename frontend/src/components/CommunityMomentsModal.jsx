@@ -28,7 +28,7 @@ const SPECIES_OPTIONS = [
   { slug: 'birds', name: 'Birds', emoji: '🐦' }
 ];
 
-const QUICK_EMOJIS = ['❤️', '🐾', '🐯', '🦁', '🐘', '🦌', '🐻', '🐦', '🌿', '✨', '🥩', '💧'];
+const QUICK_EMOJIS = ['❤️', '🐾', '🐯', '🦁', '🐘', '🦌', '🐻', '🐦', '🌿', '🌊', '🥩', '💧'];
 
 export default function CommunityMomentsModal({
   isOpen,
@@ -424,7 +424,7 @@ export default function CommunityMomentsModal({
               {/* Amount Pills */}
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
                 {[
-                  { label: 'Free ✨', value: 0, sub: 'Message only' },
+                  { label: 'Free 🌿', value: 0, sub: 'Message only' },
                   { label: '₹10 🥩', value: 10, sub: 'Share' },
                   { label: '₹50 🍖', value: 50, sub: 'Care' },
                   { label: '₹100 ❤️', value: 100, sub: 'Support' }

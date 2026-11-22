@@ -1,29 +1,30 @@
 import React, { useState, useMemo } from 'react';
-import { 
-  Search, 
-  Volume2, 
-  Tv, 
-  HeartHandshake, 
-  X, 
-  Sparkles, 
-  CheckCircle2, 
-  MapPin, 
-  Activity, 
-  Clock, 
-  Scale, 
-  Utensils, 
-  ShieldAlert, 
+import { createPortal } from 'react-dom';
+import {
+  Search,
+  Volume2,
+  Tv,
+  HeartHandshake,
+  X,
+  Sparkles,
+  CheckCircle2,
+  MapPin,
+  Activity,
+  Clock,
+  Scale,
+  Utensils,
+  ShieldAlert,
   ChevronRight,
   Info
 } from 'lucide-react';
 import { INITIAL_ANIMALS } from '../data/mockData';
-import { 
-  playTigerRoar, 
-  playLionRoar, 
-  playElephantTrumpet, 
-  playPeafowlCry, 
-  playDeerCall, 
-  playBearGrunt 
+import {
+  playTigerRoar,
+  playLionRoar,
+  playElephantTrumpet,
+  playPeafowlCry,
+  playDeerCall,
+  playBearGrunt
 } from '../utils/audioSynthesizer';
 
 export default function SpeciesGridSection({ language, onOpenTickets }) {
@@ -36,19 +37,19 @@ export default function SpeciesGridSection({ language, onOpenTickets }) {
 
   const filteredAnimals = useMemo(() => {
     return INITIAL_ANIMALS.filter((animal) => {
-      const matchesSearch = 
+      const matchesSearch =
         animal.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         animal.scientific_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         animal.habitat.toLowerCase().includes(searchQuery.toLowerCase()) ||
         animal.diet.toLowerCase().includes(searchQuery.toLowerCase());
-      
-      const matchesCategory = 
-        selectedCategory === 'All' || 
+
+      const matchesCategory =
+        selectedCategory === 'All' ||
         animal.category.toLowerCase() === selectedCategory.toLowerCase() ||
         (selectedCategory.toLowerCase().includes('aquatic') && animal.category.toLowerCase().includes('aquatic'));
 
-      const matchesStatus = 
-        selectedStatus === 'All' || 
+      const matchesStatus =
+        selectedStatus === 'All' ||
         animal.conservation_status.toLowerCase() === selectedStatus.toLowerCase();
 
       return matchesSearch && matchesCategory && matchesStatus;
@@ -71,13 +72,13 @@ export default function SpeciesGridSection({ language, onOpenTickets }) {
 
   return (
     <section id="animals" className="py-28 bg-[#0B2A1A] text-[#F4F1E8] relative z-20 overflow-hidden">
-      
+
       {/* Background Soft Emerald Glow */}
       <div className="absolute top-0 right-10 w-[600px] h-[600px] bg-[#14532D]/30 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-10 left-10 w-[500px] h-[500px] bg-[#2E7D32]/20 rounded-full blur-3xl pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 relative z-10">
-        
+
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
           <div>
@@ -96,8 +97,8 @@ export default function SpeciesGridSection({ language, onOpenTickets }) {
           </div>
 
           <p className="text-sm sm:text-base text-[#A7D7A9]/90 max-w-md font-light leading-relaxed">
-            {language === 'odia' 
-              ? 'ନନ୍ଦନକାନନ ପ୍ରାଣୀ ଉଦ୍ୟାନରେ ୧୫୬ରୁ ଅଧିକ ବିଲୁପ୍ତପ୍ରାୟ ଜାତିର ବନ୍ୟପ୍ରାଣୀ ସଂରକ୍ଷିତ ହୋଇ ରହିଛନ୍ତି।' 
+            {language === 'odia'
+              ? 'ନନ୍ଦନକାନନ ପ୍ରାଣୀ ଉଦ୍ୟାନରେ ୧୫୬ରୁ ଅଧିକ ବିଲୁପ୍ତପ୍ରାୟ ଜାତିର ବନ୍ୟପ୍ରାଣୀ ସଂରକ୍ଷିତ ହୋଇ ରହିଛନ୍ତି।'
               : 'Home to over 156 rare species thriving across 437 hectares of natural deciduous jungle, moist woodland, and freshwater wetlands.'}
           </p>
         </div>
@@ -105,8 +106,8 @@ export default function SpeciesGridSection({ language, onOpenTickets }) {
         {/* Featured Spotlight Banner: White Bengal Tiger */}
         <div className="mb-16 rounded-3xl overflow-hidden bg-gradient-to-br from-[#071D12] via-[#0E3B24] to-[#071D12] text-[#F4F1E8] p-8 sm:p-12 shadow-2xl relative group border border-[#2E7D32]/40">
           <div className="absolute right-0 top-0 bottom-0 w-full lg:w-1/2 opacity-35 lg:opacity-60 overflow-hidden pointer-events-none">
-            <img 
-              src={whiteTiger.photo_url} 
+            <img
+              src={whiteTiger.photo_url}
               alt={whiteTiger.name}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000"
             />
@@ -126,8 +127,8 @@ export default function SpeciesGridSection({ language, onOpenTickets }) {
               {whiteTiger.scientific_name} • First Born to Normal Parents in 1980
             </p>
             <p className="text-sm sm:text-base text-[#F4F1E8]/85 font-light leading-relaxed mb-8 max-w-xl">
-              Nandankanan made global history in 1980 when tawny Royal Bengal tigers Deepak and Ganga 
-              gave birth to the world’s first captive-bred white tiger litter, establishing the sanctuary as 
+              Nandankanan made global history in 1980 when tawny Royal Bengal tigers Deepak and Ganga
+              gave birth to the world’s first captive-bred white tiger litter, establishing the sanctuary as
               the planetary cradle of healthy white tiger conservation.
             </p>
 
@@ -186,11 +187,10 @@ export default function SpeciesGridSection({ language, onOpenTickets }) {
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
-                className={`px-4 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider whitespace-nowrap transition-all ${
-                  selectedCategory === cat
-                    ? 'bg-[#2E7D32] text-white shadow-md'
-                    : 'bg-[#0B2A1A] text-[#A7D7A9] hover:bg-[#14532D] border border-[#2E7D32]/30'
-                }`}
+                className={`px-4 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider whitespace-nowrap transition-all ${selectedCategory === cat
+                  ? 'bg-[#2E7D32] text-white shadow-md'
+                  : 'bg-[#0B2A1A] text-[#A7D7A9] hover:bg-[#14532D] border border-[#2E7D32]/30'
+                  }`}
               >
                 {cat}
               </button>
@@ -206,9 +206,8 @@ export default function SpeciesGridSection({ language, onOpenTickets }) {
               <div
                 key={animal.id}
                 onClick={() => setSelectedAnimal(animal)}
-                className={`group rounded-3xl bg-[#071D12]/95 border border-[#2E7D32]/40 overflow-hidden shadow-2xl hover:border-[#F28C1B]/70 hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col justify-between ${
-                  isWhiteTiger ? 'ring-2 ring-[#F28C1B]' : ''
-                }`}
+                className={`group rounded-3xl bg-[#071D12]/95 border border-[#2E7D32]/40 overflow-hidden shadow-2xl hover:border-[#F28C1B]/70 hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col justify-between ${isWhiteTiger ? 'ring-2 ring-[#F28C1B]' : ''
+                  }`}
               >
                 <div className="relative aspect-[16/11] w-full overflow-hidden bg-black/40">
                   <img
@@ -271,11 +270,23 @@ export default function SpeciesGridSection({ language, onOpenTickets }) {
 
       </div>
 
-      {/* Species Detail Modal (Dark Sanctuary Theme) */}
-      {selectedAnimal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-md animate-fadeIn">
-          <div className="bg-[#071D12] text-[#F4F1E8] rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-[#2E7D32]/50 shadow-2xl relative">
-            
+      {/* Species Detail Modal (Dark Sanctuary Theme - Portaled to document.body) */}
+      {selectedAnimal && typeof document !== 'undefined' && createPortal(
+        <div
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 bg-black/85 backdrop-blur-md animate-fadeIn"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setSelectedAnimal(null);
+          }}
+          data-lenis-prevent="true"
+          data-lenis-prevent-wheel="true"
+          data-lenis-prevent-touch="true"
+        >
+          <div
+            className="bg-[#071D12] text-[#F4F1E8] rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-[#2E7D32]/50 shadow-2xl relative overscroll-contain"
+            onClick={(e) => e.stopPropagation()}
+            data-lenis-prevent="true"
+          >
+
             <button
               onClick={() => setSelectedAnimal(null)}
               className="absolute top-5 right-5 z-20 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center shadow-lg transition-transform hover:scale-105"
@@ -387,7 +398,8 @@ export default function SpeciesGridSection({ language, onOpenTickets }) {
             </div>
 
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
     </section>

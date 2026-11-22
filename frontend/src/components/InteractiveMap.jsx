@@ -495,7 +495,7 @@ export default function InteractiveMap({
         {/* Quick Animal Jump Strip (All Animals) */}
         <div className="mb-6 flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
           <span className="text-[11px] font-bold text-gold-400 uppercase tracking-widest shrink-0 flex items-center gap-1 mr-1">
-            <Sparkles className="w-3.5 h-3.5" />
+            <Compass className="w-3.5 h-3.5" />
             <span>Identify Animal:</span>
           </span>
           {markers.map((m) => {

@@ -1,5 +1,6 @@
 import { useLanguage } from '../context/LanguageContext';
 ﻿import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   Search, 
   Filter, 
@@ -18,7 +19,8 @@ import {
   ChevronRight,
   ChevronDown,
   RotateCcw,
-  ExternalLink
+  ExternalLink,
+  ArrowLeft
 } from 'lucide-react';
 
 export const ANIMAL_CATEGORY_GROUPS = {
@@ -77,6 +79,53 @@ export default function ExploreAnimals({ animals = [], onSponsorAnimal }) {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // Handle Animal Modal: Scroll Lock, Lenis Smooth Scroll Pause & Navigation cleanup
+  useEffect(() => {
+    if (!activeAnimalModal) return;
+
+    // 1. Prevent background page scrolling & compensate for scrollbar width shift
+    const originalOverflow = document.body.style.overflow;
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+    document.body.style.overflow = 'hidden';
+    if (scrollbarWidth > 0) {
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
+    }
+
+    // 2. Pause Lenis smooth scroll while viewing animal modal
+    if (window.__lenis) {
+      window.__lenis.stop();
+    }
+
+    // 3. Close on Escape key
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setActiveAnimalModal(null);
+      }
+    };
+
+    // 4. Close on browser back/forward, hash changes, or external navigation
+    const handleNavEvent = () => {
+      setActiveAnimalModal(null);
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('popstate', handleNavEvent);
+    window.addEventListener('hashchange', handleNavEvent);
+    window.addEventListener('close-animal-modal', handleNavEvent);
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      document.body.style.paddingRight = '';
+      if (window.__lenis) {
+        window.__lenis.start();
+      }
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('popstate', handleNavEvent);
+      window.removeEventListener('hashchange', handleNavEvent);
+      window.removeEventListener('close-animal-modal', handleNavEvent);
+    };
+  }, [activeAnimalModal]);
 
   // Helper: Retrieve category-appropriate group for an animal
   const getAnimalGroup = (animal) => {
@@ -546,25 +595,72 @@ export default function ExploreAnimals({ animals = [], onSponsorAnimal }) {
 
       </div>
 
-      {/* Comprehensive Individual Animal Profile Modal */}
-      {activeAnimalModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-[#071D12]/90 backdrop-blur-xl animate-fadeIn">
-          <div className="relative w-full max-w-4xl bg-[#0B2A1A] border border-[#C8A96B]/40 rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh] text-[#F5F4EA]">
+      {/* Comprehensive Individual Animal Profile Modal (Portaled to document.body to break out of <main z-20> stacking context) */}
+      {activeAnimalModal && typeof document !== 'undefined' && createPortal(
+        <div 
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-md animate-fadeIn"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setActiveAnimalModal(null);
+            }
+          }}
+          data-lenis-prevent="true"
+          data-lenis-prevent-wheel="true"
+          data-lenis-prevent-touch="true"
+          onWheel={(e) => e.stopPropagation()}
+          role="dialog"
+          aria-modal="true"
+          aria-label={activeAnimalModal.name}
+        >
+          <div 
+            className="relative w-full max-w-4xl bg-[#0B2A1A] border border-[#C8A96B]/50 rounded-3xl overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.95)] flex flex-col max-h-[90vh] text-[#F5F4EA]"
+            onClick={(e) => e.stopPropagation()}
+          >
             
-            {/* Modal Header Bar with Close Button */}
-            <div className="absolute top-4 right-4 z-20">
+            {/* Sticky Modal Top Navigation Bar with Back & Close Buttons */}
+            <div className="sticky top-0 z-30 flex items-center justify-between px-4 sm:px-6 py-3 bg-[#071D12]/98 backdrop-blur-md border-b border-[#26734D]/50 shadow-md shrink-0">
               <button
                 onClick={() => setActiveAnimalModal(null)}
-                className="p-2.5 rounded-full bg-[#071D12]/80 hover:bg-[#123D2B] text-[#F5F4EA] border border-[#C8A96B]/30 transition-all shadow-xl"
-                aria-label="Close animal details"
+                className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-[#123D2B] hover:bg-[#1a563c] text-[#C8A96B] hover:text-white font-bold text-xs uppercase tracking-wider transition-all border border-[#C8A96B]/30 shadow-md group cursor-pointer"
+                title="Back to all species"
               >
-                <X className="w-5 h-5" />
+                <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+                <span>Back to Species</span>
+              </button>
+
+              <div className="hidden sm:flex items-center gap-2 text-xs font-medium text-[#F5F4EA]/70">
+                <span className="text-[#C8A96B] font-semibold">{activeAnimalModal.category}</span>
+                {activeAnimalModal.group && (
+                  <>
+                    <span className="opacity-40">›</span>
+                    <span>{activeAnimalModal.group}</span>
+                  </>
+                )}
+                <span className="opacity-40">›</span>
+                <span className="text-white font-bold truncate max-w-[200px]">
+                  {(getAnimalName && getAnimalName(activeAnimalModal)) || activeAnimalModal.name}
+                </span>
+              </div>
+
+              <button
+                onClick={() => setActiveAnimalModal(null)}
+                className="p-2 rounded-xl bg-[#123D2B] hover:bg-red-950/80 text-[#F5F4EA]/80 hover:text-white border border-[#26734D] hover:border-red-500/50 transition-all shadow-md cursor-pointer"
+                aria-label="Close animal details"
+                title="Close (Esc)"
+              >
+                <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="overflow-y-auto">
+            {/* Scrollable Modal Content Container */}
+            <div 
+              className="flex-1 min-h-0 overflow-y-auto overscroll-contain"
+              data-lenis-prevent="true"
+              data-lenis-prevent-wheel="true"
+              data-lenis-prevent-touch="true"
+            >
               {/* Large Photograph Banner */}
-              <div className="relative h-72 sm:h-96 w-full bg-[#071D12] overflow-hidden">
+              <div className="relative h-64 sm:h-80 md:h-96 w-full bg-[#071D12] overflow-hidden shrink-0">
                 <img
                   src={activeAnimalModal.photo_url}
                   alt={activeAnimalModal.name}
@@ -657,7 +753,7 @@ export default function ExploreAnimals({ animals = [], onSponsorAnimal }) {
                 {activeAnimalModal.fun_facts && activeAnimalModal.fun_facts.length > 0 && (
                   <div className="p-5 rounded-2xl bg-[#071D12]/90 text-[#F5F4EA] border border-[#C8A96B]/40">
                     <h4 className="font-display font-bold text-base text-[#C8A96B] mb-3 flex items-center gap-2">
-                      <Sparkles className="w-4 h-4 text-[#C8A96B]" />
+                      <Compass className="w-4 h-4 text-[#C8A96B]" />
                       Fascinating Wildlife Facts
                     </h4>
                     <ul className="space-y-2">
@@ -691,8 +787,16 @@ export default function ExploreAnimals({ animals = [], onSponsorAnimal }) {
                   </div>
                 )}
 
-                {/* Sponsorship Actions */}
-                <div className="pt-4 border-t border-[#26734D]/30 flex flex-col sm:flex-row items-center justify-end gap-4">
+                {/* Bottom Actions Bar */}
+                <div className="pt-6 border-t border-[#26734D]/40 flex flex-col sm:flex-row items-center justify-between gap-4">
+                  <button
+                    onClick={() => setActiveAnimalModal(null)}
+                    className="w-full sm:w-auto px-6 py-3 rounded-xl bg-[#123D2B] hover:bg-[#1a563c] text-[#F5F4EA]/90 hover:text-white font-bold text-xs uppercase tracking-wider transition-all border border-[#26734D] hover:border-[#C8A96B]/40 flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    <ArrowLeft className="w-4 h-4" />
+                    <span>Back to Species List</span>
+                  </button>
+
                   <button
                     onClick={() => {
                       const animal = activeAnimalModal;
@@ -710,7 +814,8 @@ export default function ExploreAnimals({ animals = [], onSponsorAnimal }) {
             </div>
 
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
     </section>
