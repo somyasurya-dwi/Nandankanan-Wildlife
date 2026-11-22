@@ -1010,15 +1010,15 @@ export const INITIAL_CAMERAS = [
   },
   {
     id: 6,
-    slug: "birds",
-    title: "Kanjia Lake Bird Sanctuary Feed #1",
-    animal_name: "Birds",
+    slug: "peacock",
+    title: "Peacock Habitat Live Feed #1",
+    animal_name: "Peacock",
     resident_id: "NKZ-B-12",
     callsign: "Mayur",
     emoji: "🦚",
     iconKey: "peacock",
     scientific_name: "Pavo cristatus & Sanctuary Aviary Species",
-    habitat_name: "Wetland Aviary & Wetland Lagoon",
+    habitat_name: "Wetland Aviary & Peafowl Reserve",
     stream_url: "/videos/birds_live.webm",
     continuous_stream_url: "/videos/birds_live.webm",
     continuous_stream_mp4: "/videos/birds_live.webm",
@@ -1026,7 +1026,7 @@ export const INITIAL_CAMERAS = [
     status: "LIVE",
     viewer_count: 1420,
     thumbnail_url: "/images/indian_peafowl.jpg?v=peacock",
-    description: "Multi-camera surveillance highlighting Indian peacocks, migratory waterfowl, and painted storks in the sanctuary aviary dome.",
+    description: "Multi-camera surveillance highlighting Indian peacocks, radiant plumage displays, and sanctuary grounds.",
     camera_location: "Walk-Through Aviary Dome",
     order: 6,
     cameras: [
@@ -1047,7 +1047,7 @@ export const INITIAL_CAMERAS = [
         zone: "Zone A: Central Aviary Pool & Ground Display",
         zone_short: "Zone A",
         isSimulated: false,
-        description: "Front optical camera capturing Indian peafowl display dance and wetland waterfowl in Zone A."
+        description: "Front optical camera capturing Indian peacock display dance in Zone A."
       },
       {
         id: 2,
@@ -1085,11 +1085,11 @@ export const INITIAL_CAMERAS = [
         zone: "Zone C: Wetland Reed Beds & Nesting Shrubbery",
         zone_short: "Zone C",
         isSimulated: false,
-        description: "Rear wide sanctuary perspective tracking foraging storks and resting waterfowl in Zone C."
+        description: "Rear wide sanctuary perspective tracking foraging peacocks and resting plumage in Zone C."
       }
     ],
     feeding_info: {
-      animal_name: "Birds",
+      animal_name: "Peacock",
       primary_food: "Species-appropriate seeds, fruits or other food",
       diet_category: "Avian Granivore & Frugivore Diet",
       daily_ration: "Selected whole millets, sunflower seeds, cracked corn, sprouted pulses, chopped seasonal fruits (apple, papaya, grapes), fresh greens, and mealworms.",
@@ -1097,22 +1097,22 @@ export const INITIAL_CAMERAS = [
       enrichment_notes: "Elevated feeding platforms, hanging seed pods, and shallow running water channels for natural wading."
     },
     medication_info: {
-      animal_name: "Birds",
+      animal_name: "Peacock",
       supervising_unit: "Nandankanan Center for Wildlife Health & Veterinary Services",
       veterinary_care: "Regular health inspections by avian specialists, beak/talon health checks, and water sanitation chlorination tests.",
       health_monitoring: "Flock vocalization acoustic monitoring, plumage molting phase records, and non-invasive droppings screening.",
-      medication_status: "Routine prophylactic water-soluble multivitamin A-D3-E and mineral supplementation active. Aviary flock in excellent health.",
+      medication_status: "Routine prophylactic water-soluble multivitamin A-D3-E and mineral supplementation active. Peacocks in excellent health.",
       records_available: true,
       disclaimer: "Official Nandankanan Veterinary Care Protocol."
     },
     donation_info: {
-      animal_name: "Birds",
+      animal_name: "Peacock",
       amounts: [100, 200, 500, 1000],
       amount_descriptions: {
-        100: "Provides nutrient-dense sunflower seed and millet blends for aviary birds.",
+        100: "Provides nutrient-dense sunflower seed and millet blends for peacocks.",
         200: "Supplies diced fresh seasonal fruit platters and sprouted grain treats.",
         500: "Funds water sanitation testing, nesting boxes, and aviary perch maintenance.",
-        1000: "Sponsors comprehensive aviary feed rations and veterinary healthcare."
+        1000: "Sponsors comprehensive peacock feed rations and veterinary healthcare."
       }
     }
   },

@@ -66,7 +66,6 @@ export default function InteractiveMap({
   const ILLUSTRATED_BOUNDS = [[0, 0], [571, 1024]];
 
   const categories = [
-    { key: 'all', label: (t && t('map.categories.all')) || 'All Sanctuary Highlights' },
     { key: 'safari_zone', label: (t && t('map.categories.safari_zone')) || '🐅 Safari Zones' },
     { key: 'animal_habitat', label: (t && t('map.categories.animal_habitat')) || '🐾 Enclosures' },
     { key: 'water_body', label: (t && t('map.categories.water_body')) || '🌊 Kanjia Lake' },
@@ -448,28 +447,6 @@ export default function InteractiveMap({
                 <span>SATELLITE</span>
               </button>
             </div>
-
-            <button
-              onClick={handleShowAllAnimals}
-              className="px-4 py-2.5 rounded-xl bg-forest-800/90 hover:bg-forest-700 text-[#FAF9F5] border border-[#C8A96B]/40 text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-lg backdrop-blur-md"
-              title="Reset view to see all animals across the full park"
-            >
-              <Navigation className="w-4 h-4 text-[#C8A96B]" />
-              <span>SHOW ALL</span>
-            </button>
-
-            <button
-              onClick={() => setIsDoubleScreen(!isDoubleScreen)}
-              className={`px-4 py-2.5 rounded-xl border text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-lg backdrop-blur-md ${
-                isDoubleScreen
-                  ? 'bg-[#C8A96B] text-[#071810] border-[#C8A96B] shadow-[#C8A96B]/30 ring-2 ring-[#C8A96B]'
-                  : 'bg-forest-800/90 hover:bg-forest-700 text-[#FAF9F5] border-[#C8A96B]/40'
-              }`}
-              title="Toggle Double Screen (Full Width Cinema Mode)"
-            >
-              <Maximize2 className="w-4 h-4 text-[#C8A96B]" />
-              <span>{isDoubleScreen ? "◫ SPLIT VIEW" : "📐 DOUBLE SCREEN"}</span>
-            </button>
           </div>
         </div>
 
@@ -479,7 +456,7 @@ export default function InteractiveMap({
             <button
               key={cat.key}
               onClick={() => {
-                setSelectedCategory(cat.key);
+                setSelectedCategory((prev) => (prev === cat.key ? 'all' : cat.key));
                 setIsolateMarkerId(null);
               }}
               className={`px-4 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider whitespace-nowrap transition-all ${selectedCategory === cat.key
@@ -522,7 +499,7 @@ export default function InteractiveMap({
           {/* Map View Box (Span 12 when Double Screen or no activeMarker, or Span 7-8 Cols when activeMarker) */}
           <div 
             id="zoo-map-viewport"
-            className={`${isDoubleScreen || !activeMarker ? "w-full" : "lg:col-span-7 xl:col-span-8"} relative rounded-3xl overflow-hidden zoo-map-frame bg-forest-950 transition-all ${isFullscreenMap ? 'fixed inset-4 z-50 rounded-2xl shadow-2xl' : ''
+            className={`${isDoubleScreen || !activeMarker ? "w-full" : "lg:col-span-7 xl:col-span-8"} relative rounded-3xl overflow-hidden zoo-map-frame bg-forest-950 transition-all scroll-mt-28 ${isFullscreenMap ? 'fixed inset-4 z-50 rounded-2xl shadow-2xl' : ''
             }`}>
 
             {/* Render 4K Deep Zoom OR 3D Google Earth WebGL canvas OR 2D Leaflet Container */}

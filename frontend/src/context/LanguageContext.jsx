@@ -778,6 +778,12 @@ const ANIMAL_TRANSLATIONS = {
     hi: 'स्लॉथ भालू',
     bn: 'স্লথ ভালুক'
   },
+  'peacock': {
+    en: 'Peacock',
+    or: 'ମୟୂର',
+    hi: 'मोर',
+    bn: 'ময়ূর'
+  },
   'indian-peafowl': {
     en: 'Indian Peafowl',
     or: 'ଭାରତୀୟ ମୟୂର',

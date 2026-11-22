@@ -5,8 +5,6 @@ import {
   Play, 
   Radio, 
   MapPin, 
-  Signal, 
-  Info,
   Sparkles,
   Clock,
   Lock
@@ -141,7 +139,7 @@ export default function LiveStreaming({
   };
 
   return (
-    <section id="live-wildlife" className="pt-6 sm:pt-8 lg:pt-10 pb-10 sm:pb-12 lg:pb-14 bg-[#071810] text-ivory-50 relative overflow-hidden">
+    <section id="live-wildlife" className="pt-6 sm:pt-8 lg:pt-10 pb-10 sm:pb-12 lg:pb-14 bg-[#071810] text-ivory-50 relative overflow-hidden scroll-mt-28">
       
       {/* Top Subtle Forest Mist Horizon Divider */}
       <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[#C8A96B]/25 to-transparent pointer-events-none" />
@@ -169,27 +167,10 @@ export default function LiveStreaming({
               Watch real-time animal observation feeds from across Nandankanan’s 437-hectare forest enclosures and sanctuary wetlands.
             </p>
           </div>
-
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="bg-forest-900/80 border border-gold-500/25 rounded-xl px-4 py-2 flex items-center gap-2.5 text-xs text-ivory-200 backdrop-blur-md shadow-sm">
-              <Signal className="w-4 h-4 text-emerald-400 animate-pulse" />
-              <span className="font-medium">{cameras?.length || 11} High-Definition Habitat Feeds Active</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Demo Mode Notice Banner */}
-        <div className="mb-6 sm:mb-8 p-3.5 rounded-2xl bg-[#0B2A1A]/70 border border-gold-500/20 backdrop-blur-md flex items-start gap-3 shadow-md">
-          <Info className="w-5 h-5 text-gold-400 shrink-0 mt-0.5" />
-          <div className="text-xs text-ivory-200/90 leading-relaxed">
-            <strong className="text-gold-300 uppercase tracking-wider font-semibold">Sanctuary Live Feeds Note:</strong>{' '}
-            Currently presenting synchronized high-fidelity habitat live video footage for visitor experience. 
-            All cameras are engineered with standard RTSP/HLS architecture for seamless connection to Nandankanan’s on-ground streaming cameras.
-          </div>
         </div>
 
         {/* 6 Camera Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+        <div id="live-cameras-grid" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 scroll-mt-28">
           {cameras.map((camera) => {
             const isPreviewing = hoveredCardId === camera.id;
             const primaryStream = camera.stream_url || camera.cameras?.[0]?.stream_url;
@@ -210,28 +191,25 @@ export default function LiveStreaming({
                   className="relative aspect-video w-full overflow-hidden bg-forest-950 cursor-pointer"
                   onClick={() => handleCardTap(camera)}
                 >
-                  {/* Base Thumbnail Poster */}
+                  {/* Base Thumbnail Poster Fallback */}
                   <img
                     src={camera.thumbnail_url}
                     alt={camera.title}
-                    className={`w-full h-full object-cover object-center transition-transform duration-700 ${
-                      isPreviewing ? 'scale-105' : 'group-hover:scale-105'
-                    }`}
+                    className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
                   />
 
-                  {/* Smooth Hover Video Preview Stream */}
+                  {/* Real-Time Continuous Live Video Stream */}
                   <video
                     ref={(el) => (videoRefs.current[camera.id] = el)}
                     src={primaryStream}
+                    autoPlay
                     muted
                     loop
                     playsInline
                     disablePictureInPicture
                     controlsList="nodownload noplaybackrate nofullscreen noremoteplayback"
-                    preload="none"
-                    className={`absolute inset-0 w-full h-full object-cover object-center pointer-events-none transition-opacity duration-400 ${
-                      isPreviewing ? 'opacity-100' : 'opacity-0'
-                    }`}
+                    preload="metadata"
+                    className="absolute inset-0 w-full h-full object-cover object-center pointer-events-none transition-transform duration-700 group-hover:scale-105"
                   />
 
                   {/* Dark gradient overlay */}
