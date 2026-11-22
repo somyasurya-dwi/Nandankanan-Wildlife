@@ -12,13 +12,11 @@ import InteractiveMap from './components/InteractiveMap';
 import ExploreAnimals from './components/ExploreAnimals';
 import VirtualExperience from './components/VirtualExperience';
 import ConservationStories from './components/ConservationStories';
-import PlanVisitSection from './components/PlanVisitSection';
 import SponsorshipPortal from './components/SponsorshipPortal';
 import ConservationSection from './components/ConservationSection';
 import ParallaxSectionBreak from './components/ParallaxSectionBreak';
 import Footer from './components/Footer';
 import ChatbotWidget from './components/ChatbotWidget';
-import TicketBookingModal from './components/TicketBookingModal';
 import AuthModal from './components/AuthModal';
 import SignInPage from './components/SignInPage';
 import AdminDashboard from './components/AdminDashboard';
@@ -58,7 +56,6 @@ export default function App() {
     }
     return 'hero';
   });
-  const [ticketModalOpen, setTicketModalOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [adminOpen, setAdminOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
@@ -404,13 +401,7 @@ export default function App() {
         {/* 9. Scientific Conservation Impact & Metric Count-Up Counters */}
         <ConservationSection language={language} />
 
-        {/* 10. Plan Your Visit: Timings, Ticket Prices, How to Reach, FAQs Accordion */}
-        <PlanVisitSection 
-          language={language}
-          onOpenTickets={() => setTicketModalOpen(true)}
-        />
-
-        {/* 11. Virtual Animal Guardianship / Adoption Portal with Live Certificate */}
+        {/* 10. Virtual Animal Guardianship / Adoption Portal with Live Certificate */}
         <SponsorshipPortal 
           animals={animals}
           preSelectedAnimal={sponsorAnimal}
@@ -418,23 +409,15 @@ export default function App() {
 
       </main>
 
-      {/* 12. Sanctuary Footer with Verified Info, Social SVG Links, and Credits */}
+      {/* 11. Sanctuary Footer with Verified Info, Social SVG Links, and Credits */}
       <Footer />
 
-      {/* 13. Floating "Ask Nandankanan" AI Assistant Widget */}
+      {/* 12. Floating "Ask Nandankanan" AI Assistant Widget */}
       <ChatbotWidget 
         language={language}
-        onOpenTickets={() => setTicketModalOpen(true)}
         onOpenLiveCam={handleLiveCamFromChatbot}
         onShowOnMap={handleShowAnimalOnMap}
         isLiveModalOpen={Boolean(activeModalCamera)}
-      />
-
-      {/* 14. Online Fast-Track Ticket Booking Modal with Instant QR Pass */}
-      <TicketBookingModal 
-        isOpen={ticketModalOpen}
-        onClose={() => setTicketModalOpen(false)}
-        language={language}
       />
 
       {/* 15. User Authentication Modal */}
