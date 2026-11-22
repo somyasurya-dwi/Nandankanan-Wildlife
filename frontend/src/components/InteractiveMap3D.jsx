@@ -20,8 +20,21 @@ function mapToNormalized(map_x, map_y) {
   return { x: norm_x, y: norm_y };
 }
 
-// 5 Priority Safaris highlighted upfront
-const PRIMARY_SAFARIS = ['Royal Bengal Tiger', 'White Tiger', 'Asiatic Lion', 'Asian Elephant', 'Sloth Bear', 'Spotted Deer'];
+// 12 Live View Animals
+const PRIMARY_SAFARIS = [
+  'Royal Bengal Tiger',
+  'White Bengal Tiger',
+  'Asiatic Lion',
+  'Elephant',
+  'Bear',
+  'Deer',
+  'Gharial Crocodile',
+  'Indian Pangolin',
+  'Birds',
+  'King Cobra',
+  'Indian Flapshell Turtle',
+  'Asian Openbill'
+];
 
 export default function InteractiveMap3D({ 
   markers = [], 
@@ -29,7 +42,8 @@ export default function InteractiveMap3D({
   onSelectAnimalBySlug, 
   onOpenLiveCam, 
   onSelectMarker,
-  embedded = false 
+  embedded = false,
+  isFullscreen: externalIsFullscreen = false
 }) {
   const osdContainerRef  = useRef(null);
   const viewerRef        = useRef(null);
@@ -39,7 +53,8 @@ export default function InteractiveMap3D({
   const [activeMarker, setActiveMarker]   = useState(null);
   const [filterCat, setFilterCat]         = useState('all');
   const [zoomPercent, setZoomPercent]     = useState(100);
-  const [isFullscreen, setIsFullscreen]   = useState(false);
+  const [internalIsFullscreen, setInternalIsFullscreen] = useState(false);
+  const isFullscreen = externalIsFullscreen || internalIsFullscreen;
   const [navigationTip, setNavigationTip] = useState(null);
 
   /* ─────────────────────────── INITIALIZE OPENSEADRAGON ─────────────────────────── */
@@ -69,11 +84,11 @@ export default function InteractiveMap3D({
         clickToZoom: false,
         dblClickToZoom: true,
         pinchToZoom: true,
-        scrollToZoom: true,
+        scrollToZoom: false,
       },
       gestureSettingsTouch: {
         pinchToZoom: true,
-        flickEnabled: true,
+        flickEnabled: false,
       },
     });
 
@@ -93,11 +108,29 @@ export default function InteractiveMap3D({
 
     // Fullscreen tracking
     viewer.addHandler('full-screen', (e) => {
-      setIsFullscreen(e.fullScreen);
+      setInternalIsFullscreen(e.fullScreen);
     });
+
+    // Intentional Ctrl+Wheel zoom handler so standard scroll moves the webpage naturally
+    const osdEl = osdContainerRef.current;
+    const handleOsdWheel = (e) => {
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        if (!viewer.viewport) return;
+        const zoomFactor = e.deltaY < 0 ? 1.2 : 0.8;
+        viewer.viewport.zoomBy(zoomFactor);
+        viewer.viewport.applyConstraints();
+      }
+    };
+    if (osdEl) {
+      osdEl.addEventListener('wheel', handleOsdWheel, { passive: false });
+    }
 
     // Cleanup
     return () => {
+      if (osdEl) {
+        osdEl.removeEventListener('wheel', handleOsdWheel);
+      }
       viewer.destroy();
       viewerRef.current = null;
     };
@@ -323,7 +356,7 @@ export default function InteractiveMap3D({
         )}
 
         {/* ── Main Map Viewport ── */}
-        <div className={`osd-viewport-container relative rounded-3xl overflow-hidden border border-[#C8A96B]/30 shadow-2xl bg-black ${embedded ? 'h-[620px] sm:h-[680px]' : ''}`}>
+        <div className={`osd-viewport-container relative rounded-3xl overflow-hidden border border-[#C8A96B]/30 shadow-2xl bg-black ${isFullscreen ? 'h-full flex-1 min-h-screen' : (embedded ? 'h-[280px] sm:h-[330px] lg:h-[370px]' : '')}`}>
           {/* OpenSeadragon Mount */}
           <div ref={osdContainerRef} className="w-full h-full" tabIndex={0} />
 
@@ -344,7 +377,7 @@ export default function InteractiveMap3D({
 
             <div className="bg-black/60 backdrop-blur-sm rounded-lg px-2.5 py-1 text-[10px] text-[#a4c2ad] flex items-center gap-1.5 w-fit">
               <span>🖱️</span>
-              <span>Scroll to zoom · Drag to navigate · Click enclosure to focus</span>
+              <span>Drag to navigate · Ctrl + Scroll / ± to Zoom · Click enclosure</span>
             </div>
           </div>
 
@@ -409,9 +442,18 @@ export default function InteractiveMap3D({
           {/* ── Interactive Animal Enclosure Slide-Over Drawer (Standalone only) ── */}
           {!embedded && activeMarker && (
             <div className="enclosure-drawer custom-scrollbar">
-              {/* Photo Banner */}
+              {/* Video / Photo Banner */}
               <div className="relative h-48 shrink-0 overflow-hidden bg-black/40">
-                {activeMarker.photo_url ? (
+                {activeMarker.stream_url ? (
+                  <video
+                    src={activeMarker.stream_url}
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="w-full h-full object-cover"
+                  />
+                ) : activeMarker.photo_url ? (
                   <img
                     src={activeMarker.photo_url}
                     alt={activeMarker.animal_name}
@@ -423,7 +465,7 @@ export default function InteractiveMap3D({
                     {activeMarker.emoji || '🐾'}
                   </div>
                 )}
-                <div className="absolute inset-0 bg-gradient-to-t from-[#041009] via-transparent to-black/30" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#041009] via-transparent to-black/30 pointer-events-none" />
 
                 {/* Close Button */}
                 <button
@@ -436,13 +478,17 @@ export default function InteractiveMap3D({
                     }
                     overlaysRef.current.forEach((el) => el.classList.remove('tag-active'));
                   }}
-                  className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/60 border border-white/20 text-white flex items-center justify-center hover:bg-[#C8A96B] hover:text-[#071D12] transition-all font-bold text-sm"
+                  className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/60 border border-white/20 text-white flex items-center justify-center hover:bg-[#C8A96B] hover:text-[#071D12] transition-all font-bold text-sm z-10"
                 >
                   ✕
                 </button>
 
                 {/* Status Pill */}
-                <div className="absolute bottom-3 left-4 flex items-center gap-2">
+                <div className="absolute bottom-3 left-4 flex items-center gap-2 z-10">
+                  <span className="text-[11px] font-black px-3 py-1 rounded-full uppercase tracking-wider bg-red-600 text-white flex items-center gap-1.5 shadow-md">
+                    <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                    LIVE
+                  </span>
                   <span className="text-[11px] font-black px-3 py-1 rounded-full uppercase tracking-wider bg-[#C8A96B] text-[#071D12]">
                     {activeMarker.emoji} {activeMarker.badge_text || activeMarker.category}
                   </span>
@@ -452,11 +498,16 @@ export default function InteractiveMap3D({
               {/* Drawer Body */}
               <div className="p-5 flex flex-col gap-4 flex-1">
                 <div>
-                  <h3 className="text-2xl font-black text-[#F5F4EA] leading-tight tracking-tight">
+                  <h3 
+                    onClick={() => onOpenLiveCam && onOpenLiveCam(activeMarker)}
+                    className="text-2xl font-black text-[#F5F4EA] leading-tight tracking-tight cursor-pointer hover:text-[#C8A96B] transition-colors"
+                    title="Click to open live video stream"
+                  >
                     {activeMarker.animal_name}
                   </h3>
-                  <span className="text-[#C8A96B] font-mono text-xs uppercase tracking-widest">
-                    Nandankanan Enclosure
+                  <span className="text-[#C8A96B] font-mono text-xs uppercase tracking-widest flex items-center gap-1.5 mt-0.5">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                    Live Camera Connected
                   </span>
                 </div>
 
@@ -522,10 +573,10 @@ export default function InteractiveMap3D({
 
                   {onOpenLiveCam && (
                     <button
-                      onClick={() => onOpenLiveCam({ name: activeMarker.animal_name, url: activeMarker.stream_url || '' })}
-                      className="w-full py-2.5 rounded-xl text-xs font-bold tracking-wide uppercase transition-all border border-emerald-400/40 text-emerald-300 hover:bg-emerald-500/10 flex items-center justify-center gap-1.5"
+                      onClick={() => onOpenLiveCam(activeMarker)}
+                      className="w-full py-2.5 rounded-xl text-xs font-bold tracking-wide uppercase transition-all bg-red-600/90 hover:bg-red-500 text-white flex items-center justify-center gap-1.5 shadow-lg"
                     >
-                      <span>📡</span>
+                      <span className="w-2 h-2 rounded-full bg-white animate-ping" />
                       <span>Watch Live Stream</span>
                     </button>
                   )}

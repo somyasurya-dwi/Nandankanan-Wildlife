@@ -199,56 +199,56 @@ export default function SpeciesGridSection({ language, onOpenTickets }) {
         </div>
 
         {/* Animals Grid (Deep Emerald Cards) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 max-w-6xl mx-auto">
           {filteredAnimals.map((animal) => {
             const isWhiteTiger = animal.slug === 'white-bengal-tiger';
             return (
               <div
                 key={animal.id}
                 onClick={() => setSelectedAnimal(animal)}
-                className={`group rounded-3xl bg-[#071D12]/95 border border-[#2E7D32]/40 overflow-hidden shadow-2xl hover:border-[#F28C1B]/70 hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col justify-between ${isWhiteTiger ? 'ring-2 ring-[#F28C1B]' : ''
+                className={`group rounded-2xl bg-[#071D12]/95 border border-gold-500/60 hover:border-gold-400 hover:ring-2 hover:ring-gold-400/80 overflow-hidden shadow-xl shadow-gold-950/20 hover:shadow-2xl hover:shadow-gold-500/30 hover:-translate-y-1.5 transition-all duration-300 cursor-pointer flex flex-col justify-between ${isWhiteTiger ? 'ring-2 ring-gold-400' : ''
                   }`}
               >
-                <div className="relative aspect-[16/11] w-full overflow-hidden bg-black/40">
+                <div className="relative aspect-video w-full overflow-hidden bg-black/40">
                   <img
                     src={animal.photo_url}
                     alt={animal.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 filter brightness-95"
                   />
-                  <div className="absolute top-3 left-3 flex items-center gap-2">
-                    <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[#071D12]/90 text-[#A7D7A9] border border-[#2E7D32]/40 backdrop-blur-md">
+                  <div className="absolute top-2 left-2 flex items-center gap-1.5">
+                    <span className="px-2 py-0.5 rounded text-[8.5px] font-bold uppercase tracking-wider bg-[#071D12]/90 text-[#A7D7A9] border border-[#2E7D32]/40 backdrop-blur-md">
                       {animal.category}
                     </span>
                     {isWhiteTiger && (
-                      <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[#F28C1B] text-[#071D12]">
+                      <span className="px-2 py-0.5 rounded text-[8.5px] font-bold uppercase tracking-wider bg-[#F28C1B] text-[#071D12]">
                         Heritage
                       </span>
                     )}
                   </div>
 
-                  <div className="absolute bottom-3 right-3">
-                    <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-[#0B2A1A]/90 text-[#A7D7A9] border border-white/10 backdrop-blur-md shadow-sm">
+                  <div className="absolute bottom-2 right-2">
+                    <span className="px-2 py-0.5 rounded text-[8.5px] font-semibold bg-[#0B2A1A]/90 text-[#A7D7A9] border border-white/10 backdrop-blur-md shadow-sm">
                       {animal.conservation_status}
                     </span>
                   </div>
                 </div>
 
-                <div className="p-6 flex-1 flex flex-col justify-between">
+                <div className="p-3.5 sm:p-4 flex-1 flex flex-col justify-between">
                   <div>
-                    <h4 className="text-xl font-serif font-bold text-white group-hover:text-[#F28C1B] transition-colors mb-1">
+                    <h4 className="text-base sm:text-lg font-serif font-bold text-white group-hover:text-[#F28C1B] transition-colors mb-0.5">
                       {animal.name}
                     </h4>
-                    <p className="text-xs text-[#A7D7A9] font-mono italic mb-3">
+                    <p className="text-[11px] text-[#A7D7A9] font-mono italic mb-1.5">
                       {animal.scientific_name}
                     </p>
-                    <p className="text-xs text-[#F4F1E8]/75 line-clamp-2 font-light leading-relaxed mb-4">
+                    <p className="text-xs text-[#F4F1E8]/75 line-clamp-2 font-light leading-relaxed mb-2">
                       {animal.short_description}
                     </p>
                   </div>
 
-                  <div className="pt-4 border-t border-white/10 flex items-center justify-between text-xs font-semibold text-[#A7D7A9]">
-                    <span className="group-hover:translate-x-1 transition-transform flex items-center gap-1 group-hover:text-white">
-                      <span>View Species Archive</span>
+                  <div className="pt-2.5 border-t border-white/10 flex items-center justify-between text-xs font-semibold text-[#A7D7A9]">
+                    <span className="group-hover:translate-x-1 transition-transform flex items-center gap-1 group-hover:text-white text-xs">
+                      <span>View Profile</span>
                       <span>→</span>
                     </span>
                     <button
@@ -256,7 +256,7 @@ export default function SpeciesGridSection({ language, onOpenTickets }) {
                         e.stopPropagation();
                         playAudio(animal.audio_type);
                       }}
-                      className="p-2 rounded-full hover:bg-white/10 text-[#F28C1B] transition-colors"
+                      className="p-1.5 rounded-full hover:bg-white/10 text-[#F28C1B] transition-colors"
                       title="Play Sound"
                     >
                       <Volume2 className="w-4 h-4" />
