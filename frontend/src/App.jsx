@@ -76,7 +76,8 @@ export default function App() {
 
   // Preselected animal for sponsorship portal
   const [sponsorAnimal, setSponsorAnimal] = useState(INITIAL_ANIMALS[0]);
-  const [scrollProgress, setScrollProgress] = useState(0);
+  const progressBarRef = useRef(null);
+  const lenisRef = useRef(null);
 
   // Session Persistence: Verify stored token on initial load
   useEffect(() => {
@@ -139,46 +140,32 @@ export default function App() {
     setCurrentUser(null);
   };
 
-  // Track global scroll progress for top viewport indicator
-  useEffect(() => {
-    if (currentPage !== 'sanctuary') return;
-    const handleScroll = () => {
-      const totalScroll = window.scrollY || document.documentElement.scrollTop;
-      const windowHeight = document.documentElement.scrollHeight - window.innerHeight;
-      if (windowHeight > 0) {
-        setScrollProgress((totalScroll / windowHeight) * 100);
-      }
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [currentPage]);
-
-  const lenisRef = useRef(null);
-
-  // Initialize Lenis Smooth Scroll & Synchronize with GSAP ScrollTrigger
+  // Initialize Lenis Smooth Scroll with Auto-RAF & Synchronize with GSAP ScrollTrigger
   useEffect(() => {
     if (currentPage !== 'sanctuary') return;
 
     const lenis = new Lenis({
-      duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      duration: 1.25,
+      easing: (t) => 1 - Math.pow(1 - t, 4),
       orientation: 'vertical',
       gestureOrientation: 'vertical',
       smoothWheel: true,
-      wheelMultiplier: 1.0,
-      touchMultiplier: 2.0,
+      wheelMultiplier: 0.95,
+      touchMultiplier: 1.2,
+      autoRaf: true,
     });
+
     lenisRef.current = lenis;
     if (typeof window !== 'undefined') window.__lenis = lenis;
 
-    lenis.on('scroll', ScrollTrigger.update);
-
-    const updateLenis = (time) => {
-      lenis.raf(time * 1000);
-    };
-
-    gsap.ticker.add(updateLenis);
-    gsap.ticker.lagSmoothing(0);
+    // Track scroll progress directly via ref to eliminate heavy App re-renders
+    lenis.on('scroll', (e) => {
+      ScrollTrigger.update();
+      if (progressBarRef.current) {
+        const pct = Math.max(0, Math.min(100, (e.progress || 0) * 100));
+        progressBarRef.current.style.width = `${pct}%`;
+      }
+    });
 
     // Settle loading screen
     const timer = setTimeout(() => {
@@ -188,7 +175,6 @@ export default function App() {
 
     return () => {
       clearTimeout(timer);
-      gsap.ticker.remove(updateLenis);
       lenisRef.current = null;
       if (typeof window !== 'undefined') window.__lenis = null;
       lenis.destroy();
@@ -197,6 +183,11 @@ export default function App() {
 
   // Universal accurate smooth scroll accounting for sticky navbar offset
   const scrollToTarget = (targetId) => {
+    // Dismiss any open modal when programmatically navigating between sections
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('close-animal-modal'));
+    }
+
     setActiveSection(targetId);
     const el = document.getElementById(targetId);
     if (!el) return;
@@ -311,8 +302,9 @@ export default function App() {
     >
       {/* Top Viewport Golden Scroll Progress Indicator */}
       <div 
-        className="fixed top-0 left-0 h-[2.5px] bg-gradient-to-r from-[#C8A96B] via-[#E5A836] to-[#C8A96B] z-[100] transition-all duration-75 ease-out pointer-events-none shadow-[0_0_10px_#C8A96B]"
-        style={{ width: `${scrollProgress}%` }}
+        ref={progressBarRef}
+        className="fixed top-0 left-0 h-[2.5px] bg-gradient-to-r from-[#C8A96B] via-[#E5A836] to-[#C8A96B] z-[100] pointer-events-none shadow-[0_0_10px_#C8A96B]"
+        style={{ width: '0%' }}
       />
       
       {/* 1. Green Paw-Print Loading Screen */}
@@ -352,7 +344,7 @@ export default function App() {
         <ParallaxSectionBreak
           id="parallax-lake-kanjia"
           bgImage="/images/kanjia_lake.jpg"
-          badge="LAKE KANJIA WETLAND BIO-CORRIDOR • RAMSAR SENSITIVE"
+          badge="🌿 LAKE KANJIA WETLAND BIO-CORRIDOR • RAMSAR SENSITIVE"
           odiaText="କାଞ୍ଜିଆ ହ୍ରଦ ଓ ସବୁଜ ବନାନୀର ମିଳନସ୍ଥଳ"
           titlePart1="Where Pristine Wetlands Meet"
           titlePart2="Ancient Chandaka Forests"
@@ -388,7 +380,7 @@ export default function App() {
         <ParallaxSectionBreak
           id="parallax-sal-canopy"
           bgImage="/images/sanctuary_forest.jpg"
-          badge="GLOBAL BREEDING & RESCUE LEADER • ESTD. 1960"
+          badge="🐾 GLOBAL BREEDING & RESCUE LEADER • ESTD. 1960"
           odiaText="ବନ୍ୟପ୍ରାଣୀ ସଂରକ୍ଷଣର ଗୌରବମୟ ଇତିହାସ"
           titlePart1="A Living Heritage of"
           titlePart2="Compassion & Conservation"

@@ -174,11 +174,6 @@ export default function LiveStreaming({
               <Signal className="w-4 h-4 text-emerald-400 animate-pulse" />
               <span className="font-medium">6 High-Definition Habitat Feeds Active</span>
             </div>
-
-            <div className="bg-[#14532D]/80 border border-[#C8A96B]/50 rounded-xl px-4 py-2.5 flex items-center gap-2 text-xs text-[#C8A96B] font-bold font-mono backdrop-blur-md shadow-lg shadow-[#C8A96B]/20">
-              <Sparkles className="w-4 h-4 text-[#C8A96B]" />
-              <span>5s Free Live Preview • Individual Passes Available (Tiger Subscribed)</span>
-            </div>
           </div>
         </div>
 

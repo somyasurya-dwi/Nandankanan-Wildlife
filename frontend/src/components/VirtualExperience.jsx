@@ -279,7 +279,7 @@ export default function VirtualExperience() {
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-10">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full glass-badge mb-3">
-            <Sparkles className="w-3.5 h-3.5 text-gold-400" />
+            <Compass className="w-3.5 h-3.5 text-gold-400" />
             <span className="text-[11px] font-bold tracking-[0.2em] uppercase text-gold-300">
               Sensory Sanctuary Portal
             </span>

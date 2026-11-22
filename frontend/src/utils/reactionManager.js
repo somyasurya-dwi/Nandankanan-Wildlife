@@ -35,7 +35,7 @@ export const ANIMAL_REACTIONS = {
     { id: 'nature_butterfly', name: 'Nature', iconKey: 'butterfly', emoji: '🦋', initialCount: 2470, effect: 'butterfly_flutter' },
     { id: 'green_earth', name: 'Green Earth', iconKey: 'leaf', emoji: '🌿', initialCount: 2190, effect: 'leaf_drift' },
     { id: 'love', name: 'Love', iconKey: 'heart_red', emoji: '❤️', initialCount: 3310, effect: 'heart_burst' },
-    { id: 'magical', name: 'Magical', iconKey: 'sparkles', emoji: '✨', initialCount: 3050, effect: 'sparkle' }
+    { id: 'magical', name: 'Magical', iconKey: 'sparkles', emoji: '🌟', initialCount: 3050, effect: 'sparkle' }
   ],
   'sloth-bear': [
     { id: 'bear_love', name: 'Bear Love', iconKey: 'bear', emoji: '🐻', initialCount: 2830, effect: 'bear_wobble' },
@@ -51,7 +51,7 @@ export const ANIMAL_REACTIONS = {
     { id: 'colorful', name: 'Colorful', iconKey: 'rainbow', emoji: '🌈', initialCount: 4180, effect: 'rainbow_arc' },
     { id: 'green_earth_tree', name: 'Green Earth', iconKey: 'tree', emoji: '🌳', initialCount: 2620, effect: 'forest_shimmer' },
     { id: 'nature_heart', name: 'Nature', iconKey: 'heart_green', emoji: '💚', initialCount: 2980, effect: 'emerald_glow' },
-    { id: 'wonderful', name: 'Wonderful', iconKey: 'sparkles', emoji: '✨', initialCount: 3740, effect: 'sparkle' }
+    { id: 'wonderful', name: 'Wonderful', iconKey: 'sparkles', emoji: '🌟', initialCount: 3740, effect: 'sparkle' }
   ]
 };
 
@@ -82,7 +82,7 @@ export const ALL_REACTIONS_CATALOG = [
   { id: 'meat_appreciation', name: 'Feast Meat', iconKey: 'meat', emoji: '🥩', category: 'cheers' },
   { id: 'honey_love', name: 'Honey Pot', iconKey: 'honey_pot', emoji: '🍯', category: 'cheers' },
   { id: 'applause', name: 'Applause', iconKey: 'applause', emoji: '👏', category: 'cheers' },
-  { id: 'sparkles', name: 'Magical Sparkles', iconKey: 'sparkles', emoji: '✨', category: 'cheers' }
+  { id: 'sparkles', name: 'Magical Sparkles', iconKey: 'sparkles', emoji: '🌟', category: 'cheers' }
 ];
 
 const STORAGE_KEY = 'nandankanan_reaction_counts_v1';
