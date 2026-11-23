@@ -759,6 +759,38 @@ Living in the freshwater channels of Lake Kanjia, these softshell turtles posses
 
 • प्रजातियां: दरियाई घोड़ा (हिप्पो), अफ्रीकी जिराफ़ और ज़ेबरा
 • आकर्षण: विशाल अफ्रीकी सवाना बाड़ा। दरियाई घोड़ों को बड़े तालाबों में गोते लगाते और तैरते हुए देखना पर्यटकों के लिए विशेष आकर्षण है।`
+  },
+
+  // 15. ASIAN OPENBILL STORK & LAKE KANJIA HERONRY
+  openbill: {
+    english: `🪶 ASIAN OPENBILL STORK (Anastomus oscitans & Lake Kanjia Wetland)
+
+• Scientific Name: Anastomus oscitans | Resident ID: NKZ-AOB-12
+• Family: Ciconiidae (Storks) | Conservation Status: Least Concern
+• Distinctive Feature: Curved gap between arched upper and lower bill specialized for extracting freshwater apple snails.
+• Habitat: Lake Kanjia Wetland Heronry with freshwater marshy edges, reed beds, and colonial nesting trees.
+• Nandankanan Significance: Over 12,000 Asian Openbills arrive at Lake Kanjia during the monsoon and winter breeding seasons, creating one of India's largest natural stork heronries.`,
+
+    odia: `🪶 ଏସିଆନ୍ ଓପନବିଲ୍ / ଗେଣ୍ଡାଳିଆ ପକ୍ଷୀ (Lake Kanjia Wetland)
+
+• ବୈଜ୍ଞାନିକ ନାମ: Anastomus oscitans
+• ପ୍ରଜାତି: ସାରସ/ବଗ ବଂଶୀୟ ପକ୍ଷୀ | ଆବାସ: କାଞ୍ଜିଆ ହ୍ରଦ ଓ ଆର୍ଦ୍ରଭୂମି
+• ବିଶେଷତା: ଉପର ଓ ତଳ ଥଣ୍ଟ ମଧ୍ୟରେ ଫାଙ୍କା ସ୍ଥାନ, ଯାହା ମାଧ୍ୟମରେ ସେମାନେ ପାଣି ଭିତରୁ ସହଜରେ ଗେଣ୍ଡା ଓ ଶାମୁକ ଶିକାର କରନ୍ତି।
+• ନନ୍ଦନକାନନରେ ମହତ୍ତ୍ୱ: ବର୍ଷା ଓ ଶୀତ ଋତୁରେ କାଞ୍ଜିଆ ହ୍ରଦକୁ ହଜାର ହଜାର ସଂଖ୍ୟାରେ ଗେଣ୍ଡାଳିଆ ପକ୍ଷୀ ବସା ବାନ୍ଧିବା ପାଇଁ ଆସିଥାନ୍ତି।`,
+
+    bengali: `🪶 এশিয়ান ওপেনবিল / শামুকখোল পাখি (কাঞ্জিয়া জলাভূমি)
+
+• বৈজ্ঞানিক নাম: Anastomus oscitans
+• পরিবার: সিকোনিডি (সারসজাতীয় পাখি) | বাসস্থান: কাঞ্জিয়া লেক হেরনরি
+• বিশেষ বৈশিষ্ট্য: বাঁকানো ঠোঁটের মাঝে ফাঁকা অংশ, যা জলের নিচের গুগলি ও শামুক শিকারের জন্য নিখুঁতভাবে তৈরি।
+• নন্দনকাননে তাৎপর্য: বর্ষা ও শীতে হাজার হাজার শামুকখোল কাঞ্জিয়া হ্রদের গাছে কলোনি গড়ে ডিম পাড়ে ও প্রজনন করে।`,
+
+    hindi: `🪶 एशियन ओपनबिल / घोंघिल पक्षी (कंजिया आर्द्रभूमि)
+
+• वैज्ञानिक नाम: Anastomus oscitans
+• परिवार: सिकॉनिडी (सारस/बगुला प्रजाति) | आवास: कंजिया झील हेरॉनरी
+• विशिष्ट विशेषता: घुमावदार चोंच के बीच का अंतर जो पानी में मीठे पानी के घोंघों को पकड़ने व निकालने के लिए अनुकूलित है।
+• नंदनकानन महत्व: मानसून और सर्दियों में कंजिया झील पर हजारों ओपनबिल प्रजनन व घोंसले बनाने आते हैं।`
   }
 };
 
@@ -1179,6 +1211,160 @@ Click below to view the Freshwater Turtle live cam in the Live Section:`,
 • दर्शक: 620+ लोग देख रहे हैं
 
 लाइव सेक्शन में कछुए का लाइव कैमरा देखने के लिए क्लिक करें:`
+  },
+
+  peacock: {
+    english: `📹 PEACOCK HABITAT & AVIARY — LIVE CAM #6
+
+• Camera: Cam #6 (1080p Full HD, 30fps)
+• Location: Walk-Through Aviary Dome
+• Habitat: Wetland Aviary & Peafowl Reserve
+• Viewers: 1,420+ nature enthusiasts observing live
+
+Click below to view the Peacock live stream in the Live Section:`,
+
+    odia: `📹 ମୟୂର ଆବାସ ଓ ଆଭିଆରୀ — ଲାଇଭ୍ କ୍ୟାମେରା #୬
+
+• କ୍ୟାମେରା: Cam #6 (1080p Full HD)
+• ସ୍ଥାନ: ୱାକ୍-ଥ୍ରୁ ଆଭିଆରୀ ଡୋମ୍
+• ଆବାସ: ଆର୍ଦ୍ରଭୂମି ଆଭିଆରୀ ଓ ମୟୂର ସଂରକ୍ଷଣ କ୍ଷେତ୍ର
+• ଦର୍ଶକ: ୧,୪୨୦+ ଜଣ ଦେଖୁଛନ୍ତି
+
+ଲାଇଭ୍ ସେକ୍ସନରେ ମୟୂରଙ୍କ ଲାଇଭ୍ କ୍ୟାମେରା ଦେଖିବା ପାଇଁ କ୍ଲିକ୍ କରନ୍ତୁ:`,
+
+    bengali: `📹 ময়ূর ও এভিয়ারি — লাইভ ক্যামেরা #৬
+
+• ক্যামেরা: Cam #6 (1080p Full HD)
+• অবস্থান: ওয়াক-থ্রু এভিয়ারি ডোম
+• বাসস্থান: জলাভূমি এভিয়ারি ও ময়ূর সংরক্ষিত এলাকা
+• দর্শক: ১,৪২০+ জন দেখছেন
+
+লাইভ সেকশনে ময়ূরের লাইভ ক্যামেরা দেখতে ক্লিক করুন:`,
+
+    hindi: `📹 मोर अभयारण्य व एवियरी — लाइव कैमरा #6
+
+• कैमरा: Cam #6 (1080p Full HD)
+• स्थान: वॉक-थ्रू एवियरी डोम
+• आवास: आर्द्रभूमि एवियरी व मोर संरक्षण क्षेत्र
+• दर्शक: 1,420+ प्रकृति प्रेमी लाइव देख रहे हैं
+
+लाइव सेक्शन में मोर का लाइव कैमरा देखने के लिए क्लिक करें:`
+  },
+
+  openbill: {
+    english: `📹 ASIAN OPENBILL HERONRY — LIVE CAM #12
+
+• Camera: Cam #12 (1080p Full HD, 30fps)
+• Location: Lake Kanjia Heronry Sector 1
+• Habitat: Lake Kanjia Wetland Heronry & Apple Snail Shallows
+• Viewers: 850+ birdwatchers observing live
+
+Click below to watch the Asian Openbill live stream in the Live Section:`,
+
+    odia: `📹 ଏସିଆନ୍ ଓପନବିଲ୍ (ଗେଣ୍ଡାଳିଆ) — ଲାଇଭ୍ କ୍ୟାମେରା #୧୨
+
+• କ୍ୟାମେରା: Cam #12 (1080p Full HD)
+• ସ୍ଥାନ: କାଞ୍ଜିଆ ହ୍ରଦ ହେରୋନରୀ ସେକ୍ଟର ୧
+• ଆବାସ: କାଞ୍ଜିଆ ଆର୍ଦ୍ରଭୂମି ବସା ଓ ଜଳାଶୟ
+• ଦର୍ଶକ: ୮୫୦+ ଜଣ ଦେଖୁଛନ୍ତି
+
+ଲାଇଭ୍ ସେକ୍ସନରେ ଓପନବିଲ୍ (ଗେଣ୍ଡାଳିଆ)ଙ୍କ ଲାଇଭ୍ କ୍ୟାମେରା ଦେଖିବା ପାଇଁ କ୍ଲିକ୍ କରନ୍ତୁ:`,
+
+    bengali: `📹 এশিয়ান ওপেনবিল (শামুকখোল) — লাইভ ক্যামেরা #১২
+
+• ক্যামেরা: Cam #12 (1080p Full HD)
+• অবস্থান: কাঞ্জিয়া লেক হেরনরি সেক্টর ১
+• বাসস্থান: কাঞ্জিয়া জলাভূমি ও শামুক শিকারের জলাশয়
+• দর্শক: ৮৫০+ জন দেখছেন
+
+লাইভ সেকশনে শামুকখোলের লাইভ ক্যামেরা দেখতে ক্লিক করুন:`,
+
+    hindi: `📹 एशियन ओपनबिल (घोंघिल) — लाइव कैमरा #12
+
+• कैमरा: Cam #12 (1080p Full HD)
+• स्थान: कंजिया झील हेरॉनरी सेक्टर 1
+• आवास: कंजिया आर्द्रभूमि व घोंघा-शिकार उथले जलक्षेत्र
+• दर्शक: 850+ पक्षी प्रेमी लाइव देख रहे हैं
+
+लाइव सेक्शन में एशियन ओपनबिल का लाइव कैमरा देखने के लिए क्लिक करें:`
+  },
+
+  all_live_cams: {
+    english: `📹 ALL 12 INDIVIDUAL SANCTUARY ANIMALS — LIVE STREAMS ACTIVE
+
+Nandankanan provides 24/7 high-definition live camera streams for all 12 individual sanctuary animals:
+
+🐅 1. Royal Bengal Tiger (Cam #1 — Dense Deciduous Forest Enclosure)
+🦁 2. Asiatic Lion (Cam #2 — Dry Scrub Grassland Safari Zone)
+🐘 3. Elephant (Cam #3 — Chandaka Corridor Elephant Yard)
+🦌 4. Deer (Cam #4 — Herbivore Meadow & Dappled Woodland)
+🐻 5. Bear (Cam #5 — Rock Cavern Habitat & Foraging Mound)
+🦚 6. Peacock (Cam #6 — Wetland Aviary & Peafowl Reserve)
+⚪ 7. White Bengal Tiger (Cam #7 — White Tiger Heritage Glade)
+🛡️ 8. Indian Pangolin (Cam #8 — Nocturnal Burrow & Mound Terrain)
+🐊 9. Gharial Crocodile (Cam #9 — Deep River Pool & Sandy Bank)
+🐍 10. King Cobra (Cam #10 — Dense Tropical Terrarium)
+🐢 11. Indian Flapshell Turtle (Cam #11 — Kanjia Wetland Lily Waters)
+🪶 12. Asian Openbill (Cam #12 — Lake Kanjia Wetland Heronry)
+
+Click any individual animal button below to launch its live stream instantly:`,
+
+    odia: `📹 ସମସ୍ତ ୧୨ଟି ନିର୍ଦ୍ଦିଷ୍ଟ ବନ୍ୟପ୍ରାଣୀ — ଲାଇଭ୍ କ୍ୟାମେରା ଷ୍ଟ୍ରିମ୍ ସକ୍ରିୟ
+
+ନନ୍ଦନକାନନରେ ସମସ୍ତ ୧୨ଟି ବନ୍ୟପ୍ରାଣୀଙ୍କ ପାଇଁ ୨୪/୭ ଲାଇଭ୍ କ୍ୟାମେରା ଷ୍ଟ୍ରିମ୍ ଉପଲବ୍ଧ ଅଛି:
+
+🐅 ୧. ରୟାଲ ବେଙ୍ଗଲ ବାଘ (Cam #1 — ବ୍ୟାଘ୍ର ସଫାରୀ)
+🦁 ୨. ଏସିଆଟିକ ସିଂହ (Cam #2 — ସିଂହ ସଫାରୀ)
+🐘 ୩. ଏସିଆଟିକ ହାତୀ (Cam #3 — ଚନ୍ଦକା କରିଡର)
+🦌 ୪. ଚିତଳ ହରିଣ (Cam #4 — ତୃଣଭୋଜୀ ସଫାରୀ)
+🐻 ୫. ଭାଲୁ (Cam #5 — ଭାଲୁ ସଫାରୀ ରକ୍ ବ୍ଲଫ୍)
+🦚 ୬. ମୟୂର (Cam #6 — ଆଭିଆରୀ ଡୋମ୍)
+⚪ ୭. ଧଳା ବାଘ (Cam #7 — ହ୍ୱାଇଟ୍ ଟାଇଗର ହେରିଟେଜ୍)
+🛡️ ୮. ଭାରତୀୟ ବଜ୍ରକାପ୍ତା (Cam #8 — ବଜ୍ରକାପ୍ତା ପ୍ରଜନନ କେନ୍ଦ୍ର)
+🐊 ୯. ଘଡ଼ିଆଳ କୁମ୍ଭୀର (Cam #9 — ଘଡ଼ିଆଳ ପ୍ରଜନନ କମ୍ପ୍ଲେକ୍ସ)
+🐍 ୧୦. ଅହିରାଜ / କିଙ୍ଗ କୋବ୍ରା (Cam #10 — ସରୀସୃପ ପାର୍କ)
+🐢 ୧୧. ଭାରତୀୟ କଇଁଛ (Cam #11 — କାଞ୍ଜିଆ ଆର୍ଦ୍ରଭୂମି)
+🪶 ୧୨. ଏସିଆନ୍ ଓପନବିଲ୍ (Cam #12 — କାଞ୍ଜିଆ ହେରୋନରୀ)
+
+ନିର୍ଦ୍ଦିଷ୍ଟ ପ୍ରାଣୀଙ୍କ ଲାଇଭ୍ ଷ୍ଟ୍ରିମ୍ ଦେଖିବା ପାଇଁ ତଳେ ଥିବା ବଟନ୍ କ୍ଲିକ୍ କରନ୍ତୁ:`,
+
+    bengali: `📹 সকল ১২টি নির্দিষ্ট বন্যপ্রাণী — লাইভ ক্যামেরা স্ট্রিম সক্রিয়
+
+নন্দনকাননে সকল ১২টি বন্যপ্রাণীর জন্য ২৪/৭ লাইভ ক্যামেরা স্ট্রিম উপলব্ধ রয়েছে:
+
+🐅 ১. রয়্যাল বেঙ্গল টাইগার (Cam #1)
+🦁 ২. এশিয়াটিক সিংহ (Cam #2)
+🐘 ৩. এশিয়ান হাতি (Cam #3)
+🦌 ৪. চিত্রা হরিণ (Cam #4)
+🐻 ৫. ভাল্লুক (Cam #5)
+🦚 ৬. ময়ূর (Cam #6)
+⚪ ৭. সাদা বাঘ (Cam #7)
+🛡️ ৮. ইন্ডিয়ান প্যাঙ্গোলিন (Cam #8)
+🐊 ৯. ঘড়িয়াল কুমির (Cam #9)
+🐍 ১০. কিং কোবরা (Cam #10)
+🐢 ১১. ভারতীয় কাছিম (Cam #11)
+🪶 ১২. এশিয়ান ওপেনবিল (Cam #12)
+
+যেকোনো প্রাণীর লাইভ স্ট্রিম দেখতে নিচের বোতামে ক্লিক করুন:`,
+
+    hindi: `📹 सभी 12 विशिष्ट वन्यजीव — लाइव कैमरा स्ट्रीम सक्रिय
+
+नंदनकानन में सभी 12 जानवरों के लिए 24/7 लाइव कैमरा स्ट्रीम उपलब्ध हैं:
+
+🐅 1. रॉयल बंगाल टाइगर (Cam #1 — टाइगर सफारी)
+🦁 2. एशियाई शेर (Cam #2 — लॉयन सफारी)
+🐘 3. एशियाई हाथी (Cam #3 — चंदका गलियारा)
+🦌 4. चीतल / हिरण (Cam #4 — शाकाहारी सफारी)
+🐻 5. भालू (Cam #5 — भालू सफारी)
+🦚 6. मोर (Cam #6 — एवियरी डोम)
+⚪ 7. सफेद बाघ (Cam #7 — व्हाइट टाइगर हेरिटेज)
+🛡️ 8. भारतीय पैंगोलिन (Cam #8 — पैंगोलिन प्रजनन केंद्र)
+🐊 9. घड़ियाल (Cam #9 — घड़ियाल ब्रीडिंग पूल)
+🐍 10. किंग कोबरा (Cam #10 — सरीसृप अनुसंधान केंद्र)
+🐢 11. कछुआ (Cam #11 — कंजिया आर्द्रभूमि)
+🪶 12. एशियन ओपनबिल (Cam #12 — कंजिया हेरॉनरी)
+
+किसी भी जानवर का लाइव स्ट्रीम देखने के लिए नीचे दिए गए बटन पर क्लिक करें:`
   }
 };
 
@@ -1570,6 +1756,276 @@ Click below to swoop the 3D map to the Lake Kanjia Wetland region:`,
 };
 
 /**
+ * Master Registry of all 12 Live Cameras for Sanctuary Animals
+ */
+export const ALL_12_ANIMAL_CAMERAS = [
+  {
+    type: 'live_cam',
+    cameraId: 1,
+    animal: 'tiger',
+    label: '🐅 Royal Bengal Tiger',
+    subLabel: 'Cam #1 • Forest Enclosure',
+    cameraObj: {
+      id: 1,
+      slug: "royal-bengal-tiger",
+      title: "Royal Bengal Tiger Feed #1",
+      animal_name: "Royal Bengal Tiger",
+      habitat_name: "Dense Deciduous Forest Enclosure",
+      stream_url: "/videos/tiger_walking_1080p.webm",
+      video_type: "demo_video",
+      status: "LIVE",
+      viewer_count: 2840,
+      thumbnail_url: "/images/royal_bengal_tiger.jpg",
+      description: "High-definition camera observing Bengal tigers near the natural forest stream and shade trees.",
+      camera_location: "Tiger Safari Observation Post",
+      emoji: "🐅"
+    }
+  },
+  {
+    type: 'live_cam',
+    cameraId: 2,
+    animal: 'lion',
+    label: '🦁 Asiatic Lion',
+    subLabel: 'Cam #2 • Lion Safari',
+    cameraObj: {
+      id: 2,
+      slug: "asiatic-lion",
+      title: "Asiatic Lion Safari Cam",
+      animal_name: "Asiatic Lion",
+      habitat_name: "Dry Scrub Grassland Safari Zone",
+      stream_url: "/videos/lion_live.webm",
+      video_type: "surveillance_stream",
+      status: "LIVE",
+      viewer_count: 1915,
+      thumbnail_url: "/images/asiatic_lion.jpg",
+      description: "Panoramic live surveillance network monitoring Asiatic lions roaming across the scrubland ridge and open savannah terrain.",
+      camera_location: "Lion Safari Sector 1-A",
+      emoji: "🦁"
+    }
+  },
+  {
+    type: 'live_cam',
+    cameraId: 3,
+    animal: 'elephant',
+    label: '🐘 Elephant',
+    subLabel: 'Cam #3 • Elephant Yard',
+    cameraObj: {
+      id: 3,
+      slug: "asian-elephant",
+      title: "Asian Elephant Meadow Feed #1",
+      animal_name: "Elephant",
+      habitat_name: "Chandaka Corridor Elephant Yard",
+      stream_url: "/videos/elephant_live.webm",
+      video_type: "demo_video",
+      status: "LIVE",
+      viewer_count: 1340,
+      thumbnail_url: "/images/asian_elephant.jpg",
+      description: "Multi-camera surveillance observing Asian elephants foraging on fresh bamboo stalks, watering pools, and shade groves.",
+      camera_location: "Elephant Shed North Deck",
+      emoji: "🐘"
+    }
+  },
+  {
+    type: 'live_cam',
+    cameraId: 4,
+    animal: 'deer',
+    label: '🦌 Deer',
+    subLabel: 'Cam #4 • Herbivore Safari',
+    cameraObj: {
+      id: 4,
+      slug: "spotted-deer",
+      title: "Spotted Deer Sanctuary",
+      animal_name: "Deer",
+      habitat_name: "Herbivore Meadow & Dappled Woodland",
+      stream_url: "/videos/deer_live.webm",
+      video_type: "surveillance_stream",
+      status: "LIVE",
+      viewer_count: 890,
+      thumbnail_url: "/images/spotted_deer.jpg",
+      description: "Panoramic live surveillance network monitoring spotted deer grazing across woodland meadows and dappled glades.",
+      camera_location: "Herbivore Safari Sector 2",
+      emoji: "🦌"
+    }
+  },
+  {
+    type: 'live_cam',
+    cameraId: 5,
+    animal: 'bear',
+    label: '🐻 Bear',
+    subLabel: 'Cam #5 • Bear Safari',
+    cameraObj: {
+      id: 5,
+      slug: "sloth-bear",
+      title: "Sloth Bear Rocky Gorge Feed #1",
+      animal_name: "Bear",
+      habitat_name: "Rock Cavern Habitat & Foraging Mound",
+      stream_url: "/videos/bear_continuous_surveillance_1080p.webm",
+      video_type: "demo_video",
+      status: "LIVE",
+      viewer_count: 645,
+      thumbnail_url: "/images/sloth_bear.jpg?v=blackbear",
+      description: "Multi-camera surveillance observing sloth bears exploring cavern boulders, foraging mounds, and rocky bluffs.",
+      camera_location: "Bear Safari Rock Bluff",
+      emoji: "🐻"
+    }
+  },
+  {
+    type: 'live_cam',
+    cameraId: 6,
+    animal: 'peacock',
+    label: '🦚 Peacock',
+    subLabel: 'Cam #6 • Aviary Dome',
+    cameraObj: {
+      id: 6,
+      slug: "peacock",
+      title: "Peacock Habitat Live Feed #1",
+      animal_name: "Peacock",
+      habitat_name: "Wetland Aviary & Peafowl Reserve",
+      stream_url: "/videos/birds_live.webm",
+      video_type: "demo_video",
+      status: "LIVE",
+      viewer_count: 1420,
+      thumbnail_url: "/images/indian_peafowl.jpg?v=peacock",
+      description: "Multi-camera surveillance highlighting Indian peacocks, radiant plumage displays, and sanctuary grounds.",
+      camera_location: "Walk-Through Aviary Dome",
+      emoji: "🦚"
+    }
+  },
+  {
+    type: 'live_cam',
+    cameraId: 7,
+    animal: 'white_tiger',
+    label: '⚪ White Bengal Tiger',
+    subLabel: 'Cam #7 • Heritage Glade',
+    cameraObj: {
+      id: 7,
+      slug: "white-bengal-tiger",
+      title: "White Bengal Tiger Heritage Feed",
+      animal_name: "White Bengal Tiger",
+      habitat_name: "White Tiger Heritage Glade",
+      stream_url: "/videos/white_tiger_live.webm",
+      video_type: "surveillance_stream",
+      status: "LIVE",
+      viewer_count: 2410,
+      thumbnail_url: "/images/white_tiger.jpg?v=20261123",
+      description: "Continuous observation stream of Nandankanan's world-famous royal white tigers resting by the shaded pool and bamboo groves.",
+      camera_location: "White Tiger Heritage Enclosure",
+      emoji: "⚪"
+    }
+  },
+  {
+    type: 'live_cam',
+    cameraId: 8,
+    animal: 'pangolin',
+    label: '🛡️ Indian Pangolin',
+    subLabel: 'Cam #8 • Breeding Center',
+    cameraObj: {
+      id: 8,
+      slug: "indian-pangolin",
+      title: "Indian Pangolin Conservation Feed",
+      animal_name: "Indian Pangolin",
+      habitat_name: "Nocturnal Burrow & Mound Terrain",
+      stream_url: "/videos/pangolin_live.webm",
+      video_type: "surveillance_stream",
+      status: "LIVE",
+      viewer_count: 1120,
+      thumbnail_url: "/images/pangolin.jpg",
+      description: "High-definition infrared stream inside Nandankanan's pioneering pangolin research and conservation breeding facility.",
+      camera_location: "Pangolin Conservation Center",
+      emoji: "🤎"
+    }
+  },
+  {
+    type: 'live_cam',
+    cameraId: 9,
+    animal: 'gharial',
+    label: '🐊 Gharial Crocodile',
+    subLabel: 'Cam #9 • River Pool',
+    cameraObj: {
+      id: 9,
+      slug: "gharial",
+      title: "Gharial Crocodile Sanctuary Feed",
+      animal_name: "Gharial Crocodile",
+      habitat_name: "Deep River Pool & Sandy Bank",
+      stream_url: "/videos/gharial_live.webm",
+      video_type: "surveillance_stream",
+      status: "LIVE",
+      viewer_count: 980,
+      thumbnail_url: "/images/gharial.jpg",
+      description: "Subsurface and bank optical surveillance observing critically endangered gharials basking in the historic breeding pool.",
+      camera_location: "Gharial Breeding Pool #1",
+      emoji: "🐊"
+    }
+  },
+  {
+    type: 'live_cam',
+    cameraId: 10,
+    animal: 'cobra',
+    label: '🐍 King Cobra',
+    subLabel: 'Cam #10 • Terrarium',
+    cameraObj: {
+      id: 10,
+      slug: "king-cobra",
+      title: "King Cobra Terrarium Stream",
+      animal_name: "King Cobra",
+      habitat_name: "Dense Tropical Terrarium",
+      stream_url: "/videos/king_cobra_live.webm",
+      video_type: "surveillance_stream",
+      status: "LIVE",
+      viewer_count: 1270,
+      thumbnail_url: "/images/king_cobra.jpg",
+      description: "Macro-focus live view of the world's longest venomous snake inside the temperature-regulated rainforest pavilion.",
+      camera_location: "King Cobra Pavilion Deck",
+      emoji: "🐍"
+    }
+  },
+  {
+    type: 'live_cam',
+    cameraId: 11,
+    animal: 'turtle',
+    label: '🐢 Flapshell Turtle',
+    subLabel: 'Cam #11 • Kanjia Wetland',
+    cameraObj: {
+      id: 11,
+      slug: "indian-flapshell-turtle",
+      title: "Freshwater Flapshell Turtle Stream",
+      animal_name: "Indian Flapshell Turtle",
+      habitat_name: "Kanjia Wetland Lily Waters",
+      stream_url: "/videos/flapshell_turtle_live.webm",
+      video_type: "surveillance_stream",
+      status: "LIVE",
+      viewer_count: 620,
+      thumbnail_url: "/images/freshwater_turtle.jpg",
+      description: "Peaceful observation feed of native flapshell turtles foraging among lotus pads in Lake Kanjia.",
+      camera_location: "Lake Kanjia Basin Sector 3",
+      emoji: "🐢"
+    }
+  },
+  {
+    type: 'live_cam',
+    cameraId: 12,
+    animal: 'openbill',
+    label: '🪶 Asian Openbill',
+    subLabel: 'Cam #12 • Lake Heronry',
+    cameraObj: {
+      id: 12,
+      slug: "asian-openbill",
+      title: "Asian Openbill Wetland Colony Feed",
+      animal_name: "Asian Openbill",
+      habitat_name: "Lake Kanjia Wetland Heronry",
+      stream_url: "/videos/asian_openbill_live.webm",
+      video_type: "surveillance_stream",
+      status: "LIVE",
+      viewer_count: 850,
+      thumbnail_url: "/images/asian_openbill.jpg",
+      description: "Continuous observation stream of colonial nesting Asian Openbills foraging freshwater snails across Lake Kanjia wetlands.",
+      camera_location: "Lake Kanjia Heronry Sector 1",
+      emoji: "🦩"
+    }
+  }
+];
+
+/**
  * Intelligent Matcher for Animal Queries
  * Returns the best localized animal knowledge response or null if not an animal query.
  */
@@ -1593,7 +2049,7 @@ export function getAnimalBotResponse(query, lang = 'english') {
     q.includes('मैप') || q.includes('नक्शा') || q.includes('क्षेत्र') || q.includes('कहाँ') || q.includes('कहा') || q.includes('स्थान') || q.includes('किधर');
 
   if (isMapIntent) {
-    // 00A. WHITE BENGAL TIGER REGION (Marker #2)
+    // 00A. WHITE BENGAL TIGER REGION (Marker #7)
     if (
       q.includes('white tiger') || q.includes('white') ||
       q.includes('ଧଳା ବାଘ') || q.includes('ସଫେଦ') ||
@@ -1604,7 +2060,7 @@ export function getAnimalBotResponse(query, lang = 'english') {
         text: MAP_REGION_RESPONSES.white_tiger[l],
         actionButton: {
           type: 'map_region',
-          markerId: 2,
+          markerId: 7,
           animal: 'white_tiger',
           label: l === 'odia' ? '🗺️ ମ୍ୟାପ୍‌ରେ ଧଳା ବାଘ ଅଞ୍ଚଳ ଦେଖନ୍ତୁ' :
                  l === 'bengali' ? '🗺️ মানচিত্রে সাদা বাঘের অঞ্চল দেখুন' :
@@ -1622,13 +2078,13 @@ export function getAnimalBotResponse(query, lang = 'english') {
       };
     }
 
-    // 00B. ASIATIC LION REGION (Marker #3)
+    // 00B. ASIATIC LION REGION (Marker #2)
     if (q.includes('lion') || q.includes('gir') || q.includes('ସିଂହ') || q.includes('সিংহ') || q.includes('सिंह') || q.includes('शेर') || q.includes('बब्बर')) {
       return {
         text: MAP_REGION_RESPONSES.lion[l],
         actionButton: {
           type: 'map_region',
-          markerId: 3,
+          markerId: 2,
           animal: 'lion',
           label: l === 'odia' ? '🗺️ ମ୍ୟାପ୍‌ରେ ସିଂହ ସଫାରୀ ଦେଖନ୍ତୁ' :
                  l === 'bengali' ? '🗺️ মানচিত্রে সিংহ সাফারি দেখুন' :
@@ -1646,13 +2102,13 @@ export function getAnimalBotResponse(query, lang = 'english') {
       };
     }
 
-    // 00C. ASIAN ELEPHANT REGION (Marker #4)
+    // 00C. ASIAN ELEPHANT REGION (Marker #3)
     if (q.includes('elephant') || q.includes('chandaka') || q.includes('hathi') || q.includes('gaja') || q.includes('ହାତୀ') || q.includes('ଗଜ') || q.includes('হাতি') || q.includes('हाथी') || q.includes('गज')) {
       return {
         text: MAP_REGION_RESPONSES.elephant[l],
         actionButton: {
           type: 'map_region',
-          markerId: 4,
+          markerId: 3,
           animal: 'elephant',
           label: l === 'odia' ? '🗺️ ମ୍ୟାପ୍‌ରେ ହାତୀ ଅଞ୍ଚଳ ଦେଖନ୍ତୁ' :
                  l === 'bengali' ? '🗺️ মানচিত্রে হাতির অঞ্চল দেখুন' :
@@ -1670,13 +2126,13 @@ export function getAnimalBotResponse(query, lang = 'english') {
       };
     }
 
-    // 00D. SPOTTED DEER REGION (Marker #6)
+    // 00D. SPOTTED DEER REGION (Marker #4)
     if (q.includes('deer') || q.includes('chital') || q.includes('sambar') || q.includes('blackbuck') || q.includes('herbivore') || q.includes('ହରିଣ') || q.includes('ଚିତଲ') || q.includes('হরিণ') || q.includes('চিত্রল') || q.includes('हिरण') || q.includes('चीतल')) {
       return {
         text: MAP_REGION_RESPONSES.deer[l],
         actionButton: {
           type: 'map_region',
-          markerId: 6,
+          markerId: 4,
           animal: 'deer',
           label: l === 'odia' ? '🗺️ ମ୍ୟାପ୍‌ରେ ହରିଣ ସଫାରୀ ଦେଖନ୍ତୁ' :
                  l === 'bengali' ? '🗺️ মানচিত্রে হরিণ সাফারি দেখুন' :
@@ -1718,14 +2174,14 @@ export function getAnimalBotResponse(query, lang = 'english') {
       };
     }
 
-    // 00F. BIRDS & AVIARY REGION (Marker #9)
+    // 00F. BIRDS & AVIARY REGION (Marker #6)
     if (q.includes('bird') || q.includes('peafowl') || q.includes('peacock') || q.includes('aviary') || q.includes('stork') || q.includes('teal') || q.includes('feather') || q.includes('ପକ୍ଷୀ') || q.includes('ମୟୂର') || q.includes('পাখি') || q.includes('ময়ূর') || q.includes('पक्षी') || q.includes('मोर') || q.includes('चिड़िया')) {
       return {
         text: MAP_REGION_RESPONSES.birds[l],
         actionButton: {
           type: 'map_region',
-          markerId: 9,
-          animal: 'birds',
+          markerId: 6,
+          animal: 'peacock',
           label: l === 'odia' ? '🗺️ ମ୍ୟାପ୍‌ରେ ପକ୍ଷୀ ଅଭୟାରଣ୍ୟ ଦେଖନ୍ତୁ' :
                  l === 'bengali' ? '🗺️ মানচিত্রে এভিয়ারি ও জলাভূমি দেখুন' :
                  l === 'hindi' ? '🗺️ 3D मैप में एवियरी व आर्द्रभूमि देखें' :
@@ -1766,13 +2222,13 @@ export function getAnimalBotResponse(query, lang = 'english') {
       };
     }
 
-    // 00H. GHARIAL CROCODILE REGION (Marker #7)
+    // 00H. GHARIAL CROCODILE REGION (Marker #9)
     if (q.includes('gharial') || q.includes('crocodile') || q.includes('alligator') || q.includes('mugger') || q.includes('kumbhir') || q.includes('ଘଡ଼ିଆଳ') || q.includes('କୁମ୍ଭୀର') || q.includes('ମଗର') || q.includes('ঘড়িয়াল') || q.includes('কুমির') || q.includes('घड़ियाल') || q.includes('मगरमच्छ') || q.includes('मगर')) {
       return {
         text: MAP_REGION_RESPONSES.gharial[l],
         actionButton: {
           type: 'map_region',
-          markerId: 7,
+          markerId: 9,
           animal: 'gharial',
           label: l === 'odia' ? '🗺️ ମ୍ୟାପ୍‌ରେ ଘଡ଼ିଆଳ ପୋଖରୀ ଦେଖନ୍ତୁ' :
                  l === 'bengali' ? '🗺️ মানচিত্রে ঘড়িয়াল পুকুর দেখুন' :
@@ -1838,6 +2294,33 @@ export function getAnimalBotResponse(query, lang = 'english') {
       };
     }
 
+    // 00J2. ASIAN OPENBILL STORK REGION (Marker #12)
+    if (q.includes('openbill') || q.includes('stork') || q.includes('ଗେଣ୍ଡାଳିଆ') || q.includes('শামুকখোল') || q.includes('घोंघिल') || q.includes('ओपनबिल')) {
+      return {
+        text: l === 'odia' ? `🗺️ ଏସିଆନ୍ ଓପନ୍‌ବିଲ୍ (ଗେଣ୍ଡାଳିଆ) — ୩D ମ୍ୟାପ୍ ଅଞ୍ଚଳ\n\n• ସ୍ଥାନ: କାଞ୍ଜିଆ ଆର୍ଦ୍ରଭୂମି ଓ ପକ୍ଷୀ ନିବାସ • ମାର୍କର #୧୨\n• ଭୌଗୋଳିକ ସ୍ଥିତି: 20.3950° N, 85.8270° E\n• ପ୍ରାକୃତିକ ଆବାସ: କାଞ୍ଜିଆ ହ୍ରଦ କୂଳରେ ଥିବା ଆର୍ଦ୍ରଭୂମି ଓ ଶାମୁକା ଖାଦ୍ୟ ସ୍ଥଳୀ।\n\n୩D ମ୍ୟାପ୍‌ରେ ଦେଖିବା ପାଇଁ ତଳ ବଟନ୍ କ୍ଲିକ୍ କରନ୍ତୁ:` :
+              l === 'bengali' ? `🗺️ এশিয়ান ওপেনবিল (শামুকখোল) — ৩D মানচিত্রে অঞ্চল\n\n• অবস্থান: কাঞ্জিয়া জলাভূমি ও পাখির ডেরা • মার্কার #১২\n• স্থানাঙ্ক: 20.3950° N, 85.8270° E\n• বাসস্থান: হ্রদের তীরবর্তী খোলা জলাভূমি ও শামুক শিকারের এলাকা।\n\n৩D মানচিত্রে দেখতে নিচের বোতামে ক্লিক করুন:` :
+              l === 'hindi' ? `🗺️ एशियाई ओपनबिल (घोंघिल) — 3D मैप में क्षेत्र\n\n• स्थान: कंजिया आर्द्रभूमि व पक्षी क्षेत्र • मार्कर #12\n• निर्देशांक: 20.3950° N, 85.8270° E\n• आवास: झील के किनारे स्थित प्राकृतिक नमभूमि व घोंघा चरने का क्षेत्र।\n\n3D मैप में देखने के लिए नीचे दिए गए बटन पर क्लिक करें:` :
+              `🗺️ ASIAN OPENBILL STORK — 3D MAP REGION\n\n• Location: Lake Kanjia Wetland Aviary & Foraging Grounds • Marker #12\n• Coordinates: 20.3950° N, 85.8270° E\n• Habitat: Freshwater shallows, reed beds, and snail foraging banks along Kanjia Lake.\n\nClick below to swoop the 3D map to the Asian Openbill Sanctuary:`,
+        actionButton: {
+          type: 'map_region',
+          markerId: 12,
+          animal: 'openbill',
+          label: l === 'odia' ? '🗺️ ମ୍ୟାପ୍‌ରେ ଗେଣ୍ଡାଳିଆ ଅଞ୍ଚଳ ଦେଖନ୍ତୁ' :
+                 l === 'bengali' ? '🗺️ মানচিত্রে ওপেনবিল অঞ্চল দেখুন' :
+                 l === 'hindi' ? '🗺️ 3D मैप में ओपनबिल क्षेत्र देखें' :
+                 '🗺️ SHOW ASIAN OPENBILL REGION ON 3D MAP',
+          preview: {
+            title: "Asian Openbill Wetland Sanctuary",
+            zone: "Lake Kanjia Wetland • Sector 5",
+            coords: "20.3950° N, 85.8270° E",
+            habitat: "Freshwater marshland & aquatic reed beds",
+            emoji: "🪶",
+            photo: "/images/asian_openbill.jpg"
+          }
+        }
+      };
+    }
+
     // 00K. LEOPARD & BIG CAT REGION (Marker #1 - Apex Predator Zone)
     if (q.includes('leopard') || q.includes('panther') || q.includes('ଚିତାବାଘ') || q.includes('চিতাবাঘ') || q.includes('तेंदुआ') || q.includes('चीता')) {
       return {
@@ -1894,11 +2377,41 @@ export function getAnimalBotResponse(query, lang = 'english') {
     q.includes('live feed') || q.includes('webcam') || q.includes('watch live') ||
     q.includes('see live') || q.includes('stream') || q.includes('camera') ||
     q.includes('live') || q.includes('vedio') || q.includes('video') ||
+    q.includes('indiviusal') || q.includes('individual') ||
     q.includes('ଭିଡିଓ') || q.includes('ଲାଇଭ୍') || q.includes('କ୍ୟାମେରା') ||
     q.includes('ভিডিও') || q.includes('লাইভ') || q.includes('ক্যামেরা') ||
     q.includes('वीडियो') || q.includes('लाइव') || q.includes('कैमरा');
 
   if (isLiveCamIntent) {
+    // 00. GENERAL / ALL 12 INDIVIDUAL ANIMALS LIVE STREAM REQUEST
+    // e.g. "show me the live stream of the indiviusal animal", "individual animal live stream", "all live cams"
+    const isGeneralLiveCamRequest = 
+      q.includes('indiviusal') || q.includes('individual') || q.includes('all live') || 
+      q.includes('all animals live') || q.includes('all animal live') || q.includes('every live') ||
+      q.includes('all camera') || q.includes('all animal camera') ||
+      q.includes('live streams') || q.includes('live cams') || q.includes('all stream') ||
+      q.includes('list of live') || q.includes('which live') ||
+      q.includes('ପ୍ରତ୍ୟେକ ପ୍ରାଣୀ') || q.includes('ସମସ୍ତ ଲାଇଭ୍') || q.includes('ସବୁ ଲାଇଭ୍') ||
+      q.includes('প্রতিটি প্রাণী') || q.includes('সকল লাইভ') || q.includes('সব লাইভ') ||
+      q.includes('प्रत्येक जानवर') || q.includes('सभी लाइव') || q.includes('सारे लाइव');
+
+    if (isGeneralLiveCamRequest) {
+      return {
+        text: LIVE_CAM_RESPONSES.all_live_cams[l],
+        actionButtons: ALL_12_ANIMAL_CAMERAS,
+        actionButton: {
+          type: 'live_cam',
+          cameraId: 1,
+          animal: 'tiger',
+          label: l === 'odia' ? '🔴 ରୟାଲ ବେଙ୍ଗଲ ବାଘ ଲାଇଭ୍ ଷ୍ଟ୍ରିମ୍' :
+                 l === 'bengali' ? '🔴 রয়্যাল বেঙ্গল টাইগার লাইভ স্ট্রিম' :
+                 l === 'hindi' ? '🔴 रॉयल बंगाल टाइगर लाइव स्ट्रीम' :
+                 '🔴 WATCH ROYAL BENGAL TIGER LIVE STREAM',
+          cameraObj: ALL_12_ANIMAL_CAMERAS[0].cameraObj
+        }
+      };
+    }
+
     // 0A. WHITE BENGAL TIGER LIVE CAM
     if (
       q.includes('white tiger') || q.includes('white') ||
@@ -2049,30 +2562,52 @@ export function getAnimalBotResponse(query, lang = 'english') {
       };
     }
 
-    // 0F. BIRDS, PEAFOWL & AVIARY LIVE CAM
-    if (q.includes('bird') || q.includes('peafowl') || q.includes('peacock') || q.includes('aviary') || q.includes('stork') || q.includes('teal') || q.includes('feather') || q.includes('ପକ୍ଷୀ') || q.includes('ମୟୂର') || q.includes('পাখি') || q.includes('ময়ূর') || q.includes('पक्षी') || q.includes('मोर') || q.includes('चिड़िया')) {
+    // 0F. PEACOCK & PEAFOWL LIVE CAM (Cam #6)
+    if (q.includes('peacock') || q.includes('peafowl') || q.includes('mayur') || q.includes('ମୟୂର') || q.includes('ময়ূর') || q.includes('मोर')) {
+      return {
+        text: LIVE_CAM_RESPONSES.peacock[l],
+        actionButton: {
+          type: 'live_cam',
+          cameraId: 6,
+          animal: 'peacock',
+          cameraObj: ALL_12_ANIMAL_CAMERAS[5].cameraObj,
+          label: l === 'odia' ? '🔴 ମୟୂର ଲାଇଭ୍ କ୍ୟାମେରା ଦେଖନ୍ତୁ' :
+                 l === 'bengali' ? '🔴 ময়ূর লাইভ ক্যামেরা দেখুন' :
+                 l === 'hindi' ? '🔴 मोर लाइव कैमरा देखें' :
+                 '🔴 WATCH PEACOCK LIVE CAM IN LIVE SECTION'
+        }
+      };
+    }
+
+    // 0G. ASIAN OPENBILL STORK LIVE CAM (Cam #12)
+    if (q.includes('openbill') || q.includes('asian openbill') || q.includes('stork') || q.includes('anastomus') || q.includes('ଗେଣ୍ଡାଳିଆ') || q.includes('ଶାମୁକଖୋଳ') || q.includes('শামুকখোল') || q.includes('घोंघिल') || q.includes('ओपनबिल')) {
+      return {
+        text: LIVE_CAM_RESPONSES.openbill[l],
+        actionButton: {
+          type: 'live_cam',
+          cameraId: 12,
+          animal: 'openbill',
+          cameraObj: ALL_12_ANIMAL_CAMERAS[11].cameraObj,
+          label: l === 'odia' ? '🔴 ଓପନବିଲ୍ ଲାଇଭ୍ କ୍ୟାମେରା ଦେଖନ୍ତୁ' :
+                 l === 'bengali' ? '🔴 শামুকখোল লাইভ ক্যামেরা দেখুন' :
+                 l === 'hindi' ? '🔴 एशियन ओपनबिल लाइव कैमरा देखें' :
+                 '🔴 WATCH ASIAN OPENBILL LIVE CAM IN LIVE SECTION'
+        }
+      };
+    }
+
+    // 0H. GENERAL BIRDS & AVIARY LIVE CAM (Cam #6)
+    if (q.includes('bird') || q.includes('aviary') || q.includes('teal') || q.includes('feather') || q.includes('ପକ୍ଷୀ') || q.includes('ଚଢ଼େଇ') || q.includes('পাখি') || q.includes('पक्षी') || q.includes('चिड़िया')) {
       return {
         text: LIVE_CAM_RESPONSES.birds[l],
         actionButton: {
           type: 'live_cam',
           cameraId: 6,
-          animal: 'birds',
-          cameraObj: {
-            id: 6,
-            title: "Kanjia Lake Bird Sanctuary",
-            animal_name: "Birds",
-            habitat_name: "Wetland Aviary & Wetland Lagoon",
-            stream_url: "/videos/birds_live.webm",
-            video_type: "demo_video",
-            status: "LIVE",
-            viewer_count: 1420,
-            thumbnail_url: "/images/indian_peafowl.jpg",
-            description: "Vibrant aviary stream highlighting Indian peacocks, migratory teal, and painted storks.",
-            camera_location: "Walk-Through Aviary Dome"
-          },
-          label: l === 'odia' ? '🔴 ପକ୍ଷୀ ଲାଇଭ୍ କ୍ୟାମେରା ଦେଖନ୍ତୁ' :
-                 l === 'bengali' ? '🔴 পাখি লাইভ ক্যামেরা দেখুন' :
-                 l === 'hindi' ? '🔴 पक्षी लाइव कैमरा देखें' :
+          animal: 'peacock',
+          cameraObj: ALL_12_ANIMAL_CAMERAS[5].cameraObj,
+          label: l === 'odia' ? '🔴 ପକ୍ଷୀ ଓ ମୟୂର ଲାଇଭ୍ କ୍ୟାମେରା ଦେଖନ୍ତୁ' :
+                 l === 'bengali' ? '🔴 পাখি ও ময়ূর লাইভ ক্যামেরা দেখুন' :
+                 l === 'hindi' ? '🔴 पक्षी व मोर लाइव कैमरा देखें' :
                  '🔴 WATCH BIRDS & AVIARY LIVE CAM IN LIVE SECTION'
         }
       };
@@ -2194,30 +2729,37 @@ export function getAnimalBotResponse(query, lang = 'english') {
       };
     }
 
-    // 0K. ROYAL BENGAL TIGER (Default Primary Live Camera)
+    // 0M. ROYAL BENGAL TIGER LIVE CAM (Cam #1)
+    if (q.includes('tiger') || q.includes('bengal') || q.includes('ବାଘ') || q.includes('বাঘ') || q.includes('बाघ')) {
+      return {
+        text: LIVE_CAM_RESPONSES.tiger[l],
+        actionButton: {
+          type: 'live_cam',
+          cameraId: 1,
+          animal: 'tiger',
+          cameraObj: ALL_12_ANIMAL_CAMERAS[0].cameraObj,
+          label: l === 'odia' ? '🔴 ବାଘ ଲାଇଭ୍ କ୍ୟାମେରା ଦେଖନ୍ତୁ' :
+                 l === 'bengali' ? '🔴 বাঘের লাইভ ক্যামেরা দেখুন' :
+                 l === 'hindi' ? '🔴 बाघ का लाइव कैमरा देखें' :
+                 '🔴 WATCH TIGER LIVE CAM IN LIVE SECTION'
+        }
+      };
+    }
+
+    // 0N. DEFAULT FOR ANY GENERAL LIVE CAM QUERY
+    // Generates all 12 animal live stream buttons so user can pick any animal!
     return {
-      text: LIVE_CAM_RESPONSES.tiger[l],
+      text: LIVE_CAM_RESPONSES.all_live_cams[l],
+      actionButtons: ALL_12_ANIMAL_CAMERAS,
       actionButton: {
         type: 'live_cam',
         cameraId: 1,
         animal: 'tiger',
-        cameraObj: {
-          id: 1,
-          title: "Royal Bengal Tiger Feed #1",
-          animal_name: "Royal Bengal Tiger",
-          habitat_name: "Dense Deciduous Forest Enclosure",
-          stream_url: "/videos/tiger_walking_1080p.webm",
-          video_type: "demo_video",
-          status: "LIVE",
-          viewer_count: 2840,
-          thumbnail_url: "/images/royal_bengal_tiger.jpg",
-          description: "High-definition camera observing Bengal tigers near the natural forest stream and shade trees.",
-          camera_location: "Tiger Safari Observation Post"
-        },
-        label: l === 'odia' ? '🔴 ବାଘ ଲାଇଭ୍ କ୍ୟାମେରା ଦେଖନ୍ତୁ' :
-               l === 'bengali' ? '🔴 বাঘের লাইভ ক্যামেরা দেখুন' :
-               l === 'hindi' ? '🔴 बाघ का लाइव कैमरा देखें' :
-               '🔴 WATCH TIGER LIVE CAM IN LIVE SECTION'
+        cameraObj: ALL_12_ANIMAL_CAMERAS[0].cameraObj,
+        label: l === 'odia' ? '🔴 ରୟାଲ ବେଙ୍ଗଲ ବାଘ ଲାଇଭ୍ ଷ୍ଟ୍ରିମ୍' :
+               l === 'bengali' ? '🔴 রয়্যাল বেঙ্গল টাইগার লাইভ স্ট্রিম' :
+               l === 'hindi' ? '🔴 रॉयल बंगाल टाइगर लाइव स्ट्रीम' :
+               '🔴 WATCH ROYAL BENGAL TIGER LIVE STREAM'
       }
     };
   }
@@ -2243,7 +2785,10 @@ export function getAnimalBotResponse(query, lang = 'english') {
     q.includes('कौन कौन से जानवर') || q.includes('पशु पक्षी') || q.includes('जीव जंतु') ||
     q.includes('सारे पशु') || q.includes('प्रत्येक जानवर') || q.includes('नंदनकानन के जानवर')
   ) {
-    return ANIMAL_KNOWLEDGE.all_animals[l];
+    return {
+      text: ANIMAL_KNOWLEDGE.all_animals[l],
+      actionButtons: ALL_12_ANIMAL_CAMERAS
+    };
   }
 
   // 2. WHITE TIGER & ROYAL BENGAL TIGER
@@ -2254,7 +2799,11 @@ export function getAnimalBotResponse(query, lang = 'english') {
     q.includes('সাদা বাঘ') || q.includes('বাঘ') ||
     q.includes('सफेद बाघ') || q.includes('बाघ') || q.includes('रॉयल बंगाल')
   ) {
-    return ANIMAL_KNOWLEDGE.tiger[l];
+    const isWhite = q.includes('white') || q.includes('ଧଳା') || q.includes('সাদা') || q.includes('सफेद');
+    return {
+      text: ANIMAL_KNOWLEDGE.tiger[l],
+      actionButton: isWhite ? ALL_12_ANIMAL_CAMERAS[6] : ALL_12_ANIMAL_CAMERAS[0]
+    };
   }
 
   // 3. ASIATIC LION & LION SAFARI
@@ -2264,7 +2813,10 @@ export function getAnimalBotResponse(query, lang = 'english') {
     q.includes('সিংহ') || q.includes('সিংহ সাফারি') ||
     q.includes('शेर') || q.includes('एशियाई शेर') || q.includes('बब्बर शेर')
   ) {
-    return ANIMAL_KNOWLEDGE.lion[l];
+    return {
+      text: ANIMAL_KNOWLEDGE.lion[l],
+      actionButton: ALL_12_ANIMAL_CAMERAS[1]
+    };
   }
 
   // 4. ASIAN ELEPHANT
@@ -2273,7 +2825,10 @@ export function getAnimalBotResponse(query, lang = 'english') {
     q.includes('ହାତୀ') || q.includes('ଗଜ') ||
     q.includes('হাতি') || q.includes('हाथी') || q.includes('गज')
   ) {
-    return ANIMAL_KNOWLEDGE.elephant[l];
+    return {
+      text: ANIMAL_KNOWLEDGE.elephant[l],
+      actionButton: ALL_12_ANIMAL_CAMERAS[2]
+    };
   }
 
   // 5. INDIAN PANGOLIN (WORLD FIRST)
@@ -2283,7 +2838,10 @@ export function getAnimalBotResponse(query, lang = 'english') {
     q.includes('প্যাঙ্গোলিন') || q.includes('বনরুই') ||
     q.includes('पैंगोलिन') || q.includes('सल्लू') || q.includes('वज्रकीट')
   ) {
-    return ANIMAL_KNOWLEDGE.pangolin[l];
+    return {
+      text: ANIMAL_KNOWLEDGE.pangolin[l],
+      actionButton: ALL_12_ANIMAL_CAMERAS[7]
+    };
   }
 
   // 6. GHARIAL CROCODILE
@@ -2294,7 +2852,10 @@ export function getAnimalBotResponse(query, lang = 'english') {
     q.includes('ঘড়িয়াল') || q.includes('কুমির') ||
     q.includes('घड़ियाल') || q.includes('मगरमच्छ') || q.includes('मगर')
   ) {
-    return ANIMAL_KNOWLEDGE.gharial[l];
+    return {
+      text: ANIMAL_KNOWLEDGE.gharial[l],
+      actionButton: ALL_12_ANIMAL_CAMERAS[8]
+    };
   }
 
   // 7. KING COBRA & REPTILE PARK
@@ -2305,7 +2866,10 @@ export function getAnimalBotResponse(query, lang = 'english') {
     q.includes('শঙ্খচূড়') || q.includes('কিং কোবরা') || q.includes('সাপ') || q.includes('অজগর') ||
     q.includes('किंग कोबरा') || q.includes('नागराज') || q.includes('सांप') || q.includes('सर्प') || q.includes('अजगर')
   ) {
-    return ANIMAL_KNOWLEDGE.cobra[l];
+    return {
+      text: ANIMAL_KNOWLEDGE.cobra[l],
+      actionButton: ALL_12_ANIMAL_CAMERAS[9]
+    };
   }
 
   // 8. SLOTH BEAR
@@ -2314,7 +2878,10 @@ export function getAnimalBotResponse(query, lang = 'english') {
     q.includes('ଭାଲୁ') || q.includes('ଭାଲୁ ସଫାରୀ') ||
     q.includes('ভাল্লুক') || q.includes('भालू') || q.includes('रीछ')
   ) {
-    return ANIMAL_KNOWLEDGE.bear[l];
+    return {
+      text: ANIMAL_KNOWLEDGE.bear[l],
+      actionButton: ALL_12_ANIMAL_CAMERAS[4]
+    };
   }
 
   // 9. SPOTTED DEER (CHITAL) & HERBIVORES
@@ -2325,7 +2892,10 @@ export function getAnimalBotResponse(query, lang = 'english') {
     q.includes('হরিণ') || q.includes('চিত্রা হরিণ') || q.includes('সাম্বার') ||
     q.includes('हिरण') || q.includes('चीतल') || q.includes('सांभर') || q.includes('काला हिरण')
   ) {
-    return ANIMAL_KNOWLEDGE.deer[l];
+    return {
+      text: ANIMAL_KNOWLEDGE.deer[l],
+      actionButton: ALL_12_ANIMAL_CAMERAS[3]
+    };
   }
 
   // 10. AVIARY DOME, PEAFOWL & BIRDS
@@ -2336,7 +2906,10 @@ export function getAnimalBotResponse(query, lang = 'english') {
     q.includes('ময়ূর') || q.includes('পাখি') || q.includes('অ্যাভিয়ারি') ||
     q.includes('मोर') || q.includes('पक्षी') || q.includes('चिड़िया') || q.includes('एवियरी')
   ) {
-    return ANIMAL_KNOWLEDGE.birds[l];
+    return {
+      text: ANIMAL_KNOWLEDGE.birds[l],
+      actionButton: ALL_12_ANIMAL_CAMERAS[5]
+    };
   }
 
   // 11. INDIAN FLAPSHELL TURTLE & LAKE KANJIA
@@ -2345,7 +2918,22 @@ export function getAnimalBotResponse(query, lang = 'english') {
     q.includes('କଇଁଛ') || q.includes('କଚ୍ଛପ') ||
     q.includes('কচ্ছপ') || q.includes('कछुआ')
   ) {
-    return ANIMAL_KNOWLEDGE.turtle[l];
+    return {
+      text: ANIMAL_KNOWLEDGE.turtle[l],
+      actionButton: ALL_12_ANIMAL_CAMERAS[10]
+    };
+  }
+
+  // 11B. ASIAN OPENBILL STORK & LAKE KANJIA HERONRY
+  if (
+    q.includes('openbill') || q.includes('asian openbill') ||
+    q.includes('ଗେଣ୍ଡାଳିଆ') || q.includes('ଶାମୁକଖୋଳ') || q.includes('শামুকখোল') ||
+    q.includes('घोंघिल') || q.includes('ओपनबिल')
+  ) {
+    return {
+      text: ANIMAL_KNOWLEDGE.openbill[l],
+      actionButton: ALL_12_ANIMAL_CAMERAS[11]
+    };
   }
 
   // 12. LEOPARD & BLACK PANTHER

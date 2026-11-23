@@ -11,6 +11,9 @@ import {
   Maximize2,
   Minimize2,
   RotateCcw,
+  RotateCw,
+  Orbit,
+  Globe,
   Volume2,
   VolumeX,
   Crosshair,
@@ -24,16 +27,86 @@ import {
 } from 'lucide-react';
 
 /**
- * ThreeZooMap - Google Earth-Class 3D Interactive Map for Nandankanan Sanctuary
+ * Architectural 3D Floating Diorama Plinth Generator
+ * Creates an elegant, solid beveled bedrock base with clean architectural proportions
+ * that lifts and showcases the sanctuary diorama floating gracefully in space.
+ */
+function createFloatingIslandBase(width, depth) {
+  const geom = new THREE.BufferGeometry();
+  const segments = 48;
+  const layers = [
+    { y: 0.1, sx: 1.01, sz: 1.01, noiseAmp: 0.1 },
+    { y: -1.2, sx: 1.00, sz: 1.00, noiseAmp: 0.18 },
+    { y: -2.6, sx: 0.98, sz: 0.98, noiseAmp: 0.25 },
+    { y: -3.8, sx: 0.94, sz: 0.94, noiseAmp: 0.18 },
+    { y: -4.5, sx: 0.88, sz: 0.88, noiseAmp: 0.1 }
+  ];
+
+  const vertices = [];
+  const uvs = [];
+  const indices = [];
+
+  for (let l = 0; l < layers.length; l++) {
+    const layer = layers[l];
+    for (let s = 0; s < segments; s++) {
+      const angle = (s / segments) * Math.PI * 2;
+      const cosA = Math.cos(angle);
+      const sinA = Math.sin(angle);
+      const halfW = (width * 0.5) * layer.sx;
+      const halfD = (depth * 0.5) * layer.sz;
+      const noise = (Math.sin(s * 3.7 + l * 2.1) * 0.5 + Math.cos(s * 5.2 - l * 1.5) * 0.5) * layer.noiseAmp;
+      const x = cosA * halfW + (cosA > 0 ? 1 : -1) * noise * 0.4;
+      const z = sinA * halfD + (sinA > 0 ? 1 : -1) * noise * 0.4;
+      const y = layer.y + (Math.sin(s * 2.3) * 0.15) * (l > 0 ? 1 : 0);
+      vertices.push(x, y, z);
+      uvs.push(s / segments, l / (layers.length - 1));
+    }
+  }
+
+  // Apex tip at bottom center
+  const apexIndex = layers.length * segments;
+  vertices.push(0, -5.0, 0);
+  uvs.push(0.5, 1.0);
+
+  // Side quads between elliptical layers
+  for (let l = 0; l < layers.length - 1; l++) {
+    const ringStart = l * segments;
+    const nextRingStart = (l + 1) * segments;
+    for (let s = 0; s < segments; s++) {
+      const nextS = (s + 1) % segments;
+      const a = ringStart + s;
+      const b = nextRingStart + s;
+      const c = nextRingStart + nextS;
+      const d = ringStart + nextS;
+      indices.push(a, b, d);
+      indices.push(b, c, d);
+    }
+  }
+
+  // Bottom cone triangles connecting to apex
+  const lastRingStart = (layers.length - 1) * segments;
+  for (let s = 0; s < segments; s++) {
+    const nextS = (s + 1) % segments;
+    indices.push(lastRingStart + s, apexIndex, lastRingStart + nextS);
+  }
+
+  geom.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+  geom.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+  geom.setIndex(indices);
+  geom.computeVertexNormals();
+  return geom;
+}
+
+/**
+ * ThreeZooMap - Google Earth-Class 3D Floating Diorama for Nandankanan Sanctuary
  * Features:
- * - 3D Terrain elevation relief (Sal woodland ridges, Lake Kanjia basin)
- * - Oblique camera pitch (tilt 0° to 65°) & 360° heading orbit
- * - Google Earth style rotating 3D compass rose (clicks to reset North)
- * - "3D" / "2D" perspective toggle button
- * - Animated 3D Light Pillar / Laser Spotlight Beam directly marking identified animals
- * - Cinematic 3D "Fly-to" swooping camera animation to animal habitats
- * - Realistic atmospheric horizon glow & dynamic shadows
- * - Synchronized species identification HUD with scientific classification
+ * - Luxury Architectural 3D Diorama model floating in space
+ * - Solid beveled rock cliff walls & glowing emerald contour trim
+ * - Full 360° circular orbit rotation (mouse, touch & brisk auto-orbit)
+ * - Optimal isometric ~42° elevated perspective showcasing both the rich 3D surface and floating diorama sides
+ * - 3D Terrain elevation relief (Sal woodland ridges, Lake Kanjia basin, 3D trees)
+ * - Clean visual presentation (zero particle clutter)
+ * - Synchronized species identification HUD and compass
  */
 export default function ThreeZooMap({
   markers = [],
@@ -44,7 +117,8 @@ export default function ThreeZooMap({
   isolateMarkerId = null,
   focusTrigger = 0,
   onResetIsolate = null,
-  isFullscreen = false
+  isFullscreen = false,
+  isExpanded = false
 }) {
   const mountRef = useRef(null);
   const sceneRef = useRef(null);
@@ -52,6 +126,8 @@ export default function ThreeZooMap({
   const rendererRef = useRef(null);
   const controlsRef = useRef(null);
   const animFrameRef = useRef(null);
+  const islandGroupRef = useRef(null);
+  const shadowMeshRef = useRef(null);
   const beaconGroupRef = useRef(null);
   const treeGroupRef = useRef(null);
   const terrainMeshRef = useRef(null);
@@ -60,10 +136,18 @@ export default function ThreeZooMap({
   // Screen-projected 2D pin positions for HTML badges
   const [pinPositions, setPinPositions] = useState([]);
   const [cameraHeading, setCameraHeading] = useState(0); // Heading in degrees (0 = North)
-  const [cameraPitch, setCameraPitch] = useState(55); // Pitch angle in degrees (0 = top-down, 90 = horizon)
+  const [cameraPitch, setCameraPitch] = useState(55); // Pitch angle in degrees
   const [is3DMode, setIs3DMode] = useState(true);
-  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
-  const audioRef = useRef(null);
+  const [isAutoRotate, setIsAutoRotate] = useState(true);
+  const isAutoRotateRef = useRef(true);
+
+  useEffect(() => {
+    isAutoRotateRef.current = isAutoRotate;
+    if (controlsRef.current) {
+      controlsRef.current.autoRotate = isAutoRotate;
+      controlsRef.current.autoRotateSpeed = 2.5;
+    }
+  }, [isAutoRotate]);
 
   const isolateMarkerIdRef = useRef(isolateMarkerId);
   useEffect(() => {
@@ -119,7 +203,7 @@ export default function ThreeZooMap({
     const camera = cameraRef.current;
 
     const isTight = tightZoom || Boolean(isolateMarkerId) || Boolean(marker._isolate);
-    const dist = isTight ? 22 : 38;
+    const dist = isTight ? 18 : 28;
 
     let currentHeadingRad = 0;
     const dx = camera.position.x - controls.target.x;
@@ -129,7 +213,7 @@ export default function ThreeZooMap({
     }
 
     const targetCamX = x + Math.sin(currentHeadingRad) * (dist * 0.72);
-    const targetCamY = y + (isTight ? 14 : 24);
+    const targetCamY = y + (isTight ? 12 : 18);
     const targetCamZ = z + Math.cos(currentHeadingRad) * (dist * 0.72);
 
     controls.minDistance = 4;
@@ -154,7 +238,7 @@ export default function ThreeZooMap({
       tarX: x,
       tarY: y + 0.5,
       tarZ: z,
-      duration: 1.1,
+      duration: 0.8,
       ease: 'power2.inOut',
       onUpdate: () => {
         camera.position.set(animState.camX, animState.camY, animState.camZ);
@@ -170,12 +254,42 @@ export default function ThreeZooMap({
     });
   }, [get3DCoords, isolateMarkerId]);
 
-  // Center / Zoom Out to view the entire sanctuary
-  const handleOverview = useCallback(() => {
-    if (onResetIsolate) onResetIsolate();
+  // Start continuous 360° turntable circular orbit rotation (matching user reference video)
+  const startOrbitRotation = useCallback(() => {
+    setIsAutoRotate(true);
+    isAutoRotateRef.current = true;
+    if (controlsRef.current) {
+      controlsRef.current.autoRotate = true;
+      controlsRef.current.autoRotateSpeed = 2.5;
+    }
+  }, []);
+
+  // Toggle 360° circular auto-orbit on/off
+  const toggleAutoRotate = useCallback(() => {
+    setIsAutoRotate((prev) => {
+      const next = !prev;
+      isAutoRotateRef.current = next;
+      if (controlsRef.current) {
+        controlsRef.current.autoRotate = next;
+        controlsRef.current.autoRotateSpeed = 2.5;
+      }
+      return next;
+    });
+  }, []);
+
+  // Reset camera to golden presentation pose (Upright, front-facing, centered & level)
+  const resetToFrontView = useCallback((smooth = true) => {
     if (!controlsRef.current || !cameraRef.current) return;
     const controls = controlsRef.current;
     const camera = cameraRef.current;
+
+    if (!smooth) {
+      camera.position.set(0, 48, 54);
+      controls.target.set(0, 0, 0);
+      controls.update();
+      startOrbitRotation();
+      return;
+    }
 
     controls.enabled = false;
     gsap.killTweensOf(camera.position);
@@ -192,27 +306,35 @@ export default function ThreeZooMap({
 
     gsap.to(animState, {
       camX: 0,
-      camY: 58,
-      camZ: 44,
+      camY: 48,
+      camZ: 54,
       tarX: 0,
       tarY: 0,
       tarZ: 0,
-      duration: 1.1,
-      ease: 'power2.inOut',
+      duration: 0.8,
+      ease: 'power2.out',
       onUpdate: () => {
         camera.position.set(animState.camX, animState.camY, animState.camZ);
         controls.target.set(animState.tarX, animState.tarY, animState.tarZ);
         camera.lookAt(controls.target);
       },
       onComplete: () => {
-        camera.position.set(0, 58, 44);
+        camera.position.set(0, 48, 54);
         controls.target.set(0, 0, 0);
-        controls.minDistance = 25;
+        controls.minDistance = 16;
         controls.enabled = true;
         controls.update();
+        startOrbitRotation();
       }
     });
-  }, [onResetIsolate]);
+  }, [startOrbitRotation]);
+
+  // Center / Zoom Out to view the entire floating sanctuary diorama
+  const handleOverview = useCallback(() => {
+    if (onResetIsolate) onResetIsolate();
+    resetToFrontView(true);
+    startOrbitRotation();
+  }, [onResetIsolate, resetToFrontView, startOrbitRotation]);
 
   // Toggle between 3D oblique perspective and 2D overhead top-down view
   const toggle2D3D = useCallback(() => {
@@ -224,7 +346,7 @@ export default function ThreeZooMap({
     const tz = controls.target.z;
 
     const currentDist = camera.position.distanceTo(controls.target);
-    const clampedDist = Math.max(30, Math.min(currentDist, 75));
+    const clampedDist = Math.max(30, Math.min(currentDist, 72));
 
     if (is3DMode) {
       // Transition to top-down 2D
@@ -232,7 +354,7 @@ export default function ThreeZooMap({
         x: tx,
         y: ty + clampedDist,
         z: tz + 0.1,
-        duration: 1.0,
+        duration: 0.7,
         ease: 'power2.inOut',
         onUpdate: () => controls.update()
       });
@@ -241,9 +363,9 @@ export default function ThreeZooMap({
       // Transition back to dramatic 3D Google Earth angle
       gsap.to(camera.position, {
         x: tx,
-        y: ty + clampedDist * 0.6,
+        y: ty + clampedDist * 0.65,
         z: tz + clampedDist * 0.75,
-        duration: 1.0,
+        duration: 0.7,
         ease: 'power2.inOut',
         onUpdate: () => controls.update()
       });
@@ -266,11 +388,14 @@ export default function ThreeZooMap({
       x: controls.target.x,
       y: currentY,
       z: controls.target.z + r,
-      duration: 0.9,
+      duration: 0.6,
       ease: 'power2.out',
-      onUpdate: () => controls.update()
+      onUpdate: () => controls.update(),
+      onComplete: () => {
+        startOrbitRotation();
+      }
     });
-  }, []);
+  }, [startOrbitRotation]);
 
   // Tilt Up (closer to horizon)
   const handleTiltUp = useCallback(() => {
@@ -285,16 +410,16 @@ export default function ThreeZooMap({
     const dy = camera.position.y - ty;
     const dz = camera.position.z - tz;
     const r = Math.sqrt(dx * dx + dy * dy + dz * dz);
-    const phi = Math.acos(dy / r); // angle from top
+    const phi = Math.acos(dy / r);
 
-    const targetPhi = Math.min(phi + 0.18, Math.PI * 0.42); // limit tilt to ~75 deg
+    const targetPhi = Math.min(phi + 0.18, Math.PI * 0.44);
     const theta = Math.atan2(dx, dz);
 
     gsap.to(camera.position, {
       x: tx + r * Math.sin(targetPhi) * Math.sin(theta),
       y: ty + r * Math.cos(targetPhi),
       z: tz + r * Math.sin(targetPhi) * Math.cos(theta),
-      duration: 0.5,
+      duration: 0.35,
       ease: 'power2.out',
       onUpdate: () => controls.update()
     });
@@ -315,20 +440,20 @@ export default function ThreeZooMap({
     const r = Math.sqrt(dx * dx + dy * dy + dz * dz);
     const phi = Math.acos(dy / r);
 
-    const targetPhi = Math.max(phi - 0.18, 0.15); // limit overhead
+    const targetPhi = Math.max(phi - 0.18, 0.16);
     const theta = Math.atan2(dx, dz);
 
     gsap.to(camera.position, {
       x: tx + r * Math.sin(targetPhi) * Math.sin(theta),
       y: ty + r * Math.cos(targetPhi),
       z: tz + r * Math.sin(targetPhi) * Math.cos(theta),
-      duration: 0.5,
+      duration: 0.35,
       ease: 'power2.out',
       onUpdate: () => controls.update()
     });
   }, []);
 
-  // Rotate Heading Left / Right by 45 degrees
+  // Rotate Heading in Circle Direction (Left / Right by 45 degrees) - Snappy
   const handleRotate = useCallback((direction = 1) => {
     if (!controlsRef.current || !cameraRef.current) return;
     const controls = controlsRef.current;
@@ -346,9 +471,42 @@ export default function ThreeZooMap({
     gsap.to(camera.position, {
       x: tx + Math.sin(targetAngle) * r,
       z: tz + Math.cos(targetAngle) * r,
-      duration: 0.6,
+      duration: 0.35,
       ease: 'power2.out',
       onUpdate: () => controls.update()
+    });
+  }, []);
+
+  // Fast 360-Degree Continuous Cinematic Sweep in Circle (2.0s)
+  const handle360Spin = useCallback((direction = 1) => {
+    if (!controlsRef.current || !cameraRef.current) return;
+    const controls = controlsRef.current;
+    const camera = cameraRef.current;
+    const tx = controls.target.x;
+    const ty = controls.target.y;
+    const tz = controls.target.z;
+
+    const dx = camera.position.x - tx;
+    const dz = camera.position.z - tz;
+    const r = Math.hypot(dx, dz);
+    const currentAngle = Math.atan2(dx, dz);
+    const targetAngle = currentAngle + (direction * Math.PI * 2);
+
+    controls.enabled = false;
+    const anim = { angle: currentAngle };
+    gsap.to(anim, {
+      angle: targetAngle,
+      duration: 2.0,
+      ease: 'power2.inOut',
+      onUpdate: () => {
+        camera.position.x = tx + Math.sin(anim.angle) * r;
+        camera.position.z = tz + Math.cos(anim.angle) * r;
+        controls.update();
+      },
+      onComplete: () => {
+        controls.enabled = true;
+        controls.update();
+      }
     });
   }, []);
 
@@ -369,13 +527,13 @@ export default function ThreeZooMap({
       x: targetCamX,
       y: targetCamY,
       z: targetCamZ,
-      duration: 0.5,
+      duration: 0.35,
       ease: 'power2.out',
       onUpdate: () => controls.update()
     });
   }, []);
 
-  // Update animated 3D Light Pillar / Satellite Beacon whenever activeMarker or focusTrigger changes
+  // Update animated 3D Light Pillar whenever activeMarker or focusTrigger changes
   useEffect(() => {
     if (!beaconGroupRef.current || !activeMarker) return;
     const beacon = beaconGroupRef.current;
@@ -384,7 +542,6 @@ export default function ThreeZooMap({
     beacon.position.set(x, y, z);
     beacon.visible = true;
 
-    // Swoop camera to the newly identified animal (tight zoom when isolated or requested)
     const isTight = Boolean(isolateMarkerId) || Boolean(activeMarker._isolate);
     flyToAnimal(activeMarker, isTight);
   }, [activeMarker, focusTrigger, isolateMarkerId, get3DCoords, flyToAnimal]);
@@ -398,18 +555,18 @@ export default function ThreeZooMap({
     let curW = Math.max(container.clientWidth || rect.width || 800, 320);
     let curH = Math.max(container.clientHeight || rect.height || 580, 400);
 
-    // 1. Scene & Distant Horizon Fog (Linear starting far past the sanctuary bounds for 100% crystal clarity)
+    // 1. Scene & Distant Horizon Fog
     const scene = new THREE.Scene();
     scene.background = new THREE.Color('#071d14');
-    scene.fog = new THREE.Fog(0x071d14, 160, 360);
+    scene.fog = new THREE.Fog(0x071d14, 250, 600);
     sceneRef.current = scene;
 
-    // 2. Camera Setup (Tilted 3D perspective by default)
-    const camera = new THREE.PerspectiveCamera(44, curW / curH, 0.5, 700);
-    camera.position.set(0, 58, 44);
+    // 2. Camera Setup: Golden Isometric Perspective (Frames whole floating diorama like image 1, showing rich 3D surface like image 2)
+    const camera = new THREE.PerspectiveCamera(46, curW / curH, 0.5, 700);
+    camera.position.set(0, 48, 54);
     cameraRef.current = camera;
 
-    // 3. WebGL Renderer with High-Fidelity Tone Mapping & Soft Shadows
+    // 3. WebGL Renderer
     const renderer = new THREE.WebGLRenderer({
       antialias: true,
       alpha: true,
@@ -418,7 +575,7 @@ export default function ThreeZooMap({
     renderer.setSize(curW, curH);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2.5));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.25;
+    renderer.toneMappingExposure = 1.35;
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     rendererRef.current = renderer;
@@ -431,44 +588,75 @@ export default function ThreeZooMap({
     renderer.domElement.style.display = 'block';
     container.appendChild(renderer.domElement);
 
-    // 4. Orbit Controls (Google Earth-style navigation)
+    // 4. Orbit Controls with 360° Circular Orbit
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
-    controls.dampingFactor = 0.06;
+    controls.dampingFactor = 0.08;
+    controls.rotateSpeed = 1.35;
     controls.screenSpacePanning = false;
-    controls.minDistance = 30; // Clamped to optimal distance so map texture stays razor-sharp
-    controls.maxDistance = 130;
-    controls.maxPolarAngle = Math.PI * 0.44; // Don't allow camera to dip below terrain
-    controls.minPolarAngle = 0.05; // Overhead
+    controls.minDistance = 16;
+    controls.maxDistance = 140;
+    controls.maxPolarAngle = Math.PI * 0.38; // Keeps camera ~22° above horizon, always displaying lush surface and never showing underside
+    controls.minPolarAngle = 0.18;
     controls.target.set(0, 0, 0);
 
-    // Prevent accidental wheel zoom hijacking when user scrolls the webpage
-    controls.enableZoom = false;
+    controls.minAzimuthAngle = -Infinity;
+    controls.maxAzimuthAngle = Infinity;
 
-    // Prevent accidental single-finger rotation while scrolling on touch devices (2 fingers to dolly/pan)
+    controls.autoRotate = isAutoRotateRef.current;
+    controls.autoRotateSpeed = 2.5; // Smooth continuous 360° turntable orbit (matches video: ~24s per revolution)
+
+    controls.enableZoom = true;
+    controls.zoomSpeed = 1.0;
+
     controls.touches = {
-      ONE: THREE.TOUCH.NONE,
+      ONE: THREE.TOUCH.ROTATE,
       TWO: THREE.TOUCH.DOLLY_PAN
     };
 
     controlsRef.current = controls;
 
-    // Allow intentional Ctrl+Wheel or Meta+Wheel zoom without hijacking normal page scrolling
-    const onCanvasWheel = (e) => {
-      if (e.ctrlKey || e.metaKey) {
-        e.preventDefault();
-        const factor = e.deltaY < 0 ? 0.88 : 1.14;
-        handleZoom(factor);
+    let idleTimer = null;
+    const handleCanvasInteractionStart = () => {
+      if (controlsRef.current) {
+        controlsRef.current.autoRotate = false;
       }
+      if (idleTimer) clearTimeout(idleTimer);
     };
-    renderer.domElement.addEventListener('wheel', onCanvasWheel, { passive: false });
 
-    // 5. Lighting Setup (Crisp Directional Sunlight + Ambient Canopy Bounce)
-    const ambientLight = new THREE.AmbientLight(0xd1fae5, 1.4);
+    const handleCanvasInteractionEnd = () => {
+      if (idleTimer) clearTimeout(idleTimer);
+      idleTimer = setTimeout(() => {
+        if (controlsRef.current && isAutoRotateRef.current) {
+          controlsRef.current.autoRotate = true;
+          controlsRef.current.autoRotateSpeed = 2.5;
+        }
+      }, 1500);
+    };
+
+    const domEl = renderer.domElement;
+    domEl.addEventListener('pointerdown', handleCanvasInteractionStart);
+    domEl.addEventListener('pointerup', handleCanvasInteractionEnd);
+    domEl.addEventListener('pointerleave', handleCanvasInteractionEnd);
+
+    const onCanvasWheel = (e) => {
+      e.preventDefault();
+      const factor = e.deltaY < 0 ? 0.88 : 1.14;
+      handleZoom(factor);
+    };
+    domEl.addEventListener('wheel', onCanvasWheel, { passive: false });
+
+    const onCanvasDblClick = () => {
+      handleZoom(0.72);
+    };
+    domEl.addEventListener('dblclick', onCanvasDblClick);
+
+    // 5. Lighting Setup
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1.85);
     scene.add(ambientLight);
 
-    const sunLight = new THREE.DirectionalLight(0xffffff, 2.8);
-    sunLight.position.set(45, 75, 40);
+    const sunLight = new THREE.DirectionalLight(0xffffff, 3.2);
+    sunLight.position.set(40, 80, 35);
     sunLight.castShadow = true;
     sunLight.shadow.mapSize.width = 2048;
     sunLight.shadow.mapSize.height = 2048;
@@ -481,15 +669,19 @@ export default function ThreeZooMap({
     sunLight.shadow.bias = -0.0005;
     scene.add(sunLight);
 
-    const rimLight = new THREE.DirectionalLight(0x38bdf8, 0.85);
-    rimLight.position.set(-40, 25, -35);
+    const rimLight = new THREE.DirectionalLight(0x7dd3fc, 0.9);
+    rimLight.position.set(-45, 30, -35);
     scene.add(rimLight);
 
-    // 6. 3D Terrain Geometry with Elevation Relief
+    // 6. Floating Sanctuary Continent Group (All meshes levitate together)
+    const islandGroup = new THREE.Group();
+    scene.add(islandGroup);
+    islandGroupRef.current = islandGroup;
+
+    // 7. 3D Terrain Geometry with Elevation Relief
     const terrainGeo = new THREE.PlaneGeometry(MAP_W, MAP_D, 120, 75);
     terrainGeo.rotateX(-Math.PI / 2);
 
-    // Apply Elevation Relief across vertices
     const posAttr = terrainGeo.attributes.position;
     for (let i = 0; i < posAttr.count; i++) {
       const vx = posAttr.getX(i);
@@ -499,20 +691,19 @@ export default function ThreeZooMap({
     }
     terrainGeo.computeVertexNormals();
 
-    // Create terrain mesh immediately so 3D landscape is instantly visible
     const terrainMat = new THREE.MeshStandardMaterial({
-      color: 0x16532d,
-      roughness: 0.38,
-      metalness: 0.02,
+      color: 0xffffff,
+      roughness: 0.18,
+      metalness: 0.0,
       flatShading: false
     });
     const terrainMesh = new THREE.Mesh(terrainGeo, terrainMat);
     terrainMesh.receiveShadow = true;
     terrainMesh.castShadow = false;
-    scene.add(terrainMesh);
+    islandGroup.add(terrainMesh);
     terrainMeshRef.current = terrainMesh;
 
-    // Load High-Definition 4K Nandankanan Zoo Map Texture (Ultra Clarity)
+    // Load High-Definition 4K Nandankanan Zoo Map Texture
     const textureLoader = new THREE.TextureLoader();
     textureLoader.load(
       '/images/nandankanan_zoo_map_4k.jpg',
@@ -524,7 +715,8 @@ export default function ThreeZooMap({
         mapTexture.minFilter = THREE.LinearMipmapLinearFilter;
         mapTexture.magFilter = THREE.LinearFilter;
         terrainMat.map = mapTexture;
-        terrainMat.roughness = 0.32;
+        terrainMat.roughness = 0.18;
+        terrainMat.metalness = 0.0;
         terrainMat.color.setHex(0xffffff);
         terrainMat.needsUpdate = true;
       },
@@ -534,18 +726,47 @@ export default function ThreeZooMap({
       }
     );
 
-    // 7. Base Platform Beneath Terrain (Sanctuary Bedrock)
-    const baseGeo = new THREE.BoxGeometry(MAP_W + 1.2, 2.8, MAP_D + 1.2);
-    const baseMat = new THREE.MeshStandardMaterial({
-      color: 0x051a11,
-      roughness: 0.9,
-      metalness: 0.1
+    // 8. Organic Floating Bedrock Island Hull (Tapered rock cone down to y = -15.5)
+    const floatingBaseGeo = createFloatingIslandBase(MAP_W, MAP_D);
+    const floatingBaseMat = new THREE.MeshStandardMaterial({
+      color: 0x143222,
+      roughness: 0.85,
+      metalness: 0.08,
+      flatShading: true
     });
-    const baseMesh = new THREE.Mesh(baseGeo, baseMat);
-    baseMesh.position.y = -1.6;
-    scene.add(baseMesh);
+    const floatingBaseMesh = new THREE.Mesh(floatingBaseGeo, floatingBaseMat);
+    floatingBaseMesh.castShadow = true;
+    floatingBaseMesh.receiveShadow = true;
+    islandGroup.add(floatingBaseMesh);
 
-    // 8. Lake Kanjia Shimmering 3D Water Surface
+    // 9. Soft Floating Ground Shadow Plane (Grounded right under base at y = -16.0)
+    const shadowCanvas = document.createElement('canvas');
+    shadowCanvas.width = 512;
+    shadowCanvas.height = 256;
+    const shadowCtx = shadowCanvas.getContext('2d');
+    const shadowGrad = shadowCtx.createRadialGradient(256, 128, 10, 256, 128, 240);
+    shadowGrad.addColorStop(0, 'rgba(0, 15, 8, 0.75)');
+    shadowGrad.addColorStop(0.5, 'rgba(0, 15, 8, 0.45)');
+    shadowGrad.addColorStop(0.85, 'rgba(0, 15, 8, 0.12)');
+    shadowGrad.addColorStop(1, 'rgba(0, 15, 8, 0)');
+    shadowCtx.fillStyle = shadowGrad;
+    shadowCtx.fillRect(0, 0, 512, 256);
+
+    const shadowTexture = new THREE.CanvasTexture(shadowCanvas);
+    const shadowGeo = new THREE.PlaneGeometry(MAP_W * 1.35, MAP_D * 1.35);
+    shadowGeo.rotateX(-Math.PI / 2);
+    const shadowMat = new THREE.MeshBasicMaterial({
+      map: shadowTexture,
+      transparent: true,
+      opacity: 0.65,
+      depthWrite: false
+    });
+    const shadowMesh = new THREE.Mesh(shadowGeo, shadowMat);
+    shadowMesh.position.y = -5.2;
+    scene.add(shadowMesh);
+    shadowMeshRef.current = shadowMesh;
+
+    // 12. Lake Kanjia Shimmering 3D Water Surface
     const waterGeo = new THREE.PlaneGeometry(36, 20, 24, 24);
     waterGeo.rotateX(-Math.PI / 2);
     const waterMat = new THREE.MeshStandardMaterial({
@@ -557,10 +778,10 @@ export default function ThreeZooMap({
     });
     const waterMesh = new THREE.Mesh(waterGeo, waterMat);
     waterMesh.position.set(28, -0.42, -14);
-    scene.add(waterMesh);
+    islandGroup.add(waterMesh);
     waterMeshRef.current = waterMesh;
 
-    // 9. 3D Miniature Sal & Teak Forest Trees (Instanced Clusters for 3D Parallax)
+    // 13. 3D Miniature Sal & Teak Forest Trees
     const treeGroup = new THREE.Group();
     const trunkGeo = new THREE.CylinderGeometry(0.12, 0.18, 1.3, 6);
     const foliageGeo1 = new THREE.ConeGeometry(0.85, 1.7, 6);
@@ -572,15 +793,12 @@ export default function ThreeZooMap({
     const foliageMatC = new THREE.MeshStandardMaterial({ color: 0x40916c, roughness: 0.7 });
     const foliageMats = [foliageMatA, foliageMatB, foliageMatC];
 
-    // Seed realistic tree positions along forest borders, trails, and lakeside
     const treeCount = 95;
     for (let i = 0; i < treeCount; i++) {
-      // Concentrate around perimeter and forest tracts
       const angle = (i / treeCount) * Math.PI * 2;
       const rx = (Math.cos(angle) * 0.44 + (Math.sin(i * 3.7) * 0.06)) * MAP_W;
       const rz = (Math.sin(angle) * 0.44 + (Math.cos(i * 4.3) * 0.06)) * MAP_D;
 
-      // Don't put trees inside the water lake basin
       if (rx > 14 && rz < -6) continue;
 
       const ry = getTerrainElevation(rx, rz);
@@ -609,13 +827,12 @@ export default function ThreeZooMap({
 
       treeGroup.add(tree);
     }
-    scene.add(treeGroup);
+    islandGroup.add(treeGroup);
     treeGroupRef.current = treeGroup;
 
-    // 10. 3D Target Identification Beacon (Slender Holographic Laser Pillar + Refined Target Rings)
+    // 14. 3D Target Identification Beacon
     const beaconGroup = new THREE.Group();
 
-    // Sleek, Non-Obscuring Holographic Light Pillar
     const pillarGeo = new THREE.CylinderGeometry(0.08, 0.65, 36, 16, 1, true);
     const pillarMat = new THREE.MeshBasicMaterial({
       color: 0x38bdf8,
@@ -629,7 +846,6 @@ export default function ThreeZooMap({
     pillar.position.y = 18;
     beaconGroup.add(pillar);
 
-    // Ultra-thin Inner Guide Laser
     const coreGeo = new THREE.CylinderGeometry(0.02, 0.05, 36, 8);
     const coreMat = new THREE.MeshBasicMaterial({
       color: 0xffffff,
@@ -642,7 +858,6 @@ export default function ThreeZooMap({
     coreBeam.position.y = 18;
     beaconGroup.add(coreBeam);
 
-    // Delicate Ground Reticle Rings (Clear enclosure view)
     const ringGeo1 = new THREE.RingGeometry(1.2, 1.45, 32);
     ringGeo1.rotateX(-Math.PI / 2);
     const ringMat1 = new THREE.MeshBasicMaterial({
@@ -669,10 +884,9 @@ export default function ThreeZooMap({
     ring2.position.y = 0.08;
     beaconGroup.add(ring2);
 
-    scene.add(beaconGroup);
+    islandGroup.add(beaconGroup);
     beaconGroupRef.current = beaconGroup;
 
-    // Initial position for beacon
     if (activeMarker) {
       const { x, y, z } = get3DCoords(activeMarker);
       beaconGroup.position.set(x, y, z);
@@ -686,16 +900,14 @@ export default function ThreeZooMap({
       beaconGroup.visible = false;
     }
 
-    // 11. Animation Loop & Throttled Screen Projection for HTML Badges
+    // 15. Animation Loop & Screen Projection for HTML Badges
     let clock = new THREE.Clock();
     let lastUiUpdate = 0;
 
     const updateProjection = (now) => {
-      // Throttle React state updates to ~20 FPS (every 50ms) to ensure smooth 60 FPS Three.js rendering
-      if (now - lastUiUpdate < 50) return;
+      if (now - lastUiUpdate < 40) return;
       lastUiUpdate = now;
 
-      // Calculate camera heading and pitch for Compass & 3D Gizmo
       const camPos = camera.position;
       const targetPos = controls.target;
       const dx = camPos.x - targetPos.x;
@@ -712,7 +924,6 @@ export default function ThreeZooMap({
       const pitchDeg = Math.atan2(dy, groundDist) * 180 / Math.PI;
       setCameraPitch(pitchDeg);
 
-      // Project each animal marker's 3D position to 2D screen coordinates
       const w = curW;
       const h = curH;
 
@@ -724,6 +935,11 @@ export default function ThreeZooMap({
         .map((marker) => {
           const { x, y, z } = get3DCoords(marker);
           const worldPos = new THREE.Vector3(x, y + 2.2, z);
+
+          // Apply islandGroup world matrix so HTML pins follow floating levitation and rotation!
+          if (islandGroupRef.current) {
+            worldPos.applyMatrix4(islandGroupRef.current.matrixWorld);
+          }
 
           worldPos.project(camera);
 
@@ -748,21 +964,38 @@ export default function ThreeZooMap({
       animFrameRef.current = requestAnimationFrame(animate);
 
       const elapsedTime = clock.getElapsedTime();
+
+      // Graceful, attractive floating levitation motion
+      // Smooth sinusoidal elevation wave that makes the 3D diorama hover majestically in space
+      const floatY = Math.sin(elapsedTime * 1.1) * 0.65;
+
+      islandGroup.position.y = floatY;
+      islandGroup.rotation.x = 0; // Keep level so terrain is upright, crisp & readable!
+      islandGroup.rotation.z = 0;
+      islandGroup.updateMatrixWorld();
+
+      // Dynamic breathing ground shadow scaling with height
+      if (shadowMeshRef.current) {
+        const shadowScale = 1.0 + floatY * 0.035;
+        shadowMeshRef.current.scale.set(shadowScale, 1, shadowScale);
+        shadowMeshRef.current.material.opacity = Math.max(0.3, 0.58 - floatY * 0.06);
+      }
+
       controls.update();
 
-      // Animate Light Beacon: gentle rotation and pulsing glow
+      // Animate Light Beacon
       if (beaconGroup.visible) {
-        pillar.rotation.y = elapsedTime * 0.8;
-        ring1.rotation.y = -elapsedTime * 1.2;
-        ring2.rotation.y = elapsedTime * 0.9;
-        const pulse = 0.2 + Math.sin(elapsedTime * 3.0) * 0.08;
+        pillar.rotation.y = elapsedTime * 1.2;
+        ring1.rotation.y = -elapsedTime * 1.6;
+        ring2.rotation.y = elapsedTime * 1.3;
+        const pulse = 0.22 + Math.sin(elapsedTime * 4.0) * 0.1;
         pillarMat.opacity = pulse;
-        ringMat1.opacity = 0.4 + Math.sin(elapsedTime * 3.0) * 0.15;
+        ringMat1.opacity = 0.45 + Math.sin(elapsedTime * 4.0) * 0.18;
       }
 
       // Animate Lake Kanjia water sheen
       if (waterMesh) {
-        waterMat.opacity = 0.72 + Math.sin(elapsedTime * 1.5) * 0.06;
+        waterMat.opacity = 0.74 + Math.sin(elapsedTime * 2.0) * 0.07;
       }
 
       updateProjection(performance.now());
@@ -772,7 +1005,37 @@ export default function ThreeZooMap({
 
     animate();
 
-    // ResizeObserver on the container to dynamically match flex/grid layout
+    // Listen for custom navigation event from navbar or hero buttons to start continuous orbit
+    const handleStartOrbit = () => {
+      const dx = camera.position.x - controls.target.x;
+      const dy = camera.position.y - controls.target.y;
+      const dz = camera.position.z - controls.target.z;
+      const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+      const isOffCenter = controls.target.length() > 2.0;
+      const isZoomed = dist < 50 || dist > 85;
+
+      if (isOffCenter || isZoomed) {
+        resetToFrontView(true);
+      } else {
+        startOrbitRotation();
+      }
+    };
+    window.addEventListener('start-zoo-map-orbit', handleStartOrbit);
+    window.addEventListener('reset-zoo-map-view', handleStartOrbit);
+
+    // Automatically start 360° turntable orbit whenever visitor scrolls or moves to the map section
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            handleStartOrbit();
+          }
+        });
+      },
+      { threshold: 0.15 }
+    );
+    if (container) observer.observe(container);
+
     const resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
         const { width: newW, height: newH } = entry.contentRect;
@@ -788,17 +1051,26 @@ export default function ThreeZooMap({
     resizeObserver.observe(container);
 
     return () => {
+      window.removeEventListener('start-zoo-map-orbit', handleStartOrbit);
+      window.removeEventListener('reset-zoo-map-view', handleStartOrbit);
+      if (observer && container) observer.unobserve(container);
       resizeObserver.disconnect();
+      if (idleTimer) clearTimeout(idleTimer);
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
       if (renderer.domElement) {
         renderer.domElement.removeEventListener('wheel', onCanvasWheel);
+        renderer.domElement.removeEventListener('dblclick', onCanvasDblClick);
+        renderer.domElement.removeEventListener('pointerdown', handleCanvasInteractionStart);
+        renderer.domElement.removeEventListener('pointerup', handleCanvasInteractionEnd);
+        renderer.domElement.removeEventListener('pointerleave', handleCanvasInteractionEnd);
         if (container.contains(renderer.domElement)) {
           container.removeChild(renderer.domElement);
         }
       }
       renderer.dispose();
       terrainGeo.dispose();
-      baseGeo.dispose();
+      if (typeof floatingBaseGeo !== 'undefined' && floatingBaseGeo) floatingBaseGeo.dispose();
+      shadowGeo.dispose();
       waterGeo.dispose();
       scene.clear();
     };
@@ -813,11 +1085,18 @@ export default function ThreeZooMap({
     : null;
 
   return (
-    <div className={`relative w-full ${isFullscreen ? 'h-full flex-1 min-h-screen' : 'h-[280px] sm:h-[330px] lg:h-[370px]'} bg-forest-950 overflow-hidden select-none`}>
+    <div className={`relative w-full ${isFullscreen ? 'h-full flex-1 min-h-screen' : isExpanded ? 'h-[620px] sm:h-[700px] md:h-[780px] lg:h-[840px] xl:h-[900px]' : 'h-[420px] sm:h-[480px] md:h-[540px] lg:h-[580px] xl:h-[600px] 2xl:h-[620px]'} bg-forest-950 overflow-hidden select-none transition-all duration-300`}>
 
       {/* Three.js Canvas Container */}
       <div
         ref={mountRef}
+        onClick={() => {
+          if (activeMarker || isolateMarkerId) {
+            handleOverview();
+          } else if (!isAutoRotateRef.current) {
+            startOrbitRotation();
+          }
+        }}
         className="w-full h-full cursor-grab active:cursor-grabbing"
       />
 
@@ -874,9 +1153,9 @@ export default function ThreeZooMap({
               <span>GEO: {activeMarker.latitude?.toFixed(4)}°N, {activeMarker.longitude?.toFixed(4)}°E</span>
             </span>
             <span className="text-ivory-400/50 hidden sm:inline">•</span>
-            <span className="text-emerald-400 hidden sm:inline">3D TERRAIN BEACON: ACTIVE</span>
+            <span className="text-emerald-400 hidden sm:inline">4K ARCHITECTURAL DIORAMA: ACTIVE</span>
             <span className="text-ivory-400/50 hidden sm:inline">•</span>
-            <span className="hidden sm:inline">Drag to Orbit • Ctrl + Scroll / ± to Zoom</span>
+            <span className="hidden sm:inline">360° Circular Orbit • Drag in Circle to Rotate</span>
           </div>
 
           {/* ISOLATED REGION ONLY BADGE + SHOW ALL ANIMALS TOGGLE */}
@@ -999,7 +1278,7 @@ export default function ThreeZooMap({
         })}
       </div>
 
-      {/* GOOGLE EARTH 3D COMPASS ROSE (TOP RIGHT - POSITIONED SAFELY CLEAR OF FULLSCREEN / CLOSE BUTTONS) */}
+      {/* GOOGLE EARTH 3D COMPASS ROSE (TOP RIGHT) */}
       <div className={`absolute top-4 ${isFullscreen ? 'right-24 sm:right-28' : 'right-20 sm:right-24'} z-20 flex flex-col items-center gap-1.5 select-none pointer-events-auto`}>
         <button
           onClick={resetNorth}
@@ -1038,25 +1317,64 @@ export default function ThreeZooMap({
         </span>
       </div>
 
-      {/* GOOGLE EARTH-STYLE FLOATING HUD CONTROLS (BOTTOM RIGHT) */}
-      <div className="absolute bottom-4 right-4 z-20 flex flex-col items-end gap-2">
+      {/* 360° CIRCULAR NAVIGATION & CONTROLS (BOTTOM RIGHT) */}
+      <div className="absolute bottom-4 right-4 z-20 flex flex-col items-end gap-2 pointer-events-auto">
 
-        {/* 3D Google Earth Perspective Switcher / Reset Button */}
-        <button
-          onClick={toggle2D3D}
-          className="px-3 py-1.5 rounded-xl bg-forest-950/92 hover:bg-forest-900 border border-gold-500/40 text-gold-300 hover:text-gold-200 text-xs font-mono font-bold uppercase tracking-wider shadow-2xl backdrop-blur-md transition-all flex items-center gap-1.5 group cursor-pointer"
-          title={is3DMode ? "3D View Active (Click for Overhead Angle)" : "Overhead View (Click for 3D Angle)"}
-        >
-          <Layers className="w-3.5 h-3.5 text-gold-400 group-hover:rotate-12 transition-transform" />
-          <span>3D VIEW</span>
-        </button>
+        {/* Top Control Bar: Quick Zoom Model Size, 360° Continuous Orbit Toggle & 3D Perspective Switcher */}
+        <div className="flex items-center gap-1.5">
+          {/* Quick Zoom / Increase 3D Size Pill */}
+          <div className="flex items-center gap-1 bg-forest-950/92 backdrop-blur-md p-1 rounded-xl border border-gold-500/40 text-[11px] font-mono shadow-xl">
+            <button
+              onClick={() => handleZoom(0.75)}
+              className="px-2 py-0.5 rounded-lg bg-forest-900/90 hover:bg-gold-500/30 text-gold-300 font-bold hover:text-gold-100 transition-colors cursor-pointer flex items-center gap-1"
+              title="Increase 3D Map Model Size (Zoom In)"
+              aria-label="Increase 3D Map Model Size"
+            >
+              <ZoomIn className="w-3 h-3 text-gold-400" />
+              <span>INCREASE</span>
+            </button>
+            <button
+              onClick={() => handleZoom(1.3)}
+              className="px-1.5 py-0.5 rounded-lg bg-forest-900/90 hover:bg-forest-800 text-ivory-300 font-bold hover:text-ivory-100 transition-colors cursor-pointer"
+              title="Decrease 3D Map Model Size (Zoom Out)"
+              aria-label="Decrease 3D Map Model Size"
+            >
+              <ZoomOut className="w-3 h-3" />
+            </button>
+          </div>
 
-        {/* Navigation Gizmo Stack */}
+          {/* 360° Continuous Auto-Orbit Button */}
+          <button
+            onClick={toggleAutoRotate}
+            className={`px-3 py-1.5 rounded-xl border text-xs font-mono font-bold uppercase tracking-wider shadow-2xl backdrop-blur-md transition-all flex items-center gap-1.5 cursor-pointer ${
+              isAutoRotate
+                ? 'bg-emerald-500 text-black border-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.5)]'
+                : 'bg-forest-950/92 hover:bg-forest-900 border-gold-500/40 text-gold-300'
+            }`}
+            title={isAutoRotate ? "Pause 360° Auto-Orbit" : "Start 360° Circular Orbit"}
+          >
+            <RotateCcw className={`w-3.5 h-3.5 ${isAutoRotate ? 'animate-spin' : ''}`} style={{ animationDuration: '3.0s' }} />
+            <span>{isAutoRotate ? '360° (ON)' : '360° ORBIT'}</span>
+            {isAutoRotate && <span className="w-1.5 h-1.5 rounded-full bg-black animate-ping" />}
+          </button>
+
+          {/* 3D Google Earth Perspective Switcher */}
+          <button
+            onClick={toggle2D3D}
+            className="px-3 py-1.5 rounded-xl bg-forest-950/92 hover:bg-forest-900 border border-gold-500/40 text-gold-300 hover:text-gold-200 text-xs font-mono font-bold uppercase tracking-wider shadow-2xl backdrop-blur-md transition-all flex items-center gap-1.5 group cursor-pointer"
+            title={is3DMode ? "3D View Active (Click for Overhead Angle)" : "Overhead View (Click for 3D Angle)"}
+          >
+            <Layers className="w-3.5 h-3.5 text-gold-400 group-hover:rotate-12 transition-transform" />
+            <span>3D VIEW</span>
+          </button>
+        </div>
+
+        {/* Circular Direction Navigation Gizmo Stack */}
         <div className="flex items-center gap-1.5 bg-forest-950/92 backdrop-blur-xl p-1.5 rounded-2xl border border-gold-500/30 shadow-2xl">
           {/* Tilt Up */}
           <button
             onClick={handleTiltUp}
-            className="p-2 rounded-xl bg-forest-900/80 hover:bg-forest-800 text-ivory-100 hover:text-gold-400 transition-colors shadow-sm"
+            className="p-2 rounded-xl bg-forest-900/80 hover:bg-forest-800 text-ivory-100 hover:text-gold-400 transition-colors shadow-sm cursor-pointer"
             title="Tilt Camera Up towards Horizon"
             aria-label="Tilt Camera Up"
           >
@@ -1066,27 +1384,47 @@ export default function ThreeZooMap({
           {/* Tilt Down */}
           <button
             onClick={handleTiltDown}
-            className="p-2 rounded-xl bg-forest-900/80 hover:bg-forest-800 text-ivory-100 hover:text-gold-400 transition-colors shadow-sm"
+            className="p-2 rounded-xl bg-forest-900/80 hover:bg-forest-800 text-ivory-100 hover:text-gold-400 transition-colors shadow-sm cursor-pointer"
             title="Tilt Camera Down towards Overhead"
             aria-label="Tilt Camera Down"
           >
             <ChevronDown className="w-4 h-4" />
           </button>
 
-          {/* Rotate Left 45° */}
+          {/* Orbit in Circle Counter-Clockwise 45° */}
           <button
             onClick={() => handleRotate(1)}
-            className="p-2 rounded-xl bg-forest-900/80 hover:bg-forest-800 text-ivory-100 hover:text-gold-400 transition-colors shadow-sm"
-            title="Orbit Left 45°"
+            className="p-2 rounded-xl bg-forest-900/80 hover:bg-forest-800 text-ivory-100 hover:text-gold-400 transition-colors shadow-sm cursor-pointer"
+            title="Orbit Counter-Clockwise in Circle 45°"
             aria-label="Orbit Left"
           >
             <RotateCcw className="w-4 h-4" />
           </button>
 
+          {/* Orbit in Circle Clockwise 45° */}
+          <button
+            onClick={() => handleRotate(-1)}
+            className="p-2 rounded-xl bg-forest-900/80 hover:bg-forest-800 text-ivory-100 hover:text-gold-400 transition-colors shadow-sm cursor-pointer"
+            title="Orbit Clockwise in Circle 45°"
+            aria-label="Orbit Right"
+          >
+            <RotateCw className="w-4 h-4" />
+          </button>
+
+          {/* Fast 360° Circular Panoramic Sweep (2.0s) */}
+          <button
+            onClick={() => handle360Spin(1)}
+            className="p-2 rounded-xl bg-forest-900/80 hover:bg-forest-800 text-emerald-400 hover:text-emerald-300 transition-colors shadow-sm cursor-pointer"
+            title="Perform Fast 360° Panoramic Circular Spin"
+            aria-label="360 Spin"
+          >
+            <Orbit className="w-4 h-4" />
+          </button>
+
           {/* Zoom In (+) */}
           <button
             onClick={() => handleZoom(0.75)}
-            className="p-2 rounded-xl bg-forest-900/80 hover:bg-forest-800 text-ivory-100 hover:text-gold-400 transition-colors shadow-sm"
+            className="p-2 rounded-xl bg-forest-900/80 hover:bg-forest-800 text-ivory-100 hover:text-gold-400 transition-colors shadow-sm cursor-pointer"
             title="Zoom In"
             aria-label="Zoom in"
           >
@@ -1096,18 +1434,18 @@ export default function ThreeZooMap({
           {/* Zoom Out (-) */}
           <button
             onClick={() => handleZoom(1.35)}
-            className="p-2 rounded-xl bg-forest-900/80 hover:bg-forest-800 text-ivory-100 hover:text-gold-400 transition-colors shadow-sm"
+            className="p-2 rounded-xl bg-forest-900/80 hover:bg-forest-800 text-ivory-100 hover:text-gold-400 transition-colors shadow-sm cursor-pointer"
             title="Zoom Out"
             aria-label="Zoom out"
           >
             <ZoomOut className="w-4 h-4" />
           </button>
 
-          {/* View Entire Sanctuary Overview */}
+          {/* Reset Overview */}
           <button
             onClick={handleOverview}
-            className="p-2 rounded-xl bg-gradient-to-r from-gold-500/20 to-gold-600/30 hover:bg-gold-500 text-gold-300 hover:text-forest-950 transition-colors shadow-sm font-bold text-xs"
-            title="Reset to Full Sanctuary Orbit Overview"
+            className="p-2 rounded-xl bg-gradient-to-r from-gold-500/20 to-gold-600/30 hover:bg-gold-500 text-gold-300 hover:text-forest-950 transition-colors shadow-sm font-bold text-xs cursor-pointer"
+            title="Reset to Full Floating Sanctuary Diorama Overview"
             aria-label="Full Sanctuary Overview"
           >
             <Navigation className="w-4 h-4" />
