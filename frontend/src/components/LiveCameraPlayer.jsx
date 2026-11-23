@@ -40,6 +40,8 @@ import {
   ZoomIn,
   ZoomOut,
   RefreshCw,
+  RotateCcw,
+  Signal,
   Loader2,
   Flame
 } from 'lucide-react';
@@ -1715,7 +1717,7 @@ export default function LiveCameraPlayer({
                     }}
                     className={`px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl text-[10px] sm:text-xs font-semibold backdrop-blur-md transition-all border flex items-center gap-1.5 cursor-pointer shrink-0 shadow-lg select-none ${showTopQualityMenu
                       ? 'bg-[#C8A96B] text-[#071D12] border-[#C8A96B] font-bold shadow-md shadow-[#C8A96B]/25'
-                      : 'bg-[#06180E]/85 hover:bg-[#0B2A1A] text-[#F5F4EA] border-[#C8A96B]/40 hover:border-[#C8A96B]'
+                      : 'bg-[#092215]/85 hover:bg-[#123D2B] text-[#F5F4EA] border-[#26734D]/60 hover:border-[#C8A96B]/60'
                       }`}
                     title={`Video Stream Quality: ${displayResolution} (Click to change)`}
                     aria-label="Change Video Stream Quality"
@@ -1728,7 +1730,7 @@ export default function LiveCameraPlayer({
                     )}
                     <span className={`px-1.5 py-0.2 rounded text-[9px] font-mono font-bold ${showTopQualityMenu
                       ? 'bg-[#071D12] text-[#C8A96B]'
-                      : 'bg-[#C8A96B]/20 text-[#C8A96B] border border-[#C8A96B]/40'
+                      : 'bg-[#061D12] text-[#C8A96B] border border-[#26734D]/60'
                       }`}>
                       {streamQuality === '480p' || streamQuality === '360p' ? 'SD' : 'HD'}
                     </span>
@@ -1737,20 +1739,38 @@ export default function LiveCameraPlayer({
                   {/* Top-Right Quality Dropdown Popover */}
                   {showTopQualityMenu && (
                     <div
-                      className="absolute top-full right-0 mt-1.5 w-44 sm:w-48 bg-[#06180E]/95 backdrop-blur-xl border border-[#C8A96B]/50 rounded-xl shadow-2xl p-1.5 z-50 text-xs font-mono animate-fadeIn pointer-events-auto max-h-[50vh] overflow-y-auto scrollbar-thin shadow-black/80"
+                      className="absolute top-full right-0 mt-2 w-64 sm:w-72 bg-[#0B2A1A] border border-[#C8A96B]/50 rounded-2xl shadow-2xl p-3.5 z-50 text-[#F5F4EA] animate-fadeIn pointer-events-auto max-h-[60vh] overflow-y-auto scrollbar-thin shadow-black/80"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      <div className="flex items-center justify-between px-2 py-1 text-[9.5px] border-b border-[#C8A96B]/20 mb-1 font-bold">
-                        <span className="flex items-center gap-1.5 text-[#C8A96B] uppercase tracking-wider">
-                          <SlidersHorizontal className="w-3 h-3 text-[#C8A96B]" />
-                          Video Stream Quality
+                      {/* Header */}
+                      <div className="flex items-center justify-between pb-2 mb-2.5 border-b border-white/10">
+                        <span className="text-[11px] font-mono uppercase tracking-widest text-[#C8A96B] flex items-center gap-1.5 font-bold">
+                          <SlidersHorizontal className="w-3.5 h-3.5 text-[#C8A96B]" />
+                          <span>Stream Quality</span>
                         </span>
-                        <span className="text-[10px] font-mono font-bold px-1.5 py-0.2 rounded-full bg-[#C8A96B]/20 text-[#C8A96B] border border-[#C8A96B]/40">
-                          {streamQuality.toUpperCase()}
-                        </span>
+                        {streamQuality !== 'auto' ? (
+                          <button
+                            type="button"
+                            onClick={() => handleSelectQuality('auto')}
+                            className="text-[10px] font-mono text-[#C8A96B] hover:text-white flex items-center gap-1 transition-colors cursor-pointer"
+                            title="Reset to Auto quality"
+                          >
+                            <RotateCcw className="w-3 h-3 text-[#C8A96B]" /> Reset
+                          </button>
+                        ) : (
+                          <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-[#061D12] text-[#C8A96B] border border-[#26734D]/70">
+                            Adaptive
+                          </span>
+                        )}
                       </div>
 
-                      <div className="space-y-1">
+                      {/* Stream Quality Options Header Label */}
+                      <label className="text-[11px] font-medium text-[#F5F4EA]/80 block mb-1.5">
+                        Resolution & Bitrate
+                      </label>
+
+                      {/* Quality Options List styled with the accessibility color combination */}
+                      <div className="space-y-1 bg-[#061D12] p-1.5 rounded-xl border border-[#26734D]/50 mb-2.5">
                         {QUALITY_OPTIONS.map((q) => {
                           const isSelected = streamQuality === q.id;
                           return (
@@ -1758,19 +1778,46 @@ export default function LiveCameraPlayer({
                               key={q.id}
                               type="button"
                               onClick={() => handleSelectQuality(q.id)}
-                              className={`w-full text-left px-2.5 py-1.5 rounded-lg flex items-center justify-between transition-all duration-150 cursor-pointer ${isSelected
-                                ? 'bg-[#C8A96B] text-[#071D12] font-black border border-[#C8A96B] shadow-sm shadow-[#C8A96B]/25'
-                                : 'bg-[#06180E]/90 text-[#F5F4EA] border border-white/5 hover:border-[#C8A96B]/50 hover:bg-[#0B2A1A] hover:text-[#C8A96B]'
-                                }`}
+                              className={`w-full px-2.5 py-1.5 rounded-lg flex items-center justify-between transition-all cursor-pointer ${
+                                isSelected
+                                  ? 'bg-[#C8A96B] text-[#071D12] font-bold shadow-sm'
+                                  : 'text-[#F5F4EA]/80 hover:bg-[#1B6537]/50 hover:text-white'
+                              }`}
                             >
-                              <span className={`text-[11px] font-mono font-bold tracking-wider ${isSelected ? 'text-[#071D12]' : 'text-[#F5F4EA]'}`}>
+                              <span className={`text-xs font-bold tracking-wide ${isSelected ? 'text-[#071D12]' : 'text-[#F5F4EA]'}`}>
                                 {q.badge}
                               </span>
-                              {isSelected && <CheckCircle2 className="w-3.5 h-3.5 text-[#071D12] shrink-0" />}
+                              <div className="flex items-center gap-1.5">
+                                <span className={`text-[10px] font-mono ${isSelected ? 'text-[#071D12]/85 font-semibold' : 'text-[#C8A96B]'}`}>
+                                  {q.fps} • {q.bitrate}
+                                </span>
+                                {isSelected && <CheckCircle2 className="w-3.5 h-3.5 text-[#071D12] shrink-0" />}
+                              </div>
                             </button>
                           );
                         })}
                       </div>
+
+                      {/* Active Status Row */}
+                      <div className="mb-2.5 flex items-center justify-between p-2.5 rounded-xl bg-[#061D12] border border-[#26734D]/50">
+                        <span className="text-xs font-medium text-[#F5F4EA] flex items-center gap-2">
+                          <Signal className="w-3.5 h-3.5 text-[#C8A96B]" />
+                          <span>Active Stream</span>
+                        </span>
+                        <span className="text-[11px] font-mono font-bold text-[#C8A96B]">
+                          {displayFps} • {displayBitrate}
+                        </span>
+                      </div>
+
+                      {/* Bottom Action Button */}
+                      <button
+                        type="button"
+                        onClick={() => handleSelectQuality(streamQuality === 'auto' ? '1080p' : 'auto')}
+                        className="w-full py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-2 border transition-all bg-[#1B6537] text-white hover:text-[#C8A96B] hover:bg-[#217c44] border border-[#26734D]/70 shadow-sm cursor-pointer"
+                      >
+                        <Sparkles className="w-3.5 h-3.5" />
+                        <span>{streamQuality === 'auto' ? 'Lock Full HD (1080P)' : 'Switch to Adaptive Auto'}</span>
+                      </button>
                     </div>
                   )}
                 </div>
@@ -1784,7 +1831,7 @@ export default function LiveCameraPlayer({
                     }}
                     className={`px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl text-[10px] sm:text-xs font-semibold backdrop-blur-md transition-all border flex items-center gap-1.5 cursor-pointer shrink-0 shadow-lg select-none ${showZoomMenu || zoomLevel > 1
                       ? 'bg-[#C8A96B] text-[#071D12] border-[#C8A96B] font-bold shadow-md shadow-[#C8A96B]/25'
-                      : 'bg-[#06180E]/85 hover:bg-[#0B2A1A] text-[#F5F4EA] border-[#C8A96B]/40 hover:border-[#C8A96B]'
+                      : 'bg-[#092215]/85 hover:bg-[#123D2B] text-[#F5F4EA] border-[#26734D]/60 hover:border-[#C8A96B]/60'
                       }`}
                     title={`Digital Zoom: ${zoomLevel}x (Click to change zoom level)`}
                     aria-label="Change Video Zoom Level"
@@ -1804,40 +1851,86 @@ export default function LiveCameraPlayer({
                   {/* Top-Right Zoom Dropdown Popover */}
                   {showZoomMenu && (
                     <div
-                      className="absolute top-full right-0 mt-1.5 w-44 sm:w-48 bg-[#06180E]/95 backdrop-blur-xl border border-[#C8A96B]/50 rounded-xl shadow-2xl p-1.5 z-50 text-xs font-mono animate-fadeIn pointer-events-auto max-h-[50vh] overflow-y-auto scrollbar-thin shadow-black/80"
+                      className="absolute top-full right-0 mt-2 w-64 sm:w-72 bg-[#0B2A1A] border border-[#C8A96B]/50 rounded-2xl shadow-2xl p-3.5 z-50 text-[#F5F4EA] animate-fadeIn pointer-events-auto shadow-black/80"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      <div className="flex items-center justify-between px-2 py-1 text-[9.5px] border-b border-[#C8A96B]/20 mb-1 font-bold">
-                        <span className="flex items-center gap-1.5 text-[#C8A96B] uppercase tracking-wider">
-                          <ZoomIn className="w-3 h-3 text-[#C8A96B]" />
-                          Optical & Digital Zoom
+                      {/* Header */}
+                      <div className="flex items-center justify-between pb-2 mb-2.5 border-b border-white/10">
+                        <span className="text-[11px] font-mono uppercase tracking-widest text-[#C8A96B] flex items-center gap-1.5 font-bold">
+                          <ZoomIn className="w-3.5 h-3.5 text-[#C8A96B]" />
+                          <span>Digital Zoom</span>
                         </span>
-                        <span className="text-[10px] font-mono font-bold px-1.5 py-0.2 rounded-full bg-[#C8A96B]/20 text-[#C8A96B] border border-[#C8A96B]/40">
-                          {zoomLevel}X
+                        {zoomLevel > 1 ? (
+                          <button
+                            type="button"
+                            onClick={() => handleSelectZoom(1)}
+                            className="text-[10px] font-mono text-[#C8A96B] hover:text-white flex items-center gap-1 transition-colors cursor-pointer"
+                            title="Reset zoom to 1x"
+                          >
+                            <RotateCcw className="w-3 h-3 text-[#C8A96B]" /> Reset
+                          </button>
+                        ) : (
+                          <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-[#061D12] text-[#C8A96B] border border-[#26734D]/70">
+                            1X Normal
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Magnification Segmented Controls (Matching Text Size 3-pill grid in screenshot) */}
+                      <div className="mb-2.5">
+                        <label className="text-[11px] font-medium text-[#F5F4EA]/80 block mb-1.5">
+                          Magnification Level
+                        </label>
+                        <div className="grid grid-cols-3 gap-1.5 bg-[#061D12] p-1 rounded-xl border border-[#26734D]/50">
+                          {ZOOM_OPTIONS.map((z) => {
+                            const isSelected = zoomLevel === z.level;
+                            return (
+                              <button
+                                key={z.level}
+                                type="button"
+                                onClick={() => handleSelectZoom(z.level)}
+                                className={`py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                                  isSelected
+                                    ? 'bg-[#C8A96B] text-[#071D12] shadow-sm'
+                                    : 'text-[#F5F4EA]/80 hover:bg-[#1B6537]/50 hover:text-white'
+                                }`}
+                              >
+                                {z.badge}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Field of View Row */}
+                      <div className="mb-2.5 flex items-center justify-between p-2.5 rounded-xl bg-[#061D12] border border-[#26734D]/50">
+                        <span className="text-xs font-medium text-[#F5F4EA] flex items-center gap-2">
+                          <Eye className="w-3.5 h-3.5 text-[#C8A96B]" />
+                          <span>Field of View</span>
+                        </span>
+                        <span className="text-[11px] font-mono font-bold text-[#C8A96B]">
+                          {zoomLevel === 1 ? '100% Panorama' : zoomLevel === 1.5 ? '67% Telephoto' : '50% Close-up'}
                         </span>
                       </div>
 
-                      <div className="space-y-1">
-                        {ZOOM_OPTIONS.map((z) => {
-                          const isSelected = zoomLevel === z.level;
-                          return (
-                            <button
-                              key={z.level}
-                              type="button"
-                              onClick={() => handleSelectZoom(z.level)}
-                              className={`w-full text-left px-2.5 py-1.5 rounded-lg flex items-center justify-between transition-all duration-150 cursor-pointer ${isSelected
-                                ? 'bg-[#C8A96B] text-[#071D12] font-black border border-[#C8A96B] shadow-sm shadow-[#C8A96B]/25'
-                                : 'bg-[#06180E]/90 text-[#F5F4EA] border border-white/5 hover:border-[#C8A96B]/50 hover:bg-[#0B2A1A] hover:text-[#C8A96B]'
-                                }`}
-                            >
-                              <span className={`text-[11px] font-mono font-bold tracking-wider ${isSelected ? 'text-[#071D12]' : 'text-[#F5F4EA]'}`}>
-                                {z.badge}
-                              </span>
-                              {isSelected && <CheckCircle2 className="w-3.5 h-3.5 text-[#071D12] shrink-0" />}
-                            </button>
-                          );
-                        })}
-                      </div>
+                      {/* Bottom Action Button */}
+                      <button
+                        type="button"
+                        onClick={() => handleSelectZoom(zoomLevel === 1 ? 2 : 1)}
+                        className="w-full py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-2 border transition-all bg-[#1B6537] text-white hover:text-[#C8A96B] hover:bg-[#217c44] border border-[#26734D]/70 shadow-sm cursor-pointer"
+                      >
+                        {zoomLevel === 1 ? (
+                          <>
+                            <ZoomIn className="w-3.5 h-3.5" />
+                            <span>Quick Zoom In (2X)</span>
+                          </>
+                        ) : (
+                          <>
+                            <RotateCcw className="w-3.5 h-3.5" />
+                            <span>Reset to Panorama (1X)</span>
+                          </>
+                        )}
+                      </button>
                     </div>
                   )}
                 </div>
@@ -1846,7 +1939,7 @@ export default function LiveCameraPlayer({
 
             {/* On-Screen Video Zoom Notification Toast */}
             {zoomNotification && (
-              <div className={`absolute ${cameraMovementNotification ? 'top-22 sm:top-24' : 'top-13 sm:top-14'} inset-x-0 mx-auto w-fit z-30 px-3.5 py-1.5 rounded-full bg-[#06180E]/90 backdrop-blur-md border border-[#C8A96B]/60 text-[#F5F4EA] shadow-2xl flex items-center gap-2 text-xs font-mono animate-fadeIn pointer-events-none`}>
+              <div className={`absolute ${cameraMovementNotification ? 'top-22 sm:top-24' : 'top-13 sm:top-14'} inset-x-0 mx-auto w-fit z-30 px-3.5 py-1.5 rounded-full bg-[#0B2A1A]/95 backdrop-blur-md border border-[#26734D]/80 text-[#F5F4EA] shadow-2xl flex items-center gap-2 text-xs font-mono animate-fadeIn pointer-events-none`}>
                 <ZoomIn className="w-3.5 h-3.5 text-[#C8A96B] animate-pulse" />
                 <span className="text-[#F5F4EA]/80">Digital Zoom:</span>
                 <span className="text-[#C8A96B] font-bold">{zoomNotification}</span>
@@ -1855,7 +1948,7 @@ export default function LiveCameraPlayer({
 
             {/* On-Screen Video Quality Notification Toast */}
             {qualityNotification && (
-              <div className={`absolute ${cameraMovementNotification ? 'top-22 sm:top-24' : 'top-13 sm:top-14'} inset-x-0 mx-auto w-fit z-30 px-3.5 py-1.5 rounded-full bg-[#06180E]/90 backdrop-blur-md border border-[#C8A96B]/60 text-[#F5F4EA] shadow-2xl flex items-center gap-2 text-xs font-mono animate-fadeIn pointer-events-none`}>
+              <div className={`absolute ${cameraMovementNotification ? 'top-22 sm:top-24' : 'top-13 sm:top-14'} inset-x-0 mx-auto w-fit z-30 px-3.5 py-1.5 rounded-full bg-[#0B2A1A]/95 backdrop-blur-md border border-[#26734D]/80 text-[#F5F4EA] shadow-2xl flex items-center gap-2 text-xs font-mono animate-fadeIn pointer-events-none`}>
                 <SlidersHorizontal className="w-3.5 h-3.5 text-[#C8A96B] animate-spin" />
                 <span className="text-[#F5F4EA]/80">Stream Quality:</span>
                 <span className="text-[#C8A96B] font-bold">{qualityNotification}</span>
