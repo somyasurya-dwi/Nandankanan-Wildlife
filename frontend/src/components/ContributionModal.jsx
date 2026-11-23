@@ -81,7 +81,7 @@ const ANIMAL_PROGRAMS = [
     slug: 'indian-pangolin',
     name: 'Indian Pangolin',
     emoji: '🦔',
-    desc: 'Support specialized insect and ant-egg diet formulation',
+    desc: 'Support approved animal nutrition and welfare programs',
     shareEmoji: '🐜',
     careEmoji: '🪵',
     supportEmoji: '❤️'
