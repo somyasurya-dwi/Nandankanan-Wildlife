@@ -12,6 +12,7 @@ import InteractiveMap from './components/InteractiveMap';
 import ExploreAnimals from './components/ExploreAnimals';
 import VirtualExperience from './components/VirtualExperience';
 import ConservationStories from './components/ConservationStories';
+import NewsNoticeSection from './components/NewsNoticeSection';
 import SponsorshipPortal from './components/SponsorshipPortal';
 import ConservationSection from './components/ConservationSection';
 import ParallaxSectionBreak from './components/ParallaxSectionBreak';
@@ -179,13 +180,18 @@ export default function App() {
   }, [currentPage]);
 
   // Universal accurate smooth scroll accounting for sticky navbar offset
-  const scrollToTarget = (targetId) => {
+  const scrollToTarget = (targetId, activeNavId) => {
     // Dismiss any open modal when programmatically navigating between sections
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('close-animal-modal'));
     }
 
-    setActiveSection(targetId);
+    if (activeNavId) {
+      setActiveSection(activeNavId);
+    } else {
+      setActiveSection(targetId);
+    }
+
     const el = document.getElementById(targetId);
     if (!el) return;
 
@@ -194,14 +200,14 @@ export default function App() {
 
     if (lenisRef.current) {
       lenisRef.current.scrollTo(el, {
-        offset: -headerHeight,
+        offset: -headerHeight - 12,
         duration: 1.2,
         immediate: false
       });
     } else {
       const elementPosition = el.getBoundingClientRect().top + window.scrollY;
       window.scrollTo({
-        top: Math.max(0, elementPosition - headerHeight),
+        top: Math.max(0, elementPosition - headerHeight - 12),
         behavior: 'smooth'
       });
     }
@@ -209,13 +215,11 @@ export default function App() {
 
   const handleSponsorAnimal = (animal) => {
     setSponsorAnimal(animal);
-    scrollToTarget('sponsorship-portal');
+    scrollToTarget('sponsorship-flow', 'sponsorship-portal');
   };
 
   const handleOpenLiveModalFromHero = () => {
-    if (INITIAL_CAMERAS && INITIAL_CAMERAS.length > 0) {
-      setActiveModalCamera(INITIAL_CAMERAS[0]);
-    }
+    scrollToTarget('live-cameras-grid', 'live-wildlife');
   };
 
   const handleLiveCamFromChatbot = (camera) => {
@@ -229,11 +233,8 @@ export default function App() {
     setHighlightedCameraId(camId);
     setInlinePlayingCameraId(camId);
 
-    // 3. Smooth scroll to the Live Section ("THE WILD, LIVE")
-    const liveSection = document.getElementById('live-wildlife');
-    if (liveSection) {
-      liveSection.scrollIntoView({ behavior: 'smooth' });
-    }
+    // 3. Smooth scroll directly to the Live Video Grid
+    scrollToTarget('live-cameras-grid', 'live-wildlife');
 
     // 4. Focus and center the specific camera card
     setTimeout(() => {
@@ -322,8 +323,8 @@ export default function App() {
         
         {/* 3. Full-Screen Cinematic Royal Bengal Tiger Hero Section (Bilingual Odia + English & Official Logo Crest) */}
         <CinematicVideoHero 
-          onExploreClick={() => scrollToTarget('explore-animals')}
-          onMapClick={() => scrollToTarget('interactive-map')}
+          onExploreClick={() => scrollToTarget('species-grid', 'explore-animals')}
+          onMapClick={() => scrollToTarget('zoo-map-viewport', 'interactive-map')}
           onWatchLiveClick={handleOpenLiveModalFromHero}
         />
 
@@ -353,8 +354,8 @@ export default function App() {
             { value: '64+', label: 'Avifauna Species' }
           ]}
           ctaText="Explore Illustrated Zoo Map"
-          ctaHref="#interactive-map"
-          onCtaClick={() => scrollToTarget('interactive-map')}
+          ctaHref="#zoo-map-viewport"
+          onCtaClick={() => scrollToTarget('zoo-map-viewport', 'interactive-map')}
         />
 
         {/* 5. Interactive Moveable Zoo Map with Click-to-Stream Animal Habitats */}
@@ -389,8 +390,8 @@ export default function App() {
             { value: '24/7', label: 'Veterinary Hospital' }
           ]}
           ctaText="Become an Animal Guardian"
-          ctaHref="#sponsorship-portal"
-          onCtaClick={() => scrollToTarget('sponsorship-portal')}
+          ctaHref="#sponsorship-flow"
+          onCtaClick={() => scrollToTarget('sponsorship-flow', 'sponsorship-portal')}
         />
 
         {/* 8. Editorial Conservation Stories: "EVERY LIFE HAS A STORY" */}
@@ -401,7 +402,10 @@ export default function App() {
         {/* 9. Scientific Conservation Impact & Metric Count-Up Counters */}
         <ConservationSection language={language} />
 
-        {/* 10. Virtual Animal Guardianship / Adoption Portal with Live Certificate */}
+        {/* 10. Official News & Notices Section (Image 2: Bulletins & Live Gazettes) */}
+        <NewsNoticeSection />
+
+        {/* 11. Virtual Animal Guardianship / Adoption Portal with Live Certificate */}
         <SponsorshipPortal 
           animals={animals}
           preSelectedAnimal={sponsorAnimal}

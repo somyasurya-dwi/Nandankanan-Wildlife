@@ -491,7 +491,7 @@ export default function ExploreAnimals({ animals = [], onSponsorAnimal }) {
 
         {/* Animal Cards Grid or Empty State */}
         {filteredAnimals.length > 0 ? (
-          <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 max-w-6xl mx-auto">
+          <div id="species-grid" className="relative z-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 max-w-6xl mx-auto scroll-mt-28">
             {filteredAnimals.map((animal) => {
               return (
                 <div

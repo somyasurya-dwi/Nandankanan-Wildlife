@@ -58,7 +58,7 @@ export default function ConservationStories({ stories }) {
         </div>
 
         {/* Stories Grid: Magazine Editorial Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+        <div id="stories-grid" className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch scroll-mt-28">
           
           {/* Main Hero Story (Span 7 cols) */}
           {stories[0] && (
