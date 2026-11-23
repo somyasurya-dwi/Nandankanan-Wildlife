@@ -7,7 +7,9 @@ import {
   MapPin, 
   Sparkles,
   Clock,
-  Lock
+  Lock,
+  Signal,
+  Info
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import LiveCameraPlayer from './LiveCameraPlayer';
