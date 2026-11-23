@@ -15,11 +15,13 @@ import {
   Calendar,
   Layers,
   ArrowRight,
-  Check
+  Check,
+  User,
+  Users
 } from 'lucide-react';
 import { subscriptionManager } from '../utils/subscriptionManager';
 import Realistic3DIcon from './reactions/Realistic3DIcon';
-import { SUBSCRIPTION_PLANS } from './AnimalSubscriptionPlans';
+import { SUBSCRIPTION_PLANS, USER_TIERS } from './AnimalSubscriptionPlans';
 
 export default function SubscriptionModal({ 
   isOpen, 
@@ -29,6 +31,7 @@ export default function SubscriptionModal({
   animalName = 'Wildlife Live Cameras',
   initialPlan = null
 }) {
+  const [selectedTier, setSelectedTier] = useState(() => initialPlan?.tier || '1_user');
   const [selectedPlanId, setSelectedPlanId] = useState(() => initialPlan?.id || 'plan_3m');
   const [isProcessing, setIsProcessing] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -38,9 +41,13 @@ export default function SubscriptionModal({
     if (initialPlan?.id) {
       setSelectedPlanId(initialPlan.id);
     }
+    if (initialPlan?.tier) {
+      setSelectedTier(initialPlan.tier);
+    }
   }, [initialPlan]);
 
   const currentPlan = SUBSCRIPTION_PLANS.find(p => p.id === selectedPlanId) || SUBSCRIPTION_PLANS[1];
+  const planPrice = currentPlan.prices ? (currentPlan.prices[selectedTier] || currentPlan.prices['1_user']) : (currentPlan.totalPrice || 249);
 
   // Demo payment checkout popup state
   const [showDemoGateway, setShowDemoGateway] = useState(false);
@@ -62,7 +69,7 @@ export default function SubscriptionModal({
         email: 'visitor@nandankanan.org',
         name: 'Sanctuary Supporter',
         animal,
-        amount: currentPlan.totalPrice,
+        amount: planPrice,
         planTitle: `${targetAnimalName} ${currentPlan.title} Live Stream Pass`,
         days: currentPlan.days
       });
@@ -101,7 +108,7 @@ export default function SubscriptionModal({
                 email: 'visitor@nandankanan.org',
                 name: 'Sanctuary Supporter',
                 animal,
-                amount: currentPlan.totalPrice,
+                amount: planPrice,
                 planTitle: `${targetAnimalName} ${currentPlan.title} Live Stream Pass`,
                 days: currentPlan.days,
                 isDemo: false
@@ -163,7 +170,7 @@ export default function SubscriptionModal({
         email: 'visitor@nandankanan.org',
         name: 'Sanctuary Supporter',
         animal,
-        amount: currentPlan.totalPrice,
+        amount: planPrice,
         planTitle: `${targetAnimalName} ${currentPlan.title} Live Stream Pass`,
         days: currentPlan.days,
         isDemo: true
@@ -248,71 +255,88 @@ export default function SubscriptionModal({
             You have enjoyed your 5-second free preview. Subscribe to the {targetAnimalName} Live Stream Pass to continue watching live.
           </p>
 
-          {/* 4-Tier Plan Selector (1 Month, 3 Months, 6 Months, 12 Months) matching reference design */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5 my-3">
+          {/* User Tier Capsule Pill Switcher (1 User | 3 Users | 5 Users) */}
+          <div className="flex justify-center my-2.5">
+            <div className="inline-flex items-center p-1 rounded-full bg-[#06180E] border border-[#C8A96B]/50 shadow-inner">
+              {USER_TIERS.map((tier, idx) => {
+                const isTierActive = selectedTier === tier.id;
+                return (
+                  <React.Fragment key={tier.id}>
+                    {idx > 0 && <span className="text-white/20 mx-1 font-mono text-xs">|</span>}
+                    <button
+                      type="button"
+                      onClick={() => setSelectedTier(tier.id)}
+                      className={`px-3 py-1 rounded-full text-xs font-bold transition-all flex items-center gap-1 cursor-pointer ${
+                        isTierActive
+                          ? 'bg-gradient-to-r from-[#C8A96B] via-[#E5C378] to-[#C8A96B] text-[#071D12] shadow-md'
+                          : 'text-white/70 hover:text-white'
+                      }`}
+                    >
+                      {tier.icon === 'user' ? <User className="w-3 h-3 stroke-[2.5]" /> : <Users className="w-3 h-3 stroke-[2.5]" />}
+                      <span>{tier.label}</span>
+                    </button>
+                  </React.Fragment>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* 3-Tier Plan Selector (1 Month, 3 Months, 6 Months) matching reference design */}
+          <div className="grid grid-cols-3 gap-2 sm:gap-2.5 my-3">
             {SUBSCRIPTION_PLANS.map((plan) => {
               const isSelected = plan.id === selectedPlanId;
+              const price = plan.prices[selectedTier] || plan.prices['1_user'];
               return (
                 <button
                   key={plan.id}
                   type="button"
                   onClick={() => setSelectedPlanId(plan.id)}
-                  className={`relative p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                  className={`relative p-2.5 sm:p-3 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
                     isSelected
-                      ? 'bg-[#14532D]/90 border-[#C8A96B] shadow-md shadow-[#C8A96B]/25 ring-1 ring-[#C8A96B]'
+                      ? 'bg-gradient-to-b from-[#0B2A1A] to-[#071D12] border-2 border-[#C8A96B] ring-1 ring-[#C8A96B] shadow-lg shadow-[#C8A96B]/25'
                       : 'bg-[#0B2A1A]/80 border-white/10 hover:border-[#C8A96B]/50 hover:bg-[#0B2A1A]'
                   }`}
                 >
-                  {plan.badge && (
-                    <span className="absolute -top-2.5 inset-x-0 mx-auto w-fit px-1.5 py-0.5 rounded-full bg-[#C8A96B] text-[#071D12] text-[8px] sm:text-[9px] font-bold uppercase tracking-wider whitespace-nowrap shadow-sm">
-                      {plan.isPopular ? '★ Popular' : '♥ Best Value'}
+                  {plan.isPopular && (
+                    <span className="absolute -top-2.5 inset-x-0 mx-auto w-fit px-1.5 py-0.2 rounded-full bg-[#C8A96B] text-[#071D12] text-[7.5px] sm:text-[8px] font-extrabold uppercase tracking-wider whitespace-nowrap shadow-sm">
+                      ★ POPULAR
                     </span>
                   )}
                   <div>
-                    <span className="text-xs font-serif font-bold text-white block mt-0.5">{plan.title}</span>
+                    <span className="text-xs sm:text-sm font-serif font-bold text-white block mt-0.5">{plan.title}</span>
                     <span className="text-[10px] text-[#A7D7A9] font-sans block">{plan.days} Days</span>
                   </div>
                   <div className="mt-2 pt-1 border-t border-white/10 flex items-baseline justify-between">
-                    <span className="text-xs sm:text-sm font-bold text-[#C8A96B] font-display">₹{plan.totalPrice}</span>
-                    <span className="text-[9px] text-white/50 font-mono">net</span>
+                    <span className="text-xs sm:text-base font-bold text-[#C8A96B] font-display">₹{price}</span>
+                    {plan.discount && (
+                      <span className="text-[8.5px] font-bold text-[#C8A96B] bg-[#C8A96B]/15 px-1 rounded">{plan.discount}</span>
+                    )}
                   </div>
                 </button>
               );
             })}
           </div>
 
-          {/* Prominent Price Tag for Selected Plan */}
-          <div className="my-2.5 p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-[#0B2A1A] border border-[#C8A96B]/40 flex items-center justify-between">
-            <div>
-              <span className="text-[10px] sm:text-xs text-[#C8A96B] uppercase font-mono tracking-wider">
-                {currentPlan.title} • {currentPlan.subtitle}
-              </span>
-              <div className="flex items-baseline gap-1 mt-0.5">
-                <span className="text-2xl sm:text-3xl font-extrabold text-[#C8A96B] font-display">₹{currentPlan.basePrice}</span>
-                <span className="text-[11px] sm:text-xs text-[#F5F4EA]/60 font-mono">+ GST (18%)</span>
-                <span className="ml-2 px-2 py-0.5 rounded-full bg-[#06180E] border border-[#C8A96B]/50 text-[10px] font-mono font-bold text-[#F5F4EA]">
-                  Total: ₹{currentPlan.totalPrice}
-                </span>
-              </div>
-            </div>
-
-            <div className="text-right">
-              <span className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-lg bg-[#14532D] text-[#A7D7A9] text-[10px] sm:text-xs font-mono font-bold border border-[#A7D7A9]/30">
-                <Calendar className="w-3 h-3 text-[#C8A96B]" />
-                {currentPlan.days} Days Unlimited
-              </span>
-              <p className="text-[10px] sm:text-[11px] text-[#F5F4EA]/50 mt-0.5">One-time payment</p>
-            </div>
-          </div>
-
           {/* Features Inclusions for Selected Plan */}
-          <div className="space-y-1.5 sm:space-y-2 mb-3 sm:mb-4 text-xs sm:text-[13px] text-[#F5F4EA]/90">
-            {currentPlan.features.map((feature, idx) => (
-              <div key={idx} className="flex items-center gap-2">
-                <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#C8A96B] shrink-0" />
-                <span>{feature}</span>
-              </div>
-            ))}
+          <div className="my-2.5 p-3 rounded-xl bg-[#0B2A1A] border border-[#C8A96B]/40">
+            <div className="flex items-baseline justify-between mb-2">
+              <span className="text-xs font-serif font-bold text-white">
+                {currentPlan.title} ({currentPlan.subtitle})
+              </span>
+              <span className="text-sm font-extrabold text-[#C8A96B] font-display">
+                ₹{planPrice} {currentPlan.periodLabel}
+              </span>
+            </div>
+            <div className="space-y-1.5 text-xs text-[#F5F4EA]/90">
+              {currentPlan.features.map((feature, idx) => (
+                <div key={idx} className="flex items-center gap-2">
+                  <span className="w-3.5 h-3.5 rounded-full border border-[#C8A96B] flex items-center justify-center text-[#C8A96B] shrink-0">
+                    <Check className="w-2 h-2 stroke-[3]" />
+                  </span>
+                  <span>{feature}</span>
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* Error Message if Any */}
@@ -327,7 +351,7 @@ export default function SubscriptionModal({
           <button
             onClick={handleStartSubscription}
             disabled={isProcessing}
-            className="w-full py-2.5 sm:py-3 px-5 rounded-xl sm:rounded-2xl bg-gradient-to-r from-[#C8A96B] to-[#E5C384] text-[#071D12] font-display font-extrabold text-sm sm:text-base tracking-wide shadow-xl shadow-[#C8A96B]/25 hover:shadow-2xl hover:scale-[1.01] active:scale-[0.98] transition-all flex items-center justify-center gap-2 border border-[#C8A96B] cursor-pointer"
+            className="w-full py-2.5 sm:py-3 px-5 rounded-full bg-gradient-to-r from-[#C8A96B] via-[#E5C378] to-[#C8A96B] text-[#071D12] font-display font-extrabold text-sm sm:text-base tracking-wide shadow-xl shadow-[#C8A96B]/25 hover:shadow-2xl hover:scale-[1.01] active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer"
           >
             {isProcessing ? (
               <>
@@ -337,7 +361,7 @@ export default function SubscriptionModal({
             ) : (
               <>
                 <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 fill-current" />
-                <span>Subscribe to {targetAnimalName} ({currentPlan.title}) – ₹{currentPlan.totalPrice}</span>
+                <span>Subscribe to {targetAnimalName} ({currentPlan.title}) – ₹{planPrice}</span>
               </>
             )}
           </button>
@@ -398,7 +422,7 @@ export default function SubscriptionModal({
               <p className="text-sm font-bold text-white">{targetAnimalName} {currentPlan.title} Live Pass</p>
             </div>
             <div className="text-right">
-              <p className="text-xl font-bold text-[#C8A96B] font-display">₹{currentPlan.totalPrice}.00</p>
+              <p className="text-xl font-bold text-[#C8A96B] font-display">₹{planPrice}.00</p>
               <p className="text-[10px] text-white/50 font-mono">{demoOrder?.order_id || 'order_demo'}</p>
             </div>
           </div>
@@ -490,7 +514,7 @@ export default function SubscriptionModal({
                   <span>Verifying...</span>
                 </>
               ) : (
-                <span>Confirm & Pay ₹{currentPlan.totalPrice}</span>
+                <span>Confirm & Pay ₹{planPrice}</span>
               )}
             </button>
           </div>
