@@ -127,57 +127,61 @@ const ANIMAL_PROGRAMS = [
 export const FOOD_CONTRIBUTIONS = [
   {
     id: 'green-leaves',
-    name: 'Green Leaves',
-    animal: 'Turtle',
+    name: 'Leaves',
     emoji: '🥬',
     price: 20
   },
   {
     id: 'vegetables',
-    name: 'Fresh Vegetables',
-    animal: 'Deer',
+    name: 'Carrot',
     emoji: '🥕',
     price: 30
   },
   {
     id: 'hay-grass',
-    name: 'Grass & Seeds',
-    animal: 'Birds',
+    name: 'Grass',
     emoji: '🌾',
     price: 25
   },
   {
     id: 'fruit-basket',
-    name: 'Fruit Basket',
-    animal: 'Elephant',
+    name: 'Fruits',
     emoji: '🍎',
     price: 40
   },
   {
+    id: 'banana',
+    name: 'Banana',
+    emoji: '🍌',
+    price: 35
+  },
+  {
     id: 'honey-treat',
-    name: 'Honey & Treat',
-    animal: 'Bear',
+    name: 'Honey',
     emoji: '🍯',
     price: 80
   },
   {
     id: 'chicken-leg',
-    name: 'Chicken Leg',
-    animal: 'Lion',
+    name: 'Chicken',
     emoji: '🍗',
     price: 50
   },
   {
     id: 'buffalo-meat',
-    name: 'Buffalo Meat',
-    animal: 'Tiger',
+    name: 'Meat',
     emoji: '🥩',
     price: 100
   },
   {
+    id: 'bone-meat',
+    name: 'Bone Meat',
+    emoji: '🍖',
+    price: 70
+  },
+  {
     id: 'fresh-fish',
-    name: 'Fresh Fish',
-    animal: 'Gharial',
+    name: 'Fish',
     emoji: '🐟',
     price: 60
   }
@@ -405,7 +409,7 @@ export default function ContributionModal({
               </span>
             </div>
 
-            <div className="grid grid-cols-4 gap-1.5 sm:gap-2">
+            <div className="grid grid-cols-5 gap-1 sm:gap-1.5">
               {FOOD_CONTRIBUTIONS.map((food) => {
                 const isSelected = !isCustom && selectedFoodId === food.id;
                 return (
@@ -413,18 +417,18 @@ export default function ContributionModal({
                     key={food.id}
                     type="button"
                     onClick={() => handleFoodSelect(food)}
-                    title={`${food.animal} • ${food.name}: ₹${food.price}`}
-                    className={`py-1.5 sm:py-2 px-1 rounded-xl border text-center transition-all duration-150 cursor-pointer flex flex-col items-center justify-center gap-0.5 ${
+                    title={`${food.name}: ₹${food.price}`}
+                    className={`py-1.5 sm:py-2 px-0.5 rounded-xl border text-center transition-all duration-150 cursor-pointer flex flex-col items-center justify-center gap-0.5 ${
                       isSelected
                         ? 'bg-[#C8A96B] text-[#071D12] border-[#C8A96B] shadow-md shadow-[#C8A96B]/30 scale-[1.02] font-black'
                         : 'bg-[#06180E]/90 text-[#F5F4EA] border-white/10 hover:border-[#C8A96B]/50 hover:bg-[#0B2A1A]'
                     }`}
                   >
                     <span className="text-lg sm:text-xl leading-none transition-transform hover:scale-110">{food.emoji}</span>
-                    <span className={`text-[10px] sm:text-[11px] font-serif font-bold tracking-tight truncate w-full px-0.5 ${
+                    <span className={`text-[10px] sm:text-[10.5px] font-serif font-bold tracking-tight truncate w-full px-0.5 ${
                       isSelected ? 'text-[#071D12]' : 'text-[#F5F4EA]'
                     }`}>
-                      {food.animal}
+                      {food.name}
                     </span>
                     <span className={`font-mono font-bold text-[10.5px] sm:text-xs tracking-tight ${isSelected ? 'text-[#071D12]' : 'text-[#C8A96B]'}`}>
                       ₹{food.price}
