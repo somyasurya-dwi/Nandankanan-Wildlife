@@ -67,6 +67,123 @@ const ANIMAL_PROGRAMS = [
     shareEmoji: '🌾',
     careEmoji: '🍇',
     supportEmoji: '❤️'
+  },
+  {
+    slug: 'white-bengal-tiger',
+    name: 'White Bengal Tiger',
+    emoji: '🐅',
+    desc: 'Support approved enrichment nutrition & meat rations',
+    shareEmoji: '🥩',
+    careEmoji: '🍖',
+    supportEmoji: '❤️'
+  },
+  {
+    slug: 'indian-pangolin',
+    name: 'Indian Pangolin',
+    emoji: '🦔',
+    desc: 'Support approved animal nutrition and welfare programs',
+    shareEmoji: '🐜',
+    careEmoji: '🪵',
+    supportEmoji: '❤️'
+  },
+  {
+    slug: 'gharial-crocodile',
+    name: 'Gharial Crocodile',
+    emoji: '🐊',
+    desc: 'Support live freshwater fish and veterinary aquatic care',
+    shareEmoji: '🐟',
+    careEmoji: '🦐',
+    supportEmoji: '❤️'
+  },
+  {
+    slug: 'king-cobra',
+    name: 'King Cobra',
+    emoji: '🐍',
+    desc: 'Support climate-controlled terrarium and specialized diet',
+    shareEmoji: '🥚',
+    careEmoji: '🌿',
+    supportEmoji: '❤️'
+  },
+  {
+    slug: 'indian-flapshell-turtle',
+    name: 'Indian Flapshell Turtle',
+    emoji: '🐢',
+    desc: 'Support lake wetland vegetation and aquatic health',
+    shareEmoji: '🥬',
+    careEmoji: '🌱',
+    supportEmoji: '❤️'
+  },
+  {
+    slug: 'asian-openbill',
+    name: 'Asian Openbill',
+    emoji: '🪶',
+    desc: 'Support Lake Kanjia freshwater snail population and wetland care',
+    shareEmoji: '🐌',
+    careEmoji: '🌾',
+    supportEmoji: '❤️'
+  }
+];
+
+export const FOOD_CONTRIBUTIONS = [
+  {
+    id: 'green-leaves',
+    name: 'Leaves',
+    emoji: '🥬',
+    price: 20
+  },
+  {
+    id: 'vegetables',
+    name: 'Carrot',
+    emoji: '🥕',
+    price: 30
+  },
+  {
+    id: 'hay-grass',
+    name: 'Grass',
+    emoji: '🌾',
+    price: 25
+  },
+  {
+    id: 'fruit-basket',
+    name: 'Fruits',
+    emoji: '🍎',
+    price: 40
+  },
+  {
+    id: 'banana',
+    name: 'Banana',
+    emoji: '🍌',
+    price: 35
+  },
+  {
+    id: 'honey-treat',
+    name: 'Honey',
+    emoji: '🍯',
+    price: 80
+  },
+  {
+    id: 'chicken-leg',
+    name: 'Chicken',
+    emoji: '🍗',
+    price: 50
+  },
+  {
+    id: 'buffalo-meat',
+    name: 'Meat',
+    emoji: '🥩',
+    price: 100
+  },
+  {
+    id: 'bone-meat',
+    name: 'Bone Meat',
+    emoji: '🍖',
+    price: 70
+  },
+  {
+    id: 'fresh-fish',
+    name: 'Fish',
+    emoji: '🐟',
+    price: 60
   }
 ];
 
@@ -74,11 +191,41 @@ const resolveAnimal = (target) => {
   if (!target) return ANIMAL_PROGRAMS[0];
   const targetSlug = (target.slug || '').toLowerCase();
   const targetName = (target.animal_name || target.name || '').toLowerCase();
-  return ANIMAL_PROGRAMS.find(a => 
-    a.slug === targetSlug || 
-    (targetSlug && (targetSlug.includes(a.slug) || a.slug.includes(targetSlug))) ||
-    (targetName && (targetName.includes(a.name.toLowerCase()) || a.name.toLowerCase().includes(targetName)))
-  ) || ANIMAL_PROGRAMS[0];
+  
+  if (targetSlug.includes('white') || targetName.includes('white')) {
+    return ANIMAL_PROGRAMS.find(a => a.slug === 'white-bengal-tiger') || ANIMAL_PROGRAMS[0];
+  }
+  if (targetSlug.includes('pangolin') || targetName.includes('pangolin')) {
+    return ANIMAL_PROGRAMS.find(a => a.slug === 'indian-pangolin') || ANIMAL_PROGRAMS[0];
+  }
+  if (targetSlug.includes('gharial') || targetName.includes('gharial') || targetName.includes('crocodile')) {
+    return ANIMAL_PROGRAMS.find(a => a.slug === 'gharial-crocodile') || ANIMAL_PROGRAMS[0];
+  }
+  if (targetSlug.includes('cobra') || targetName.includes('cobra')) {
+    return ANIMAL_PROGRAMS.find(a => a.slug === 'king-cobra') || ANIMAL_PROGRAMS[0];
+  }
+  if (targetSlug.includes('turtle') || targetName.includes('turtle') || targetName.includes('flapshell')) {
+    return ANIMAL_PROGRAMS.find(a => a.slug === 'indian-flapshell-turtle') || ANIMAL_PROGRAMS[0];
+  }
+  if (targetSlug.includes('openbill') || targetName.includes('openbill') || targetName.includes('openbell')) {
+    return ANIMAL_PROGRAMS.find(a => a.slug === 'asian-openbill') || ANIMAL_PROGRAMS[0];
+  }
+  if (targetSlug.includes('lion') || targetName.includes('lion')) {
+    return ANIMAL_PROGRAMS.find(a => a.slug === 'asiatic-lion') || ANIMAL_PROGRAMS[0];
+  }
+  if (targetSlug.includes('elephant') || targetName.includes('elephant')) {
+    return ANIMAL_PROGRAMS.find(a => a.slug === 'asian-elephant') || ANIMAL_PROGRAMS[0];
+  }
+  if (targetSlug.includes('deer') || targetName.includes('deer')) {
+    return ANIMAL_PROGRAMS.find(a => a.slug === 'spotted-deer') || ANIMAL_PROGRAMS[0];
+  }
+  if (targetSlug.includes('bear') || targetName.includes('bear')) {
+    return ANIMAL_PROGRAMS.find(a => a.slug === 'sloth-bear') || ANIMAL_PROGRAMS[0];
+  }
+  if (targetSlug.includes('bird') || targetName.includes('bird') || targetName.includes('peacock')) {
+    return ANIMAL_PROGRAMS.find(a => a.slug === 'birds') || ANIMAL_PROGRAMS[0];
+  }
+  return ANIMAL_PROGRAMS.find(a => a.slug === 'royal-bengal-tiger') || ANIMAL_PROGRAMS[0];
 };
 
 export default function ContributionModal({
@@ -101,12 +248,38 @@ export default function ContributionModal({
     }
   }, [initialAnimal, isOpen]);
 
-  // Selected amount (10, 50, 100, or custom)
-  const [selectedAmount, setSelectedAmount] = useState(
-    initialAmount === 'custom' ? 100 : (Number(initialAmount) || 50)
-  );
+  // Food selection state (defaults to chicken-leg or matching initialAmount)
+  const [selectedFoodId, setSelectedFoodId] = useState(() => {
+    if (initialAmount === 'custom') return null;
+    const match = FOOD_CONTRIBUTIONS.find(f => f.price === Number(initialAmount));
+    return match ? match.id : 'chicken-leg';
+  });
+
+  const selectedFood = FOOD_CONTRIBUTIONS.find(f => f.id === selectedFoodId);
+
+  // Selected amount (from food or custom)
+  const [selectedAmount, setSelectedAmount] = useState(() => {
+    if (initialAmount === 'custom') return 100;
+    const match = FOOD_CONTRIBUTIONS.find(f => f.price === Number(initialAmount));
+    return match ? match.price : 50;
+  });
   const [isCustom, setIsCustom] = useState(initialAmount === 'custom');
   const [customInput, setCustomInput] = useState(initialAmount === 'custom' ? '200' : '');
+
+  const handleFoodSelect = (food) => {
+    setIsCustom(false);
+    setSelectedFoodId(food.id);
+    setSelectedAmount(food.price);
+    if (walletBalance < food.price && paymentMethod === 'wallet') {
+      setPaymentMethod('razorpay');
+    }
+  };
+
+  const handleCustomClick = () => {
+    setIsCustom(true);
+    setSelectedFoodId(null);
+    if (!customInput) setCustomInput('200');
+  };
 
   // Form fields
   const [donorName, setDonorName] = useState('Priya Sharma');
@@ -129,11 +302,6 @@ export default function ContributionModal({
     }
   };
 
-  const handleCustomClick = () => {
-    setIsCustom(true);
-    if (!customInput) setCustomInput('200');
-  };
-
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage(null);
@@ -150,9 +318,12 @@ export default function ContributionModal({
 
     setIsSubmitting(true);
     try {
+      const currentFood = FOOD_CONTRIBUTIONS.find(f => f.id === selectedFoodId);
       const res = await onConfirmContribution({
         animal: selectedAnimal,
         amount: effectiveAmount,
+        foodItem: isCustom ? null : currentFood,
+        foodName: isCustom ? 'Custom Contribution' : currentFood?.name,
         donorName: isAnonymous ? 'Anonymous Wildlife Friend' : donorName,
         personalMessage,
         isAnonymous,
@@ -182,141 +353,119 @@ export default function ContributionModal({
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md animate-fadeIn overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/85 backdrop-blur-md animate-fadeIn overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
       <div 
-        className="relative w-full max-w-md sm:max-w-lg rounded-2xl bg-gradient-to-b from-[#0B2A1A] to-[#071D12] border border-[#C8A96B]/50 shadow-2xl p-3.5 sm:p-4.5 text-[#F5F4EA] my-auto max-h-[92vh] overflow-y-auto"
+        className="relative w-full max-w-[420px] rounded-2xl bg-gradient-to-b from-[#0B2A1A] to-[#071D12] border border-[#C8A96B]/50 shadow-2xl p-3 sm:p-3.5 text-[#F5F4EA] my-auto max-h-[96vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
         onClick={(e) => e.stopPropagation()}
       >
         
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-3.5 right-3.5 sm:top-4 sm:right-4 p-1.5 rounded-full bg-white/10 text-white/70 hover:text-white hover:bg-white/20 transition-all cursor-pointer"
+          className="absolute top-3 right-3 sm:top-3.5 sm:right-3.5 p-1.5 rounded-full bg-white/10 text-white/70 hover:text-white hover:bg-white/20 transition-all cursor-pointer"
           aria-label="Close"
         >
           <X className="w-4 h-4" />
         </button>
 
         {/* Modal Header */}
-        <div className="flex items-center gap-2.5 mb-2.5">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#C8A96B] to-[#997736] flex items-center justify-center text-[#071D12] shadow-md shadow-[#C8A96B]/30 shrink-0">
-            <Heart className="w-4 h-4 fill-current" />
+        <div className="flex items-center gap-2 mb-2">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#C8A96B] to-[#997736] flex items-center justify-center text-lg shadow-md shadow-[#C8A96B]/30 shrink-0">
+            {selectedAnimal?.emoji || <Heart className="w-4 h-4 text-[#071D12] fill-current" />}
           </div>
           <div>
             <h3 className="font-serif font-bold text-base sm:text-lg text-[#F5F4EA] leading-tight">
-              Share Happiness, Feed Wildlife
+              Share Happiness, Feed {selectedAnimal?.name || 'Wildlife'}
             </h3>
+            {/* Animal ration profile reference: selectedAnimal?.shareEmoji || selectedAnimal?.careEmoji */}
             <p className="text-[11px] sm:text-xs text-[#C8A96B] font-mono">
-              Support approved animal nutrition & welfare programs ❤️
+              {selectedAnimal?.desc || 'Support approved animal nutrition & welfare programs'}
             </p>
           </div>
         </div>
 
         {/* Zoo-Approved Welfare Notice */}
-        <div className="mb-2.5 p-2 rounded-lg bg-forest-900/80 border border-[#C8A96B]/20 text-[10px] sm:text-[10.5px] text-[#A7D7A9] flex items-start gap-1.5 leading-snug">
+        <div className="mb-2 p-1.5 sm:p-2 rounded-lg bg-forest-900/80 border border-[#C8A96B]/20 text-[10px] sm:text-[10.5px] text-[#A7D7A9] flex items-start gap-1.5 leading-snug">
           <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
           <span>
             <strong>Official Care Protocol:</strong> Donations support zoo-approved animal nutrition, veterinary care, & enrichment diets managed by Nandankanan wildlife experts. Visitors do not directly feed animals.
           </span>
         </div>
 
-        <form onSubmit={handleFormSubmit} className="space-y-2.5">
+        <form onSubmit={handleFormSubmit} className="space-y-2">
           
-          {/* 1. Animal Selector */}
+          {/* SELECT FOOD CONTRIBUTION */}
           <div>
-            <label className="block text-[10.5px] sm:text-xs font-mono uppercase tracking-wider text-[#C8A96B] font-semibold mb-1">
-              Select Animal to Support:
-            </label>
-            <div className="grid grid-cols-3 gap-1.5">
-              {ANIMAL_PROGRAMS.map((a) => {
-                const isSelected = selectedAnimal.slug === a.slug;
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-[11px] font-mono uppercase tracking-wider text-[#C8A96B] font-bold">
+                Select Food Contribution:
+              </label>
+              <span className="text-[10px] font-semibold px-2 py-0.2 rounded-full bg-emerald-950/80 border border-emerald-500/30 text-emerald-400">
+                {FOOD_CONTRIBUTIONS.length} options
+              </span>
+            </div>
+
+            <div className="grid grid-cols-5 gap-1 sm:gap-1.5">
+              {FOOD_CONTRIBUTIONS.map((food) => {
+                const isSelected = !isCustom && selectedFoodId === food.id;
                 return (
                   <button
-                    key={a.slug}
+                    key={food.id}
                     type="button"
-                    onClick={() => setSelectedAnimal(a)}
-                    className={`py-1.5 px-2 rounded-lg border text-[11px] font-semibold flex items-center gap-1 transition-all cursor-pointer ${
+                    onClick={() => handleFoodSelect(food)}
+                    title={`${food.name}: ₹${food.price}`}
+                    className={`py-1.5 sm:py-2 px-0.5 rounded-xl border text-center transition-all duration-150 cursor-pointer flex flex-col items-center justify-center gap-0.5 ${
                       isSelected
-                        ? 'bg-[#C8A96B] text-[#071D12] font-bold border-[#C8A96B] shadow-sm shadow-[#C8A96B]/20 scale-[1.01]'
-                        : 'bg-[#06180E]/80 text-[#F5F4EA]/80 border-white/10 hover:border-[#C8A96B]/40 hover:text-white'
+                        ? 'bg-[#C8A96B] text-[#071D12] border-[#C8A96B] shadow-md shadow-[#C8A96B]/30 scale-[1.02] font-black'
+                        : 'bg-[#06180E]/90 text-[#F5F4EA] border-white/10 hover:border-[#C8A96B]/50 hover:bg-[#0B2A1A]'
                     }`}
                   >
-                    <span className="text-sm shrink-0">{a.emoji}</span>
-                    <span className="truncate">{a.name}</span>
+                    <span className="text-lg sm:text-xl leading-none transition-transform hover:scale-110">{food.emoji}</span>
+                    <span className={`text-[10px] sm:text-[10.5px] font-serif font-bold tracking-tight truncate w-full px-0.5 ${
+                      isSelected ? 'text-[#071D12]' : 'text-[#F5F4EA]'
+                    }`}>
+                      {food.name}
+                    </span>
+                    <span className={`font-mono font-bold text-[10.5px] sm:text-xs tracking-tight ${isSelected ? 'text-[#071D12]' : 'text-[#C8A96B]'}`}>
+                      ₹{food.price}
+                    </span>
                   </button>
                 );
               })}
             </div>
 
-            {/* Animal Nutrition Program Description */}
-            <div className="mt-1.5 px-2.5 py-1 rounded-lg bg-black/30 border border-white/5 text-[10px] text-[#A7D7A9] flex items-center gap-1.5 font-mono">
-              <span>{selectedAnimal.emoji}</span>
-              <span className="truncate">{selectedAnimal.desc}</span>
-            </div>
-          </div>
-
-          {/* 2. Contribution Amount */}
-          <div>
-            <label className="block text-[10.5px] sm:text-xs font-mono uppercase tracking-wider text-[#C8A96B] font-semibold mb-1">
-              Select Contribution Amount:
-            </label>
-            <div className="grid grid-cols-4 gap-1.5">
-              {[
-                { amt: 10, label: 'Share', emoji: selectedAnimal?.shareEmoji || '🥩' },
-                { amt: 50, label: 'Care', emoji: selectedAnimal?.careEmoji || '🍖' },
-                { amt: 100, label: 'Support', emoji: selectedAnimal?.supportEmoji || '❤️' },
-              ].map((opt) => (
-                <button
-                  key={opt.amt}
-                  type="button"
-                  onClick={() => handleAmountClick(opt.amt)}
-                  className={`py-1.5 px-1 rounded-lg border text-[11px] font-bold transition-all flex flex-col items-center justify-center cursor-pointer ${
-                    !isCustom && selectedAmount === opt.amt
-                      ? 'bg-[#C8A96B] text-[#071D12] border-[#C8A96B] shadow-sm shadow-[#C8A96B]/25 scale-[1.01]'
-                      : 'bg-[#06180E]/80 text-[#F5F4EA] border-white/10 hover:border-[#C8A96B]/40 hover:bg-[#14532D]/40'
-                  }`}
-                >
-                  <span className="text-xs">{opt.emoji}</span>
-                  <span className="font-mono text-xs font-black">₹{opt.amt}</span>
-                  <span className="text-[9.5px] font-normal opacity-80">{opt.label}</span>
-                </button>
-              ))}
-
+            {/* Custom Amount Option */}
+            <div className="mt-2 flex items-center justify-between text-xs pt-1 border-t border-white/10">
               <button
                 type="button"
                 onClick={handleCustomClick}
-                className={`py-1.5 px-1 rounded-lg border text-[11px] font-bold transition-all flex flex-col items-center justify-center cursor-pointer ${
-                  isCustom
-                    ? 'bg-[#C8A96B] text-[#071D12] border-[#C8A96B] shadow-sm shadow-[#C8A96B]/25 scale-[1.01]'
-                    : 'bg-[#06180E]/80 text-[#F5F4EA] border-white/10 hover:border-[#C8A96B]/40 hover:bg-[#14532D]/40'
+                className={`text-[11px] font-mono flex items-center gap-1.5 transition-colors cursor-pointer ${
+                  isCustom ? 'text-[#C8A96B] font-bold underline' : 'text-[#A7D7A9] hover:text-[#C8A96B]'
                 }`}
               >
-                <span className="text-xs">⭐</span>
-                <span className="font-mono text-xs font-black">Extra</span>
-                <span className="text-[9.5px] font-normal opacity-80">Custom</span>
+                <span>⭐</span>
+                <span>Or enter custom contribution amount</span>
               </button>
+              {isCustom && (
+                <div className="flex items-center gap-1.5 w-32">
+                  <span className="text-xs font-mono text-[#C8A96B] font-bold">₹</span>
+                  <input
+                    type="number"
+                    min="10"
+                    step="10"
+                    value={customInput}
+                    onChange={(e) => setCustomInput(e.target.value)}
+                    placeholder="e.g. 250"
+                    className="w-full px-2 py-0.5 rounded bg-black/50 border border-[#C8A96B]/50 text-[#F5F4EA] font-mono text-xs focus:outline-none focus:border-[#C8A96B]"
+                    autoFocus
+                  />
+                </div>
+              )}
             </div>
-
-            {/* Custom Amount Input */}
-            {isCustom && (
-              <div className="mt-1.5 flex items-center gap-1.5">
-                <span className="text-xs font-mono text-[#C8A96B] font-bold">₹</span>
-                <input
-                  type="number"
-                  min="10"
-                  step="10"
-                  value={customInput}
-                  onChange={(e) => setCustomInput(e.target.value)}
-                  placeholder="Enter amount (e.g. 250)"
-                  className="w-full px-2.5 py-1 rounded-lg bg-black/40 border border-[#C8A96B]/40 text-[#F5F4EA] font-mono text-xs focus:outline-none focus:border-[#C8A96B]"
-                  autoFocus
-                />
-              </div>
-            )}
           </div>
 
           {/* 3. Donor Name & Message */}
@@ -370,7 +519,7 @@ export default function ContributionModal({
                 type="button"
                 onClick={() => setPaymentMethod('wallet')}
                 disabled={!canPayFromWallet}
-                className={`p-2 rounded-lg border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                className={`p-1.5 sm:p-2 rounded-lg border text-left transition-all cursor-pointer flex flex-col justify-between ${
                   paymentMethod === 'wallet' && canPayFromWallet
                     ? 'bg-[#14532D] border-emerald-400 text-white shadow-sm'
                     : canPayFromWallet
@@ -380,7 +529,7 @@ export default function ContributionModal({
               >
                 <div className="flex items-center gap-1 mb-0.5">
                   <Wallet className="w-3 h-3 text-emerald-400" />
-                  <span className="text-[11px] font-bold">Wildlife Wallet</span>
+                  <span className="text-[10.5px] sm:text-[11px] font-bold">Wildlife Wallet</span>
                 </div>
                 <div className="text-[9.5px] font-mono text-[#C8A96B]">
                   Balance: ₹{walletBalance}
@@ -391,7 +540,7 @@ export default function ContributionModal({
               <button
                 type="button"
                 onClick={() => setPaymentMethod('razorpay')}
-                className={`p-2 rounded-lg border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                className={`p-1.5 sm:p-2 rounded-lg border text-left transition-all cursor-pointer flex flex-col justify-between ${
                   paymentMethod === 'razorpay'
                     ? 'bg-[#14532D] border-[#C8A96B] text-white shadow-sm'
                     : 'bg-black/30 border-white/10 text-[#F5F4EA]/70 hover:border-white/20'
@@ -399,7 +548,7 @@ export default function ContributionModal({
               >
                 <div className="flex items-center gap-1 mb-0.5">
                   <CreditCard className="w-3 h-3 text-[#C8A96B]" />
-                  <span className="text-[11px] font-bold">UPI / Card / NetBanking</span>
+                  <span className="text-[10.5px] sm:text-[11px] font-bold">UPI / Card / NetBanking</span>
                 </div>
                 <span className="text-[9.5px] font-mono text-[#A7D7A9]">
                   Instant Razorpay Demo
@@ -417,11 +566,11 @@ export default function ContributionModal({
           )}
 
           {/* Submit Action */}
-          <div className="pt-1 sm:pt-1.5">
+          <div className="pt-1">
             <button
               type="submit"
               disabled={isSubmitting || effectiveAmount <= 0}
-              className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#C8A96B] via-[#E2CB99] to-[#C8A96B] hover:brightness-105 active:scale-[0.99] text-[#071D12] font-serif font-black text-xs sm:text-sm uppercase tracking-wider transition-all shadow-lg shadow-[#C8A96B]/25 flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+              className="w-full py-2 sm:py-2.5 rounded-xl bg-gradient-to-r from-[#C8A96B] via-[#E2CB99] to-[#C8A96B] hover:brightness-105 active:scale-[0.99] text-[#071D12] font-serif font-black text-xs sm:text-sm uppercase tracking-wider transition-all shadow-lg shadow-[#C8A96B]/25 flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
             >
               {isSubmitting ? (
                 <>
