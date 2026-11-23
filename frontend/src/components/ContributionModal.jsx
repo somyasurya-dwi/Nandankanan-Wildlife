@@ -409,7 +409,7 @@ export default function ContributionModal({
               </span>
             </div>
 
-            <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
+            <div className="grid grid-cols-5 gap-1 sm:gap-1.5">
               {FOOD_CONTRIBUTIONS.map((food) => {
                 const isSelected = !isCustom && selectedFoodId === food.id;
                 return (
@@ -418,14 +418,14 @@ export default function ContributionModal({
                     type="button"
                     onClick={() => handleFoodSelect(food)}
                     title={`${food.name}: ₹${food.price}`}
-                    className={`py-2 sm:py-2.5 px-1 rounded-xl border text-center transition-all duration-150 cursor-pointer flex flex-col items-center justify-center gap-1 ${
+                    className={`py-1 sm:py-1.5 px-0.5 rounded-lg border text-center transition-all duration-150 cursor-pointer flex flex-col items-center justify-center gap-0.5 ${
                       isSelected
-                        ? 'bg-[#C8A96B] text-[#071D12] border-[#C8A96B] shadow-md shadow-[#C8A96B]/30 scale-[1.02] font-black'
+                        ? 'bg-[#C8A96B] text-[#071D12] border-[#C8A96B] shadow-sm shadow-[#C8A96B]/30 scale-[1.02] font-black'
                         : 'bg-[#06180E]/90 text-[#F5F4EA] border-white/10 hover:border-[#C8A96B]/50 hover:bg-[#0B2A1A]'
                     }`}
                   >
-                    <span className="text-xl sm:text-2xl leading-none transition-transform hover:scale-110">{food.emoji}</span>
-                    <span className={`font-mono font-extrabold text-xs sm:text-sm tracking-tight ${isSelected ? 'text-[#071D12]' : 'text-[#C8A96B]'}`}>
+                    <span className="text-base sm:text-lg leading-none transition-transform hover:scale-110">{food.emoji}</span>
+                    <span className={`font-mono font-bold text-[10px] sm:text-[11px] tracking-tight ${isSelected ? 'text-[#071D12]' : 'text-[#C8A96B]'}`}>
                       ₹{food.price}
                     </span>
                   </button>
