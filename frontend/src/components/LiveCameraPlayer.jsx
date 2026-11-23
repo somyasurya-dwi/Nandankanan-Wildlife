@@ -49,7 +49,6 @@ import { subscriptionManager } from '../utils/subscriptionManager';
 import Realistic3DIcon from './reactions/Realistic3DIcon';
 import { reactionManager } from '../utils/reactionManager';
 import SubscriptionModal from './SubscriptionModal';
-import AnimalSubscriptionPlans from './AnimalSubscriptionPlans';
 import ContributionModal from './ContributionModal';
 import AddMoneyModal from './AddMoneyModal';
 import WalletHistoryModal from './WalletHistoryModal';
@@ -810,11 +809,6 @@ export default function LiveCameraPlayer({
         activeVideo.play().then(() => setIsPlaying(true)).catch(() => {});
       }
     }
-  };
-
-  const handleSelectPlanFromLivePage = (plan) => {
-    setSelectedSubscriptionPlan(plan);
-    setShowSubscriptionModal(true);
   };
 
   const handleSubscriptionSuccess = (sub) => {
@@ -2108,20 +2102,7 @@ export default function LiveCameraPlayer({
         </main>
 
         {/* =========================================================================
-            5. ANIMAL LIVE STREAM & CONSERVATION SUBSCRIPTION PLANS
-            (Dedicated 4-tier plan section on every animal's live video page)
-            ========================================================================= */}
-        {!isFullscreen && (
-          <AnimalSubscriptionPlans
-            animal={animal}
-            isSubscribed={isSubscribed}
-            activeSubscription={subscriptionManager.getSubscription(animal)}
-            onSelectPlan={handleSelectPlanFromLivePage}
-          />
-        )}
-
-        {/* =========================================================================
-            6. SANCTUARY FOOTER
+            5. SANCTUARY FOOTER
             ========================================================================= */}
         <footer className="w-full bg-[#06180E] border-t border-[#14532D]/80 shadow-2xl py-1.5 sm:py-2 px-3 sm:px-6 lg:px-8 xl:px-10 shrink-0 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-[#A7D7A9] font-mono">
           <div className="flex items-center gap-2">
