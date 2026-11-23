@@ -122,9 +122,6 @@ export default function Footer() {
                 <a href="#interactive-map" className="hover:text-gold-300 transition-colors">Interactive GIS Map</a>
               </li>
               <li>
-                <a href="#virtual-experience" className="hover:text-gold-300 transition-colors">360° Habitat & Sounds</a>
-              </li>
-              <li>
                 <a href="#sponsorship-portal" className="hover:text-gold-300 transition-colors">Animal Guardianship</a>
               </li>
             </ul>

@@ -428,57 +428,54 @@ export default function InteractiveMap({
             <div className="flex items-center gap-1.5 p-1.5 rounded-2xl bg-forest-950/95 border border-[#C8A96B]/40 backdrop-blur-md shadow-2xl">
               <button
                 onClick={() => setMapStyle('3d')}
-                className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-2 transition-all ${
+                className={`px-3.5 py-2 rounded-xl text-xs font-extrabold tracking-wider flex items-center gap-1.5 transition-all ${
                   mapStyle === '3d'
                     ? 'bg-[#C8A96B] text-[#071810] shadow-lg shadow-[#C8A96B]/30 ring-2 ring-[#C8A96B]'
                     : 'text-[#FAF9F5] hover:text-[#C8A96B] hover:bg-forest-900/70'
                 }`}
                 title="Interactive 3D Google Earth Terrain Perspective"
               >
+                <span>3D View</span>
                 <span className="text-sm">🌍</span>
-                <span className="font-extrabold tracking-wide">3D GOOGLE EARTH</span>
-                <span className={`px-1.5 py-0.5 rounded text-[9px] font-black ${
-                  mapStyle === '3d' ? 'bg-[#071810] text-[#C8A96B]' : 'bg-[#C8A96B]/20 text-[#C8A96B]'
-                }`}>HD</span>
               </button>
 
               <button
                 onClick={() => setMapStyle('deepzoom')}
-                className={`px-3.5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all ${
+                className={`px-3.5 py-2 rounded-xl text-xs font-extrabold tracking-wider flex items-center gap-1.5 transition-all ${
                   mapStyle === 'deepzoom'
                     ? 'bg-[#C8A96B] text-[#071810] shadow-md ring-2 ring-[#C8A96B]'
                     : 'text-[#FAF9F5] hover:text-[#C8A96B] hover:bg-forest-900/70'
                 }`}
                 title="4K Deep-Zoom DZI Interactive Pyramidal Map"
               >
+                <span>4K View</span>
                 <span className="text-sm">🔍</span>
-                <span>4K DEEP ZOOM</span>
               </button>
 
               <button
                 onClick={() => setMapStyle('illustrated')}
-                className={`px-3.5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all ${
+                className={`px-3.5 py-2 rounded-xl text-xs font-extrabold tracking-wider flex items-center gap-1.5 transition-all ${
                   mapStyle === 'illustrated'
                     ? 'bg-[#C8A96B] text-[#071810] shadow-md ring-2 ring-[#C8A96B]'
                     : 'text-[#FAF9F5] hover:text-[#C8A96B] hover:bg-forest-900/70'
                 }`}
                 title="Official 2D Illustrated Sanctuary Guide Map"
               >
+                <span>2D View</span>
                 <span className="text-sm">🗺️</span>
-                <span>2D MAP</span>
               </button>
 
               <button
                 onClick={() => setMapStyle('satellite')}
-                className={`px-3.5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all ${
+                className={`px-3.5 py-2 rounded-xl text-xs font-extrabold tracking-wider flex items-center gap-1.5 transition-all ${
                   mapStyle === 'satellite'
                     ? 'bg-[#C8A96B] text-[#071810] shadow-md ring-2 ring-[#C8A96B]'
                     : 'text-[#FAF9F5] hover:text-[#C8A96B] hover:bg-forest-900/70'
                 }`}
                 title="Topographic Satellite World Imagery"
               >
+                <span>Satellite View</span>
                 <span className="text-sm">🛰️</span>
-                <span>SATELLITE</span>
               </button>
             </div>
           </div>

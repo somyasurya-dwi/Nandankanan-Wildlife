@@ -10,7 +10,6 @@ import CinematicVideoHero from './components/CinematicVideoHero';
 import LiveStreaming from './components/LiveStreaming';
 import InteractiveMap from './components/InteractiveMap';
 import ExploreAnimals from './components/ExploreAnimals';
-import VirtualExperience from './components/VirtualExperience';
 import ConservationStories from './components/ConservationStories';
 import NewsNoticeSection from './components/NewsNoticeSection';
 import SponsorshipPortal from './components/SponsorshipPortal';
@@ -370,9 +369,6 @@ export default function App() {
           animals={animals}
           onSponsorAnimal={handleSponsorAnimal}
         />
-
-        {/* 7. 360° Virtual Wildlife Experience & Bio-Acoustic Soundboard */}
-        <VirtualExperience />
 
         {/* Parallax Breakthrough 2: Chandaka Sal Forest Canopy Heritage */}
         <ParallaxSectionBreak
