@@ -409,7 +409,7 @@ export default function ContributionModal({
               </span>
             </div>
 
-            <div className="grid grid-cols-2 gap-1.5">
+            <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
               {FOOD_CONTRIBUTIONS.map((food) => {
                 const isSelected = !isCustom && selectedFoodId === food.id;
                 return (
@@ -417,28 +417,17 @@ export default function ContributionModal({
                     key={food.id}
                     type="button"
                     onClick={() => handleFoodSelect(food)}
-                    className={`px-2.5 py-1.5 rounded-lg border text-left transition-all duration-150 cursor-pointer flex items-center justify-between gap-1.5 ${
+                    title={`${food.name}: ₹${food.price}`}
+                    className={`py-2 sm:py-2.5 px-1 rounded-xl border text-center transition-all duration-150 cursor-pointer flex flex-col items-center justify-center gap-1 ${
                       isSelected
-                        ? 'bg-[#C8A96B] text-[#071D12] border-[#C8A96B] shadow-sm shadow-[#C8A96B]/30 font-bold scale-[1.01]'
+                        ? 'bg-[#C8A96B] text-[#071D12] border-[#C8A96B] shadow-md shadow-[#C8A96B]/30 scale-[1.02] font-black'
                         : 'bg-[#06180E]/90 text-[#F5F4EA] border-white/10 hover:border-[#C8A96B]/50 hover:bg-[#0B2A1A]'
                     }`}
                   >
-                    <div className="flex items-center gap-1.5 min-w-0">
-                      <span className="text-base shrink-0 leading-none">{food.emoji}</span>
-                      <span className={`font-serif font-bold text-[11px] sm:text-xs truncate ${isSelected ? 'text-[#071D12]' : 'text-[#F5F4EA]'}`}>
-                        {food.name}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1 shrink-0 ml-1">
-                      <span className={`font-mono font-bold text-[11px] sm:text-xs ${isSelected ? 'text-[#071D12]' : 'text-[#C8A96B]'}`}>
-                        ₹{food.price}
-                      </span>
-                      {isSelected && (
-                        <span className="w-3.5 h-3.5 rounded-full bg-[#071D12] text-[#C8A96B] flex items-center justify-center shrink-0">
-                          <Check className="w-2 h-2 stroke-[3]" />
-                        </span>
-                      )}
-                    </div>
+                    <span className="text-xl sm:text-2xl leading-none transition-transform hover:scale-110">{food.emoji}</span>
+                    <span className={`font-mono font-extrabold text-xs sm:text-sm tracking-tight ${isSelected ? 'text-[#071D12]' : 'text-[#C8A96B]'}`}>
+                      ₹{food.price}
+                    </span>
                   </button>
                 );
               })}
