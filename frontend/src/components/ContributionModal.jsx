@@ -67,6 +67,60 @@ const ANIMAL_PROGRAMS = [
     shareEmoji: '🌾',
     careEmoji: '🍇',
     supportEmoji: '❤️'
+  },
+  {
+    slug: 'white-bengal-tiger',
+    name: 'White Bengal Tiger',
+    emoji: '🐅',
+    desc: 'Support approved enrichment nutrition & meat rations',
+    shareEmoji: '🥩',
+    careEmoji: '🍖',
+    supportEmoji: '❤️'
+  },
+  {
+    slug: 'indian-pangolin',
+    name: 'Indian Pangolin',
+    emoji: '🦔',
+    desc: 'Support specialized insect and ant-egg diet formulation',
+    shareEmoji: '🐜',
+    careEmoji: '🪵',
+    supportEmoji: '❤️'
+  },
+  {
+    slug: 'gharial-crocodile',
+    name: 'Gharial Crocodile',
+    emoji: '🐊',
+    desc: 'Support live freshwater fish and veterinary aquatic care',
+    shareEmoji: '🐟',
+    careEmoji: '🦐',
+    supportEmoji: '❤️'
+  },
+  {
+    slug: 'king-cobra',
+    name: 'King Cobra',
+    emoji: '🐍',
+    desc: 'Support climate-controlled terrarium and specialized diet',
+    shareEmoji: '🥚',
+    careEmoji: '🌿',
+    supportEmoji: '❤️'
+  },
+  {
+    slug: 'indian-flapshell-turtle',
+    name: 'Indian Flapshell Turtle',
+    emoji: '🐢',
+    desc: 'Support lake wetland vegetation and aquatic health',
+    shareEmoji: '🥬',
+    careEmoji: '🌱',
+    supportEmoji: '❤️'
+  },
+  {
+    slug: 'asian-openbill',
+    name: 'Asian Openbill',
+    emoji: '🪶',
+    desc: 'Support Lake Kanjia freshwater snail population and wetland care',
+    shareEmoji: '🐌',
+    careEmoji: '🌾',
+    supportEmoji: '❤️'
   }
 ];
 
@@ -74,11 +128,41 @@ const resolveAnimal = (target) => {
   if (!target) return ANIMAL_PROGRAMS[0];
   const targetSlug = (target.slug || '').toLowerCase();
   const targetName = (target.animal_name || target.name || '').toLowerCase();
-  return ANIMAL_PROGRAMS.find(a => 
-    a.slug === targetSlug || 
-    (targetSlug && (targetSlug.includes(a.slug) || a.slug.includes(targetSlug))) ||
-    (targetName && (targetName.includes(a.name.toLowerCase()) || a.name.toLowerCase().includes(targetName)))
-  ) || ANIMAL_PROGRAMS[0];
+  
+  if (targetSlug.includes('white') || targetName.includes('white')) {
+    return ANIMAL_PROGRAMS.find(a => a.slug === 'white-bengal-tiger') || ANIMAL_PROGRAMS[0];
+  }
+  if (targetSlug.includes('pangolin') || targetName.includes('pangolin')) {
+    return ANIMAL_PROGRAMS.find(a => a.slug === 'indian-pangolin') || ANIMAL_PROGRAMS[0];
+  }
+  if (targetSlug.includes('gharial') || targetName.includes('gharial') || targetName.includes('crocodile')) {
+    return ANIMAL_PROGRAMS.find(a => a.slug === 'gharial-crocodile') || ANIMAL_PROGRAMS[0];
+  }
+  if (targetSlug.includes('cobra') || targetName.includes('cobra')) {
+    return ANIMAL_PROGRAMS.find(a => a.slug === 'king-cobra') || ANIMAL_PROGRAMS[0];
+  }
+  if (targetSlug.includes('turtle') || targetName.includes('turtle') || targetName.includes('flapshell')) {
+    return ANIMAL_PROGRAMS.find(a => a.slug === 'indian-flapshell-turtle') || ANIMAL_PROGRAMS[0];
+  }
+  if (targetSlug.includes('openbill') || targetName.includes('openbill') || targetName.includes('openbell')) {
+    return ANIMAL_PROGRAMS.find(a => a.slug === 'asian-openbill') || ANIMAL_PROGRAMS[0];
+  }
+  if (targetSlug.includes('lion') || targetName.includes('lion')) {
+    return ANIMAL_PROGRAMS.find(a => a.slug === 'asiatic-lion') || ANIMAL_PROGRAMS[0];
+  }
+  if (targetSlug.includes('elephant') || targetName.includes('elephant')) {
+    return ANIMAL_PROGRAMS.find(a => a.slug === 'asian-elephant') || ANIMAL_PROGRAMS[0];
+  }
+  if (targetSlug.includes('deer') || targetName.includes('deer')) {
+    return ANIMAL_PROGRAMS.find(a => a.slug === 'spotted-deer') || ANIMAL_PROGRAMS[0];
+  }
+  if (targetSlug.includes('bear') || targetName.includes('bear')) {
+    return ANIMAL_PROGRAMS.find(a => a.slug === 'sloth-bear') || ANIMAL_PROGRAMS[0];
+  }
+  if (targetSlug.includes('bird') || targetName.includes('bird') || targetName.includes('peacock')) {
+    return ANIMAL_PROGRAMS.find(a => a.slug === 'birds') || ANIMAL_PROGRAMS[0];
+  }
+  return ANIMAL_PROGRAMS.find(a => a.slug === 'royal-bengal-tiger') || ANIMAL_PROGRAMS[0];
 };
 
 export default function ContributionModal({
@@ -203,15 +287,15 @@ export default function ContributionModal({
 
         {/* Modal Header */}
         <div className="flex items-center gap-2.5 mb-2.5">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#C8A96B] to-[#997736] flex items-center justify-center text-[#071D12] shadow-md shadow-[#C8A96B]/30 shrink-0">
-            <Heart className="w-4 h-4 fill-current" />
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#C8A96B] to-[#997736] flex items-center justify-center text-lg shadow-md shadow-[#C8A96B]/30 shrink-0">
+            {selectedAnimal?.emoji || <Heart className="w-4 h-4 text-[#071D12] fill-current" />}
           </div>
           <div>
             <h3 className="font-serif font-bold text-base sm:text-lg text-[#F5F4EA] leading-tight">
-              Share Happiness, Feed Wildlife
+              Share Happiness, Feed {selectedAnimal?.name || 'Wildlife'}
             </h3>
             <p className="text-[11px] sm:text-xs text-[#C8A96B] font-mono">
-              Support approved animal nutrition & welfare programs ❤️
+              {selectedAnimal?.desc || 'Support approved animal nutrition & welfare programs'} ❤️
             </p>
           </div>
         </div>
@@ -226,40 +310,7 @@ export default function ContributionModal({
 
         <form onSubmit={handleFormSubmit} className="space-y-2.5">
           
-          {/* 1. Animal Selector */}
-          <div>
-            <label className="block text-[10.5px] sm:text-xs font-mono uppercase tracking-wider text-[#C8A96B] font-semibold mb-1">
-              Select Animal to Support:
-            </label>
-            <div className="grid grid-cols-3 gap-1.5">
-              {ANIMAL_PROGRAMS.map((a) => {
-                const isSelected = selectedAnimal.slug === a.slug;
-                return (
-                  <button
-                    key={a.slug}
-                    type="button"
-                    onClick={() => setSelectedAnimal(a)}
-                    className={`py-1.5 px-2 rounded-lg border text-[11px] font-semibold flex items-center gap-1 transition-all cursor-pointer ${
-                      isSelected
-                        ? 'bg-[#C8A96B] text-[#071D12] font-bold border-[#C8A96B] shadow-sm shadow-[#C8A96B]/20 scale-[1.01]'
-                        : 'bg-[#06180E]/80 text-[#F5F4EA]/80 border-white/10 hover:border-[#C8A96B]/40 hover:text-white'
-                    }`}
-                  >
-                    <span className="text-sm shrink-0">{a.emoji}</span>
-                    <span className="truncate">{a.name}</span>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Animal Nutrition Program Description */}
-            <div className="mt-1.5 px-2.5 py-1 rounded-lg bg-black/30 border border-white/5 text-[10px] text-[#A7D7A9] flex items-center gap-1.5 font-mono">
-              <span>{selectedAnimal.emoji}</span>
-              <span className="truncate">{selectedAnimal.desc}</span>
-            </div>
-          </div>
-
-          {/* 2. Contribution Amount */}
+          {/* Contribution Amount */}
           <div>
             <label className="block text-[10.5px] sm:text-xs font-mono uppercase tracking-wider text-[#C8A96B] font-semibold mb-1">
               Select Contribution Amount:
