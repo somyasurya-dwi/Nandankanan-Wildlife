@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Lock, 
   CheckCircle2, 
@@ -13,21 +13,35 @@ import {
   AlertCircle,
   Loader2,
   Calendar,
-  Layers
+  Layers,
+  ArrowRight,
+  Check
 } from 'lucide-react';
 import { subscriptionManager } from '../utils/subscriptionManager';
 import Realistic3DIcon from './reactions/Realistic3DIcon';
+import { SUBSCRIPTION_PLANS } from './AnimalSubscriptionPlans';
 
 export default function SubscriptionModal({ 
   isOpen, 
   onClose, 
   onSuccess,
   animal = null,
-  animalName = 'Wildlife Live Cameras' 
+  animalName = 'Wildlife Live Cameras',
+  initialPlan = null
 }) {
+  const [selectedPlanId, setSelectedPlanId] = useState(() => initialPlan?.id || 'plan_3m');
   const [isProcessing, setIsProcessing] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   
+  // Sync initialPlan when passed from parent
+  useEffect(() => {
+    if (initialPlan?.id) {
+      setSelectedPlanId(initialPlan.id);
+    }
+  }, [initialPlan]);
+
+  const currentPlan = SUBSCRIPTION_PLANS.find(p => p.id === selectedPlanId) || SUBSCRIPTION_PLANS[1];
+
   // Demo payment checkout popup state
   const [showDemoGateway, setShowDemoGateway] = useState(false);
   const [demoOrder, setDemoOrder] = useState(null);
@@ -43,12 +57,14 @@ export default function SubscriptionModal({
     setIsProcessing(true);
 
     try {
-      // 1. Create order on backend for specific animal
+      // 1. Create order on backend for specific animal with chosen plan duration and price
       const order = await subscriptionManager.createPaymentOrder({
         email: 'visitor@nandankanan.org',
         name: 'Sanctuary Supporter',
         animal,
-        amount: 50
+        amount: currentPlan.totalPrice,
+        planTitle: `${targetAnimalName} ${currentPlan.title} Live Stream Pass`,
+        days: currentPlan.days
       });
 
       if (!order || !order.order_id) {
@@ -69,7 +85,7 @@ export default function SubscriptionModal({
           amount: order.amount,
           currency: order.currency || 'INR',
           name: 'Nandankanan Wildlife Sanctuary',
-          description: `${targetAnimalName} Live Stream Pass (30 Days)`,
+          description: `${targetAnimalName} ${currentPlan.title} Live Pass (${currentPlan.days} Days)`,
           image: '/images/nandankanan_logo.png',
           order_id: order.order_id,
           theme: {
@@ -85,7 +101,9 @@ export default function SubscriptionModal({
                 email: 'visitor@nandankanan.org',
                 name: 'Sanctuary Supporter',
                 animal,
-                amount: 50,
+                amount: currentPlan.totalPrice,
+                planTitle: `${targetAnimalName} ${currentPlan.title} Live Stream Pass`,
+                days: currentPlan.days,
                 isDemo: false
               });
 
@@ -145,7 +163,9 @@ export default function SubscriptionModal({
         email: 'visitor@nandankanan.org',
         name: 'Sanctuary Supporter',
         animal,
-        amount: 50,
+        amount: currentPlan.totalPrice,
+        planTitle: `${targetAnimalName} ${currentPlan.title} Live Stream Pass`,
+        days: currentPlan.days,
         isDemo: true
       });
 
@@ -228,43 +248,71 @@ export default function SubscriptionModal({
             You have enjoyed your 5-second free preview. Subscribe to the {targetAnimalName} Live Stream Pass to continue watching live.
           </p>
 
-          {/* Prominent Price Tag: ₹50 */}
-          <div className="my-3 sm:my-3.5 p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-[#0B2A1A] border border-[#C8A96B]/40 flex items-center justify-between">
+          {/* 4-Tier Plan Selector (1 Month, 3 Months, 6 Months, 12 Months) matching reference design */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5 my-3">
+            {SUBSCRIPTION_PLANS.map((plan) => {
+              const isSelected = plan.id === selectedPlanId;
+              return (
+                <button
+                  key={plan.id}
+                  type="button"
+                  onClick={() => setSelectedPlanId(plan.id)}
+                  className={`relative p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                    isSelected
+                      ? 'bg-[#14532D]/90 border-[#C8A96B] shadow-md shadow-[#C8A96B]/25 ring-1 ring-[#C8A96B]'
+                      : 'bg-[#0B2A1A]/80 border-white/10 hover:border-[#C8A96B]/50 hover:bg-[#0B2A1A]'
+                  }`}
+                >
+                  {plan.badge && (
+                    <span className="absolute -top-2.5 inset-x-0 mx-auto w-fit px-1.5 py-0.5 rounded-full bg-[#C8A96B] text-[#071D12] text-[8px] sm:text-[9px] font-bold uppercase tracking-wider whitespace-nowrap shadow-sm">
+                      {plan.isPopular ? '★ Popular' : '♥ Best Value'}
+                    </span>
+                  )}
+                  <div>
+                    <span className="text-xs font-serif font-bold text-white block mt-0.5">{plan.title}</span>
+                    <span className="text-[10px] text-[#A7D7A9] font-sans block">{plan.days} Days</span>
+                  </div>
+                  <div className="mt-2 pt-1 border-t border-white/10 flex items-baseline justify-between">
+                    <span className="text-xs sm:text-sm font-bold text-[#C8A96B] font-display">₹{plan.totalPrice}</span>
+                    <span className="text-[9px] text-white/50 font-mono">net</span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Prominent Price Tag for Selected Plan */}
+          <div className="my-2.5 p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-[#0B2A1A] border border-[#C8A96B]/40 flex items-center justify-between">
             <div>
-              <span className="text-[10px] sm:text-xs text-[#C8A96B] uppercase font-mono tracking-wider">Individual Animal Pass</span>
+              <span className="text-[10px] sm:text-xs text-[#C8A96B] uppercase font-mono tracking-wider">
+                {currentPlan.title} • {currentPlan.subtitle}
+              </span>
               <div className="flex items-baseline gap-1 mt-0.5">
-                <span className="text-2xl sm:text-3xl font-extrabold text-[#C8A96B] font-display">₹50</span>
-                <span className="text-[11px] sm:text-xs text-[#F5F4EA]/60 font-mono">/ 30 Days</span>
+                <span className="text-2xl sm:text-3xl font-extrabold text-[#C8A96B] font-display">₹{currentPlan.basePrice}</span>
+                <span className="text-[11px] sm:text-xs text-[#F5F4EA]/60 font-mono">+ GST (18%)</span>
+                <span className="ml-2 px-2 py-0.5 rounded-full bg-[#06180E] border border-[#C8A96B]/50 text-[10px] font-mono font-bold text-[#F5F4EA]">
+                  Total: ₹{currentPlan.totalPrice}
+                </span>
               </div>
             </div>
 
             <div className="text-right">
               <span className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-lg bg-[#14532D] text-[#A7D7A9] text-[10px] sm:text-xs font-mono font-bold border border-[#A7D7A9]/30">
                 <Calendar className="w-3 h-3 text-[#C8A96B]" />
-                30 Days Unlimited
+                {currentPlan.days} Days Unlimited
               </span>
               <p className="text-[10px] sm:text-[11px] text-[#F5F4EA]/50 mt-0.5">One-time payment</p>
             </div>
           </div>
 
-          {/* Features Inclusions Required by User */}
+          {/* Features Inclusions for Selected Plan */}
           <div className="space-y-1.5 sm:space-y-2 mb-3 sm:mb-4 text-xs sm:text-[13px] text-[#F5F4EA]/90">
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#C8A96B] shrink-0" />
-              <span><strong>Unlimited live camera access</strong> to {targetAnimalName} for 30 consecutive days</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#C8A96B] shrink-0" />
-              <span><strong>Individual Pass:</strong> Full surveillance access dedicated to {targetAnimalName}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#C8A96B] shrink-0" />
-              <span><strong>Access to all available camera angles:</strong> Front, Side & Wide Views</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#C8A96B] shrink-0" />
-              <span><strong>High Definition 1080p:</strong> Seamless continuous surveillance</span>
-            </div>
+            {currentPlan.features.map((feature, idx) => (
+              <div key={idx} className="flex items-center gap-2">
+                <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#C8A96B] shrink-0" />
+                <span>{feature}</span>
+              </div>
+            ))}
           </div>
 
           {/* Error Message if Any */}
@@ -275,7 +323,7 @@ export default function SubscriptionModal({
             </div>
           )}
 
-          {/* Prominent Action Button: Subscribe Now – ₹50 */}
+          {/* Prominent Action Button */}
           <button
             onClick={handleStartSubscription}
             disabled={isProcessing}
@@ -289,7 +337,7 @@ export default function SubscriptionModal({
             ) : (
               <>
                 <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 fill-current" />
-                <span>Subscribe to {targetAnimalName} – ₹50</span>
+                <span>Subscribe to {targetAnimalName} ({currentPlan.title}) – ₹{currentPlan.totalPrice}</span>
               </>
             )}
           </button>
@@ -347,10 +395,10 @@ export default function SubscriptionModal({
           <div className="my-4 p-3 rounded-xl bg-[#0B2A1A] border border-white/10 flex items-center justify-between">
             <div>
               <p className="text-xs text-[#A7D7A9] font-mono">Nandankanan Wildlife Sanctuary</p>
-              <p className="text-sm font-bold text-white">{targetAnimalName} Live Pass (30 Days)</p>
+              <p className="text-sm font-bold text-white">{targetAnimalName} {currentPlan.title} Live Pass</p>
             </div>
             <div className="text-right">
-              <p className="text-xl font-bold text-[#C8A96B] font-display">₹50.00</p>
+              <p className="text-xl font-bold text-[#C8A96B] font-display">₹{currentPlan.totalPrice}.00</p>
               <p className="text-[10px] text-white/50 font-mono">{demoOrder?.order_id || 'order_demo'}</p>
             </div>
           </div>
@@ -425,7 +473,7 @@ export default function SubscriptionModal({
               type="button"
               onClick={handleCancelDemoPayment}
               disabled={isProcessing}
-              className="flex-1 py-3 px-4 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-semibold transition-colors"
+              className="flex-1 py-3 px-4 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-semibold transition-colors cursor-pointer"
             >
               Cancel Payment
             </button>
@@ -434,7 +482,7 @@ export default function SubscriptionModal({
               type="button"
               onClick={handleConfirmDemoPayment}
               disabled={isProcessing}
-              className="flex-1 py-3 px-4 rounded-xl bg-[#C8A96B] hover:bg-[#E5C384] text-[#071D12] text-xs font-bold transition-all shadow-md flex items-center justify-center gap-1.5"
+              className="flex-1 py-3 px-4 rounded-xl bg-[#C8A96B] hover:bg-[#E5C384] text-[#071D12] text-xs font-bold transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer"
             >
               {isProcessing ? (
                 <>
@@ -442,7 +490,7 @@ export default function SubscriptionModal({
                   <span>Verifying...</span>
                 </>
               ) : (
-                <span>Confirm & Pay ₹50</span>
+                <span>Confirm & Pay ₹{currentPlan.totalPrice}</span>
               )}
             </button>
           </div>

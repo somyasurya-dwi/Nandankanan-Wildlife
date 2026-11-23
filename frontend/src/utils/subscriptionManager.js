@@ -356,15 +356,16 @@ class SubscriptionManager {
   // PAYMENT INTEGRATION (RAZORPAY & DEMO SANDBOX)
   // =========================================================================
 
-  async createPaymentOrder({ email = 'visitor@nandankanan.org', name = 'Wildlife Enthusiast', animal = null, amount = 50 } = {}) {
+  async createPaymentOrder({ email = 'visitor@nandankanan.org', name = 'Wildlife Enthusiast', animal = null, amount = 353, planTitle = null, days = 90 } = {}) {
     const key = this.normalizeAnimalKey(animal);
     const animalDisplayName = animal?.animal_name || (key.charAt(0).toUpperCase() + key.slice(1));
+    const effectivePlanTitle = planTitle || `${animalDisplayName} Live Stream Pass (${days || 30} Days)`;
     try {
       const res = await fetch(`${API_BASE}/create-order/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          plan: `live_stream_${key}_30d`,
+          plan: `live_stream_${key}_${days || 30}d`,
           amount,
           currency: 'INR',
           email,
@@ -387,16 +388,18 @@ class SubscriptionManager {
       order_id: 'order_demo_' + Math.random().toString(36).substring(2, 12),
       amount: amount * 100,
       currency: 'INR',
-      plan: `${animalDisplayName} Live Stream Pass (30 Days)`,
+      plan: effectivePlanTitle,
       price_inr: amount,
       animal_key: key,
-      animal_name: animalDisplayName
+      animal_name: animalDisplayName,
+      days: days || 30
     };
   }
 
-  async verifyPayment({ orderId, paymentId, signature, email, name, animal = null, isDemo = false, amount = 50 }) {
+  async verifyPayment({ orderId, paymentId, signature, email, name, animal = null, isDemo = false, amount = 353, planTitle = null, days = 90 }) {
     const key = this.normalizeAnimalKey(animal);
     const animalDisplayName = animal?.animal_name || (key.charAt(0).toUpperCase() + key.slice(1));
+    const effectivePlanTitle = planTitle || `${animalDisplayName} Live Stream Pass (${days || 30} Days)`;
     try {
       const res = await fetch(`${API_BASE}/verify/`, {
         method: 'POST',
@@ -425,14 +428,15 @@ class SubscriptionManager {
 
     if (isDemo && paymentId && paymentId.startsWith('pay_')) {
       const now = new Date();
-      const expiresAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+      const numDays = days || 30;
+      const expiresAt = new Date(now.getTime() + numDays * 24 * 60 * 60 * 1000);
       const subData = {
         id: 'SUB-' + key.toUpperCase() + '-' + Math.random().toString(36).substring(2, 8).toUpperCase(),
         animal_key: key,
         animal_name: animalDisplayName,
         user_name: name || 'Wildlife Supporter',
         user_email: email || 'visitor@nandankanan.org',
-        plan: `${animalDisplayName} Live Stream Pass (30 Days)`,
+        plan: effectivePlanTitle,
         amount,
         currency: 'INR',
         status: 'active',
@@ -440,7 +444,7 @@ class SubscriptionManager {
         is_demo: true,
         starts_at: now.toISOString(),
         expires_at: expiresAt.toISOString(),
-        days_remaining: 30,
+        days_remaining: numDays,
         token: 'demo_token_' + Math.random().toString(36).substring(2)
       };
 
