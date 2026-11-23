@@ -128,62 +128,58 @@ export const FOOD_CONTRIBUTIONS = [
   {
     id: 'green-leaves',
     name: 'Green Leaves',
+    animal: 'Turtle',
     emoji: '🥬',
     price: 20
   },
   {
-    id: 'chicken-leg',
-    name: 'Chicken Leg',
-    emoji: '🍗',
-    price: 50
-  },
-  {
-    id: 'chicken-breast',
-    name: 'Chicken Breast',
-    emoji: '🍗',
-    price: 70
-  },
-  {
-    id: 'buffalo-meat',
-    name: 'Buffalo Meat',
-    emoji: '🥩',
-    price: 100
-  },
-  {
-    id: 'fruit-basket',
-    name: 'Fruit Basket',
-    emoji: '🍎',
-    price: 40
-  },
-  {
-    id: 'vegetable-basket',
-    name: 'Vegetable Basket',
+    id: 'vegetables',
+    name: 'Fresh Vegetables',
+    animal: 'Deer',
     emoji: '🥕',
     price: 30
   },
   {
-    id: 'hay-dry-grass',
-    name: 'Hay / Dry Grass',
+    id: 'hay-grass',
+    name: 'Grass & Seeds',
+    animal: 'Birds',
     emoji: '🌾',
     price: 25
   },
   {
-    id: 'bird-food-mix',
-    name: 'Bird Food Mix',
-    emoji: '🐦',
-    price: 35
-  },
-  {
-    id: 'fresh-fish',
-    name: 'Fresh Fish',
-    emoji: '🐟',
-    price: 60
+    id: 'fruit-basket',
+    name: 'Fruit Basket',
+    animal: 'Elephant',
+    emoji: '🍎',
+    price: 40
   },
   {
     id: 'honey-treat',
     name: 'Honey & Treat',
+    animal: 'Bear',
     emoji: '🍯',
     price: 80
+  },
+  {
+    id: 'chicken-leg',
+    name: 'Chicken Leg',
+    animal: 'Lion',
+    emoji: '🍗',
+    price: 50
+  },
+  {
+    id: 'buffalo-meat',
+    name: 'Buffalo Meat',
+    animal: 'Tiger',
+    emoji: '🥩',
+    price: 100
+  },
+  {
+    id: 'fresh-fish',
+    name: 'Fresh Fish',
+    animal: 'Gharial',
+    emoji: '🐟',
+    price: 60
   }
 ];
 
@@ -405,11 +401,11 @@ export default function ContributionModal({
                 Select Food Contribution:
               </label>
               <span className="text-[10px] font-semibold px-2 py-0.2 rounded-full bg-emerald-950/80 border border-emerald-500/30 text-emerald-400">
-                10 options
+                {FOOD_CONTRIBUTIONS.length} options
               </span>
             </div>
 
-            <div className="grid grid-cols-5 gap-1 sm:gap-1.5">
+            <div className="grid grid-cols-4 gap-1.5 sm:gap-2">
               {FOOD_CONTRIBUTIONS.map((food) => {
                 const isSelected = !isCustom && selectedFoodId === food.id;
                 return (
@@ -417,15 +413,20 @@ export default function ContributionModal({
                     key={food.id}
                     type="button"
                     onClick={() => handleFoodSelect(food)}
-                    title={`${food.name}: ₹${food.price}`}
-                    className={`py-1 sm:py-1.5 px-0.5 rounded-lg border text-center transition-all duration-150 cursor-pointer flex flex-col items-center justify-center gap-0.5 ${
+                    title={`${food.animal} • ${food.name}: ₹${food.price}`}
+                    className={`py-1.5 sm:py-2 px-1 rounded-xl border text-center transition-all duration-150 cursor-pointer flex flex-col items-center justify-center gap-0.5 ${
                       isSelected
-                        ? 'bg-[#C8A96B] text-[#071D12] border-[#C8A96B] shadow-sm shadow-[#C8A96B]/30 scale-[1.02] font-black'
+                        ? 'bg-[#C8A96B] text-[#071D12] border-[#C8A96B] shadow-md shadow-[#C8A96B]/30 scale-[1.02] font-black'
                         : 'bg-[#06180E]/90 text-[#F5F4EA] border-white/10 hover:border-[#C8A96B]/50 hover:bg-[#0B2A1A]'
                     }`}
                   >
-                    <span className="text-base sm:text-lg leading-none transition-transform hover:scale-110">{food.emoji}</span>
-                    <span className={`font-mono font-bold text-[10px] sm:text-[11px] tracking-tight ${isSelected ? 'text-[#071D12]' : 'text-[#C8A96B]'}`}>
+                    <span className="text-lg sm:text-xl leading-none transition-transform hover:scale-110">{food.emoji}</span>
+                    <span className={`text-[10px] sm:text-[11px] font-serif font-bold tracking-tight truncate w-full px-0.5 ${
+                      isSelected ? 'text-[#071D12]' : 'text-[#F5F4EA]'
+                    }`}>
+                      {food.animal}
+                    </span>
+                    <span className={`font-mono font-bold text-[10.5px] sm:text-xs tracking-tight ${isSelected ? 'text-[#071D12]' : 'text-[#C8A96B]'}`}>
                       ₹{food.price}
                     </span>
                   </button>
