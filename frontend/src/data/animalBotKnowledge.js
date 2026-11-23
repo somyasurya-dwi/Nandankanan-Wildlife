@@ -1616,7 +1616,7 @@ export function getAnimalBotResponse(query, lang = 'english') {
             coords: "20.4030° N, 85.8185° E",
             habitat: "Historic white tiger lineage enclosure with shaded pools",
             emoji: "🐅",
-            photo: "/images/white_tiger.jpg"
+            photo: "/images/white_tiger.jpg?v=20261123"
           }
         }
       };
@@ -1921,7 +1921,7 @@ export function getAnimalBotResponse(query, lang = 'english') {
             video_type: "demo_video",
             status: "LIVE",
             viewer_count: 2410,
-            thumbnail_url: "/images/white_tiger.jpg",
+            thumbnail_url: "/images/white_tiger.jpg?v=20261123",
             description: "Continuous observation stream of Nandankanan's world-famous royal white tigers resting by the shaded pool.",
             camera_location: "White Tiger Heritage Enclosure"
           },
