@@ -1659,10 +1659,12 @@ export default function LiveCameraPlayer({
                 <div className="pointer-events-auto flex items-center gap-1.5 sm:gap-2 shrink-0 ml-auto">
                 {/* Live Viewers Watching Badge */}
                 {!isFullscreen && (
-                  <div className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl bg-black/75 hover:bg-black/90 backdrop-blur-md border border-[#C8A96B]/40 text-[10px] sm:text-xs text-[#A7D7A9] font-mono shrink-0 shadow-lg select-none">
+                  <div 
+                    className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl bg-black/75 hover:bg-black/90 backdrop-blur-md border border-[#C8A96B]/40 text-[10px] sm:text-xs font-mono shrink-0 shadow-lg select-none"
+                    title={`Live Viewers: ${animal?.viewer_count?.toLocaleString() || '1,420'}`}
+                  >
                     <Eye className="w-3.5 h-3.5 text-[#C8A96B] shrink-0" />
                     <span className="font-bold text-[#F5F4EA]">{animal?.viewer_count?.toLocaleString() || '1,420'}</span>
-                    <span className="hidden md:inline text-[#A7D7A9]">watching</span>
                   </div>
                 )}
 
