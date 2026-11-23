@@ -18,7 +18,7 @@ export default function VantaraFooter({ language, onOpenTickets }) {
 
   const galleryImages = [
     { title: "Royal Bengal Tiger", src: "/images/royal_bengal_tiger.jpg" },
-    { title: "White Tiger Lineage", src: "/images/white_tiger.jpg?v=20261123" },
+    { title: "White Tiger Lineage", src: "/images/white_tiger.jpg?v=20261123_front" },
     { title: "Asiatic Lion", src: "/images/asiatic_lion.jpg" },
     { title: "Asian Elephant", src: "/images/asian_elephant.jpg" },
     { title: "Kanjia Lake Eco-Zone", src: "/images/kanjia_lake.jpg" },

@@ -1511,6 +1511,7 @@ export default function LiveCameraPlayer({
                     loop
                     muted={isMuted}
                     playsInline
+                    poster={animal?.thumbnail_url || animal?.photo_url}
                     disablePictureInPicture
                     controlsList="nodownload noplaybackrate nofullscreen noremoteplayback"
                     onWaiting={() => setIsBuffering(true)}
