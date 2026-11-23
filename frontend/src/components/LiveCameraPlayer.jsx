@@ -1477,7 +1477,7 @@ export default function LiveCameraPlayer({
         {/* =========================================================================
             MAIN DASHBOARD BODY (Full Width Panoramic Video Surveillance View)
             ========================================================================= */}
-        <main className="w-full max-w-7xl mx-auto xl:max-w-[1480px] 2xl:max-w-[1680px] px-2 sm:px-4 lg:px-6 xl:px-8 py-1.5 sm:py-2 flex-1 flex flex-col justify-center items-center" >
+        <main className="w-full max-w-7xl mx-auto px-4 sm:px-8 md:px-12 lg:px-16 xl:px-20 2xl:px-24 py-1.5 sm:py-2 flex-1 flex flex-col justify-center items-center" >
 
           {/* Main Top Section: Full Width High-Definition Live Camera Viewport & Controls */}
           <div className="w-full flex-1 flex flex-col justify-center items-center" >
