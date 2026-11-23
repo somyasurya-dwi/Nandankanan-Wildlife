@@ -68,7 +68,6 @@ export default function InteractiveMap({
   const ILLUSTRATED_BOUNDS = [[0, 0], [571, 1024]];
 
   const categories = [
-    { key: 'all', label: (t && t('map.categories.all')) || 'All 12 Live Animals' },
     { key: 'safari_zone', label: (t && t('map.categories.safari_zone')) || '🐅 Safari Zones' },
     { key: 'animal_habitat', label: (t && t('map.categories.animal_habitat')) || '🐾 Habitats & Enclosures' }
   ];
