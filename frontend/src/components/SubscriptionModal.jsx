@@ -17,7 +17,10 @@ import {
   ArrowRight,
   Check,
   User,
-  Users
+  Users,
+  Binoculars,
+  Sprout,
+  PawPrint
 } from 'lucide-react';
 import { subscriptionManager } from '../utils/subscriptionManager';
 import Realistic3DIcon from './reactions/Realistic3DIcon';
@@ -236,68 +239,69 @@ export default function SubscriptionModal({
           ========================================================================= */}
       {!showDemoGateway ? (
         <div 
-          className="relative w-full max-w-[480px] bg-[#071D12] border-2 border-[#C8A96B] rounded-2xl sm:rounded-3xl p-3.5 sm:p-4 shadow-2xl text-[#F5F4EA] flex flex-col overflow-hidden"
+          className="relative w-full max-w-4xl lg:max-w-5xl bg-[#071D12] border-2 border-[#C8A96B] rounded-2xl sm:rounded-3xl p-4 sm:p-5 lg:p-6 shadow-2xl text-[#F5F4EA] flex flex-col max-h-[96vh] overflow-y-auto"
           onClick={(e) => e.stopPropagation()}
         >
           
           {/* Subtle Top Gold Ambient Glow */}
-          <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-80 h-48 bg-[#C8A96B]/20 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-48 bg-[#C8A96B]/20 rounded-full blur-3xl pointer-events-none" />
 
           {/* Close Icon (Dismissal & Redirect to Live Views) */}
           <button
             onClick={handleReturnToLiveViews}
             disabled={isProcessing}
-            className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 p-1 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-colors cursor-pointer z-10"
+            className="absolute top-3 right-3 sm:top-4 sm:right-4 p-1.5 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-colors cursor-pointer z-10"
             title="Close & Return to Home Page"
             aria-label="Close & Return to Home Page"
           >
-            <X className="w-4 h-4 sm:w-5 sm:h-5" />
+            <X className="w-5 h-5" />
           </button>
 
           {/* Header Badge */}
-          <div className="flex items-center gap-2 mb-1.5 sm:mb-2">
-            <span className="px-2.5 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 font-mono text-[10.5px] sm:text-[11px] font-semibold uppercase tracking-wider flex items-center gap-1.5">
-              <Lock className="w-3 h-3 text-amber-400" />
-              Preview Complete
+          <div className="flex items-center justify-center gap-2 mb-2 sm:mb-2.5">
+            <span className="px-3 py-1 rounded-full border border-[#C8A96B] bg-[#071D12] text-[#C8A96B] font-mono text-[11px] sm:text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-sm">
+              <Check className="w-3.5 h-3.5 stroke-[2.5] text-[#C8A96B]" />
+              <span>PREVIEW COMPLETE</span>
+              <Lock className="w-3 h-3 text-[#C8A96B]" />
             </span>
-            <span className="text-[10.5px] sm:text-[11px] text-[#A7D7A9] font-mono">5s Free Limit Reached</span>
+            <span className="text-xs sm:text-[13px] text-[#A7D7A9] font-mono font-medium">5s Free Limit Reached</span>
           </div>
 
           {/* Main Title Required by User */}
-          <h2 className="text-base sm:text-lg font-display font-bold text-white tracking-wide leading-tight flex items-center gap-2">
-            <span className="shrink-0 flex items-center justify-center">
-              {animal?.iconKey ? (
-                <Realistic3DIcon iconKey={animal.iconKey} size={22} className="drop-shadow-md" />
-              ) : (
-                <span>{animal?.emoji || '🐾'}</span>
-              )}
-            </span>
-            <span>Enjoy Unlimited {targetAnimalName} Live Streaming!</span>
-          </h2>
-
-          {/* Subtitle Required by User */}
-          <p className="mt-0.5 sm:mt-1 text-[11px] sm:text-xs text-[#F5F4EA]/80 leading-snug">
-            You have enjoyed your 5-second free preview. Subscribe to the {targetAnimalName} Live Stream Pass to continue watching live.
-          </p>
+          <div className="text-center mb-2 sm:mb-3">
+            <h2 className="text-lg sm:text-2xl lg:text-3xl font-serif font-bold text-white tracking-wide leading-tight flex items-center justify-center gap-2.5">
+              <span className="shrink-0 flex items-center justify-center">
+                {animal?.iconKey ? (
+                  <Realistic3DIcon iconKey={animal.iconKey} size={32} className="drop-shadow-md" />
+                ) : (
+                  <span className="text-2xl sm:text-3xl">{animal?.emoji || '🐾'}</span>
+                )}
+              </span>
+              <span>ENJOY UNLIMITED {targetAnimalName.toUpperCase()} LIVE STREAMING!</span>
+            </h2>
+            <p className="mt-1 text-xs sm:text-sm text-[#F5F4EA]/80 max-w-2xl mx-auto leading-snug">
+              You have enjoyed your 5-second free preview. Subscribe to the {targetAnimalName} Live Stream Pass to continue watching live.
+            </p>
+          </div>
 
           {/* User Tier Capsule Pill Switcher (1 User | 3 Users | 5 Users) */}
-          <div className="flex justify-center my-1.5 sm:my-2">
-            <div className="inline-flex items-center p-0.5 rounded-full bg-[#06180E] border border-[#C8A96B]/50 shadow-inner">
+          <div className="flex justify-center mb-3 sm:mb-4">
+            <div className="inline-flex items-center p-0.5 sm:p-1 rounded-full bg-[#06180E] border border-[#C8A96B]/50 shadow-inner">
               {USER_TIERS.map((tier, idx) => {
                 const isTierActive = selectedTier === tier.id;
                 return (
                   <React.Fragment key={tier.id}>
-                    {idx > 0 && <span className="text-white/20 mx-0.5 font-mono text-[11px]">|</span>}
+                    {idx > 0 && <span className="text-white/20 mx-1 font-mono text-xs">|</span>}
                     <button
                       type="button"
                       onClick={() => setSelectedTier(tier.id)}
-                      className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer ${
+                      className={`px-3.5 sm:px-4 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                         isTierActive
                           ? 'bg-gradient-to-r from-[#C8A96B] via-[#E5C378] to-[#C8A96B] text-[#071D12] shadow-md'
                           : 'text-white/70 hover:text-white'
                       }`}
                     >
-                      {tier.icon === 'user' ? <User className="w-2.5 h-2.5 stroke-[2.5]" /> : <Users className="w-2.5 h-2.5 stroke-[2.5]" />}
+                      {tier.icon === 'user' ? <User className="w-3.5 h-3.5 stroke-[2.5]" /> : <Users className="w-3.5 h-3.5 stroke-[2.5]" />}
                       <span>{tier.label}</span>
                     </button>
                   </React.Fragment>
@@ -306,61 +310,117 @@ export default function SubscriptionModal({
             </div>
           </div>
 
-          {/* 3-Tier Plan Selector (1 Month, 3 Months, 6 Months) matching reference design */}
-          <div className="grid grid-cols-3 gap-1.5 sm:gap-2 my-1.5 sm:my-2">
+          {/* 3 Pricing Cards Grid (1 Month | 3 Months | 6 Months) */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 sm:gap-4 lg:gap-5 items-stretch mb-3 sm:mb-3.5">
             {SUBSCRIPTION_PLANS.map((plan) => {
               const isSelected = plan.id === selectedPlanId;
-              const price = plan.prices[selectedTier] || plan.prices['1_user'];
+              const price = plan.prices ? (plan.prices[selectedTier] || plan.prices['1_user']) : (plan.totalPrice || 249);
               return (
-                <button
+                <div
                   key={plan.id}
-                  type="button"
                   onClick={() => setSelectedPlanId(plan.id)}
-                  className={`relative p-2 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                  className={`relative rounded-2xl p-4 sm:p-5 flex flex-col justify-between transition-all duration-300 cursor-pointer ${
                     isSelected
-                      ? 'bg-gradient-to-b from-[#0B2A1A] to-[#071D12] border-2 border-[#C8A96B] ring-1 ring-[#C8A96B] shadow-md shadow-[#C8A96B]/25'
-                      : 'bg-[#0B2A1A]/80 border-white/10 hover:border-[#C8A96B]/50 hover:bg-[#0B2A1A]'
+                      ? 'bg-gradient-to-b from-[#0B2A1A] via-[#071D12] to-[#04110A] border-2 border-[#C8A96B] ring-1 ring-[#C8A96B]/80 shadow-[0_0_28px_rgba(200,169,107,0.25)]'
+                      : 'bg-[#06180E]/90 border border-[#C8A96B]/30 hover:border-[#C8A96B]/60 shadow-lg'
                   }`}
                 >
-                  {plan.isPopular && (
-                    <span className="absolute -top-2 inset-x-0 mx-auto w-fit px-1.5 py-0.2 rounded-full bg-[#C8A96B] text-[#071D12] text-[7.5px] font-extrabold uppercase tracking-wider whitespace-nowrap shadow-sm">
-                      ★ POPULAR
-                    </span>
-                  )}
                   <div>
-                    <span className="text-[11px] sm:text-xs font-serif font-bold text-white block mt-0.5">{plan.title}</span>
-                    <span className="text-[9.5px] text-[#A7D7A9] font-sans block">{plan.days} Days</span>
+                    <h3 className="text-xl sm:text-2xl font-serif font-bold text-white tracking-wide">
+                      {plan.title}
+                    </h3>
+                    <p className="mt-1 text-xs text-[#A7D7A9] font-sans">
+                      {plan.subtitle}
+                    </p>
+
+                    {/* Pricing Block */}
+                    <div className="mt-3 flex items-baseline gap-1.5">
+                      <span className="text-2xl sm:text-3xl font-extrabold text-[#C8A96B] font-display tracking-tight">
+                        ₹{price}
+                      </span>
+                      <span className="text-xs text-[#F5F4EA]/70 font-sans">
+                        {plan.periodLabel}
+                      </span>
+                      {plan.discount && (
+                        <span className="ml-1.5 px-2 py-0.5 rounded-full bg-[#C8A96B] text-[#071D12] text-[10px] font-bold font-sans tracking-wide">
+                          {plan.discount}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Features Checkmark List */}
+                    <ul className="my-3 space-y-2">
+                      {plan.features.map((feature, idx) => (
+                        <li key={idx} className="flex items-center gap-2 text-xs text-[#F5F4EA]/90 leading-snug">
+                          <span className="w-3.5 h-3.5 rounded-full border border-[#C8A96B] flex items-center justify-center text-[#C8A96B] shrink-0">
+                            <Check className="w-2 h-2 stroke-[3]" />
+                          </span>
+                          <span>{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
-                  <div className="mt-1.5 pt-1 border-t border-white/10 flex items-baseline justify-between">
-                    <span className="text-xs sm:text-sm font-bold text-[#C8A96B] font-display">₹{price}</span>
-                    {plan.discount && (
-                      <span className="text-[8px] font-bold text-[#C8A96B] bg-[#C8A96B]/15 px-1 rounded">{plan.discount}</span>
+
+                  {/* Card Bottom Button */}
+                  <div className="pt-2">
+                    {isSelected ? (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleStartSubscription();
+                        }}
+                        className="w-full py-2 sm:py-2.5 rounded-full bg-gradient-to-r from-[#C8A96B] via-[#E5C378] to-[#C8A96B] text-[#071D12] font-bold text-xs sm:text-sm tracking-wide shadow-md transition-all cursor-pointer hover:brightness-105 active:scale-98"
+                      >
+                        Selected
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedPlanId(plan.id);
+                        }}
+                        className="w-full py-2 sm:py-2.5 rounded-full border border-[#C8A96B] text-[#C8A96B] hover:bg-[#C8A96B]/15 font-bold text-xs sm:text-sm tracking-wide transition-all cursor-pointer"
+                      >
+                        Choose Plan
+                      </button>
                     )}
                   </div>
-                </button>
+                </div>
               );
             })}
           </div>
 
-          {/* Features Inclusions for Selected Plan */}
-          <div className="my-1.5 p-2 sm:p-2.5 rounded-xl bg-[#0B2A1A] border border-[#C8A96B]/40">
-            <div className="flex items-baseline justify-between mb-1.5">
-              <span className="text-[11px] sm:text-xs font-serif font-bold text-white">
-                {currentPlan.title} ({currentPlan.subtitle})
-              </span>
-              <span className="text-xs sm:text-sm font-extrabold text-[#C8A96B] font-display">
-                ₹{planPrice} {currentPlan.periodLabel}
-              </span>
+          {/* Feature Strip (Under Cards) */}
+          <div className="p-2.5 sm:p-3 rounded-2xl bg-[#06180E]/90 border border-[#C8A96B]/30 shadow-md grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 items-center mb-3 sm:mb-3.5">
+            <div className="flex items-center gap-2.5">
+              <Binoculars className="w-5 h-5 sm:w-6 sm:h-6 stroke-[1.8] text-[#E5C378] shrink-0" />
+              <div>
+                <h4 className="text-xs font-bold text-[#F5F4EA] leading-tight">24/7 Live</h4>
+                <p className="text-[10px] text-[#A7D7A9] font-sans">Wildlife Camera</p>
+              </div>
             </div>
-            <div className="space-y-1 text-[10.5px] sm:text-[11px] text-[#F5F4EA]/90">
-              {currentPlan.features.map((feature, idx) => (
-                <div key={idx} className="flex items-center gap-1.5">
-                  <span className="w-3 h-3 rounded-full border border-[#C8A96B] flex items-center justify-center text-[#C8A96B] shrink-0">
-                    <Check className="w-2 h-2 stroke-[3]" />
-                  </span>
-                  <span>{feature}</span>
-                </div>
-              ))}
+            <div className="flex items-center gap-2.5">
+              <Sprout className="w-5 h-5 sm:w-6 sm:h-6 stroke-[1.8] text-[#E5C378] shrink-0" />
+              <div>
+                <h4 className="text-xs font-bold text-[#F5F4EA] leading-tight">Exclusive</h4>
+                <p className="text-[10px] text-[#A7D7A9] font-sans">Conservation Updates</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2.5">
+              <Calendar className="w-5 h-5 sm:w-6 sm:h-6 stroke-[1.8] text-[#E5C378] shrink-0" />
+              <div>
+                <h4 className="text-xs font-bold text-[#F5F4EA] leading-tight">Plan Your Visit</h4>
+                <p className="text-[10px] text-[#A7D7A9] font-sans">with Ease</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2.5">
+              <PawPrint className="w-5 h-5 sm:w-6 sm:h-6 stroke-[1.8] text-[#E5C378] shrink-0" />
+              <div>
+                <h4 className="text-xs font-bold text-[#F5F4EA] leading-tight">Contribute to</h4>
+                <p className="text-[10px] text-[#A7D7A9] font-sans">Wildlife Conservation</p>
+              </div>
             </div>
           </div>
 
@@ -372,30 +432,38 @@ export default function SubscriptionModal({
             </div>
           )}
 
-          {/* Prominent Action Button */}
-          <button
-            onClick={handleStartSubscription}
-            disabled={isProcessing}
-            className="w-full py-2 sm:py-2.5 px-4 rounded-full bg-gradient-to-r from-[#C8A96B] via-[#E5C378] to-[#C8A96B] text-[#071D12] font-display font-extrabold text-xs sm:text-sm tracking-wide shadow-lg hover:scale-[1.01] active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-          >
-            {isProcessing ? (
-              <>
-                <Loader2 className="w-3.5 h-3.5 animate-spin text-[#071D12]" />
-                <span>Connecting to Payment Gateway...</span>
-              </>
-            ) : (
-              <>
-                <Sparkles className="w-3.5 h-3.5 fill-current" />
-                <span>Subscribe to {targetAnimalName} ({currentPlan.title}) – ₹{planPrice}</span>
-              </>
-            )}
-          </button>
+          {/* Bottom Action Bar: Dynamic Radio on Left + Continue to Payment Button on Right */}
+          <div className="p-2 sm:p-2.5 rounded-full bg-[#06180E] border border-[#C8A96B]/50 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-2.5">
+            <div className="flex items-center gap-2.5 text-xs sm:text-sm font-serif font-bold text-[#F5F4EA] px-3">
+              <span className="w-3.5 h-3.5 rounded-full bg-[#10B981] shadow-[0_0_8px_#10B981] shrink-0" />
+              <span>Subscribe to {targetAnimalName} ({currentPlan.title}) – ₹{planPrice}</span>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleStartSubscription}
+              disabled={isProcessing}
+              className="w-full sm:w-auto px-6 sm:px-8 py-2 sm:py-2.5 rounded-full bg-gradient-to-r from-[#C8A96B] via-[#E5C378] to-[#C8A96B] text-[#071D12] font-bold text-xs sm:text-sm tracking-wide shadow-lg hover:brightness-105 active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer shrink-0"
+            >
+              {isProcessing ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin text-[#071D12]" />
+                  <span>Connecting to Payment Gateway...</span>
+                </>
+              ) : (
+                <>
+                  <span>Continue to Payment</span>
+                  <ArrowRight className="w-4 h-4 stroke-[2.5]" />
+                </>
+              )}
+            </button>
+          </div>
 
           {/* Maybe Later Dismissal Button */}
           <button
             onClick={handleReturnToLiveViews}
             disabled={isProcessing}
-            className="w-full mt-1.5 py-1 px-2 rounded-lg text-[11px] sm:text-xs font-semibold text-[#F5F4EA]/70 hover:text-white hover:bg-white/10 transition-colors text-center cursor-pointer border border-transparent hover:border-white/10 flex items-center justify-center gap-1.5"
+            className="w-full mt-2 py-1 px-2 rounded-lg text-[11px] sm:text-xs font-semibold text-[#F5F4EA]/70 hover:text-white hover:bg-white/10 transition-colors text-center cursor-pointer border border-transparent hover:border-white/10 flex items-center justify-center gap-1.5"
             title="Close & Return to Home Page"
           >
             <span>Maybe Later</span>
