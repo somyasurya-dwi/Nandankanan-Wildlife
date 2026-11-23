@@ -22,6 +22,7 @@ import {
   Info,
   Radio,
   ExternalLink,
+  ChevronLeft,
   ChevronRight,
   Plus,
   Minus,
@@ -61,6 +62,33 @@ export default function InteractiveMap({
   const [isDoubleScreen, setIsDoubleScreen] = useState(false);
   const [isolateMarkerId, setIsolateMarkerId] = useState(null);
   const [focusTrigger, setFocusTrigger] = useState(0);
+
+  // Quick Animal Jump Strip horizontal scroll state
+  const animalScrollRef = useRef(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
+
+  const checkAnimalScroll = useCallback(() => {
+    if (animalScrollRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = animalScrollRef.current;
+      setCanScrollLeft(scrollLeft > 10);
+      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
+    }
+  }, []);
+
+  const scrollAnimalStrip = (direction) => {
+    if (animalScrollRef.current) {
+      const scrollAmount = direction === 'left' ? -320 : 320;
+      animalScrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+      setTimeout(checkAnimalScroll, 350);
+    }
+  };
+
+  useEffect(() => {
+    checkAnimalScroll();
+    window.addEventListener('resize', checkAnimalScroll);
+    return () => window.removeEventListener('resize', checkAnimalScroll);
+  }, [checkAnimalScroll, markers]);
 
   // Exact center of Nandankanan's animal enclosures (for satellite mode)
   const NANDANKANAN_CENTER = [20.4020, 85.8190];
@@ -500,30 +528,59 @@ export default function InteractiveMap({
           ))}
         </div>
 
-        {/* Quick Animal Jump Strip (All 12 Live Sanctuary Animals) */}
-        <div className="mb-3 flex items-center gap-2 overflow-x-auto pb-1.5 scrollbar-none">
-          <span className="text-[11px] font-bold text-gold-400 uppercase tracking-widest shrink-0 flex items-center gap-1 mr-1">
-            <Compass className="w-3.5 h-3.5" />
-            <span>Select Animal to View Live:</span>
-          </span>
-          {markers.map((m) => {
-            const isCurrent = activeMarker && (activeMarker.id === m.id || activeMarker.animal_slug === m.animal_slug);
-            return (
-              <button
-                key={m.id || m.animal_slug}
-                onClick={() => focusOnAnimal(m)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs whitespace-nowrap transition-all shrink-0 cursor-pointer ${isCurrent
-                    ? 'bg-gold-500 text-forest-950 font-bold shadow-lg shadow-gold-500/30 ring-2 ring-gold-400 scale-105'
-                    : 'bg-forest-950/70 border border-forest-800 hover:border-gold-500/40 text-ivory-200 hover:text-white'
-                  }`}
-                title={`Click to view ${m.animal_name || m.title} live video`}
-              >
-                <span>{m.emoji || '🐾'}</span>
-                <span>{m.animal_name || m.title}</span>
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse ml-0.5" />
-              </button>
-            );
-          })}
+        {/* Quick Animal Jump Strip (All 12 Live Sanctuary Animals with Scroll Arrows) */}
+        <div className="relative mb-3 flex items-center group/strip">
+          {/* Scroll Left Button */}
+          {canScrollLeft && (
+            <button
+              onClick={() => scrollAnimalStrip('left')}
+              className="absolute left-0 z-20 h-8 w-8 rounded-full bg-forest-950/95 hover:bg-gold-500 text-gold-400 hover:text-forest-950 border border-gold-500/50 shadow-xl flex items-center justify-center transition-all cursor-pointer backdrop-blur-md active:scale-95 shrink-0"
+              title="Scroll left to see previous animals"
+              aria-label="Previous animals"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+          )}
+
+          {/* Scrollable Animal Container */}
+          <div
+            ref={animalScrollRef}
+            onScroll={checkAnimalScroll}
+            className={`flex items-center gap-2 overflow-x-auto pb-1.5 scrollbar-none scroll-smooth w-full ${canScrollLeft ? 'pl-9' : 'pl-0'}`}
+          >
+            <span className="text-[11px] font-bold text-gold-400 uppercase tracking-widest shrink-0 flex items-center gap-1 mr-1">
+              <Compass className="w-3.5 h-3.5" />
+              <span>Select Animal to View Live:</span>
+            </span>
+            {markers.map((m) => {
+              const isCurrent = activeMarker && (activeMarker.id === m.id || activeMarker.animal_slug === m.animal_slug);
+              return (
+                <button
+                  key={m.id || m.animal_slug}
+                  onClick={() => focusOnAnimal(m)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs whitespace-nowrap transition-all shrink-0 cursor-pointer ${isCurrent
+                      ? 'bg-gold-500 text-forest-950 font-bold shadow-lg shadow-gold-500/30 ring-2 ring-gold-400 scale-105'
+                      : 'bg-forest-950/70 border border-forest-800 hover:border-gold-500/40 text-ivory-200 hover:text-white'
+                    }`}
+                  title={`Click to view ${m.animal_name || m.title} live video`}
+                >
+                  <span>{m.emoji || '🐾'}</span>
+                  <span>{m.animal_name || m.title}</span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse ml-0.5" />
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Scroll Right Button (Arrow requested by user) */}
+          <button
+            onClick={() => scrollAnimalStrip('right')}
+            className="z-20 h-8 w-8 rounded-full bg-forest-950/95 hover:bg-gold-500 text-gold-400 hover:text-forest-950 border border-gold-500/50 shadow-xl flex items-center justify-center transition-all cursor-pointer backdrop-blur-md active:scale-95 shrink-0 ml-1.5"
+            title="Scroll right to see other animals"
+            aria-label="Next animals"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
         </div>
 
         {/* Main Grid: 3D/2D Map Box (Full Width when no active marker or Double Screen) + Live Video Feed Panel */}
@@ -614,214 +671,126 @@ export default function InteractiveMap({
 
           {/* Right Cols / Bottom Section: Active Animal Live Video Stream Card & "SPECIES IDENTIFIED" Dossier */}
           {activeMarker && (
-            <div className={`${isDoubleScreen ? "w-full" : "lg:col-span-5 xl:col-span-4"} bg-forest-950/95 border border-gold-500/30 rounded-3xl p-3.5 backdrop-blur-xl shadow-2xl flex flex-col justify-between min-h-[280px] sm:min-h-[330px] lg:min-h-[370px] max-h-[370px] overflow-y-auto scrollbar-thin animate-fadeIn`}>
-              <div className="flex flex-col justify-between h-full space-y-2.5">
-                <div>
-                  {/* "SPECIES IDENTIFIED" TOP HUD BADGE */}
-                  <div className="flex items-center justify-between mb-1.5 pb-1.5 border-b border-forest-800/80">
-                    <div className="flex items-center gap-1.5">
-                      <div className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                      <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-400">
-                        SPECIES IDENTIFIED
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-mono text-gold-300">
-                        ID: #{activeMarker.id} • 3D BEACON LOCKED
-                      </span>
-                      <button
-                        onClick={() => {
-                          setActiveMarker(null);
-                          setIsolateMarkerId(null);
-                        }}
-                        className="w-6 h-6 rounded-full bg-forest-900 hover:bg-[#C8A96B] text-ivory-200 hover:text-[#071D12] border border-gold-500/30 flex items-center justify-center transition-all cursor-pointer"
-                        title="Close Panel (Full Width Map)"
-                        aria-label="Close details panel"
-                      >
-                        <X className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
+            <div className={`${isDoubleScreen ? "w-full" : "lg:col-span-5 xl:col-span-4"} bg-forest-950/95 border border-gold-500/30 rounded-3xl p-4 backdrop-blur-xl shadow-2xl flex flex-col justify-between animate-fadeIn`}>
+              <div className="flex flex-col space-y-3">
+                {/* "SPECIES IDENTIFIED" TOP HUD BADGE */}
+                <div className="flex items-center justify-between pb-1.5 border-b border-forest-800/80">
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-400">
+                      SPECIES IDENTIFIED
+                    </span>
                   </div>
-
-                  {/* LIVE VIDEO STREAM FOR SELECTED ANIMAL */}
-                  <div className="relative aspect-video max-h-[110px] w-full rounded-xl overflow-hidden mb-2 border border-gold-500/40 bg-black shadow-xl group">
-                    <video
-                      ref={sideVideoRef}
-                      key={activeMarker.id + (activeMarker.stream_url || '')}
-                      src={activeMarker.stream_url || '/videos/tiger_walking_1080p.webm'}
-                      autoPlay
-                      loop
-                      muted={isMuted}
-                      playsInline
-                      disablePictureInPicture
-                      controlsList="nodownload noplaybackrate nofullscreen noremoteplayback"
-                      className="w-full h-full object-cover"
-                    />
-
-                    {/* Top Status Overlays */}
-                    <div className="absolute top-3 left-3 flex items-center gap-1.5 z-10">
-                      <span className="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-red-600/95 text-white flex items-center gap-1.5 shadow-lg shadow-red-600/50">
-                        <span className="w-2 h-2 rounded-full bg-white live-indicator" />
-                        LIVE
-                      </span>
-                    </div>
-
-                    {/* Top Right Controls: Mute/Unmute & Expand Modal */}
-                    <div className="absolute top-3 right-3 flex items-center gap-1.5 z-10">
-                      <button
-                        onClick={() => setIsMuted(!isMuted)}
-                        className={`p-1.5 rounded-lg border backdrop-blur-md transition-all shadow-md ${!isMuted
-                            ? 'bg-emerald-600/90 text-white border-emerald-400'
-                            : 'bg-forest-950/80 hover:bg-forest-900 border-gold-500/30 text-gold-300'
-                          }`}
-                        title={isMuted ? "Unmute Enclosure Sound" : "Mute Sound"}
-                        aria-label="Toggle Enclosure Audio"
-                      >
-                        {isMuted ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5 text-white" />}
-                      </button>
-
-                      <button
-                        onClick={toggleSideVideoPlay}
-                        className="p-1.5 rounded-lg bg-forest-950/80 hover:bg-forest-900 border border-gold-500/30 text-gold-300 transition-all shadow-md"
-                        title={isPlaying ? "Pause Stream" : "Play Stream"}
-                        aria-label="Play or Pause Stream"
-                      >
-                        {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
-                      </button>
-
-                      <button
-                        onClick={() => onOpenLiveCam && onOpenLiveCam(activeMarker)}
-                        className="p-1.5 rounded-lg bg-forest-950/80 hover:bg-forest-900 border border-gold-500/30 text-gold-300 transition-all shadow-md"
-                        title="Open Fullscreen Cinema Live Modal"
-                        aria-label="Open Fullscreen Live Modal"
-                      >
-                        <Maximize2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-
-                    {/* Bottom Telemetry Bar */}
-                    <div className="absolute bottom-2.5 left-2.5 right-2.5 flex items-center justify-between text-ivory-50 z-10 bg-forest-950/85 backdrop-blur-md px-2.5 py-1 rounded-lg border border-white/10 text-[10px]">
-                      <span className="flex items-center gap-1 text-gold-300 font-semibold truncate">
-                        <Radio className="w-3 h-3 text-red-500 shrink-0 animate-pulse" />
-                        <span className="truncate">{activeMarker.animal_name || activeMarker.title}</span>
-                      </span>
-                      <span className="font-mono text-emerald-400 shrink-0 text-[9px] flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
-                        Live Observation Active
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* IDENTIFIED SPECIES SCIENTIFIC PROFILE */}
-                  <div className="mb-2">
-                    <div className="flex items-center justify-between gap-2 mb-1">
-                      <h3 
-                        onClick={() => onOpenLiveCam && onOpenLiveCam(activeMarker)}
-                        className="font-display font-black text-xl sm:text-2xl text-ivory-50 cursor-pointer hover:text-gold-300 transition-colors"
-                        title="Click to view live stream in full player"
-                      >
-                        {activeMarker.animal_name || activeMarker.title}
-                      </h3>
-                      {identifiedAnimal?.conservation_status && (
-                        <span className={`px-2 py-0.5 rounded text-[9.5px] font-bold uppercase tracking-wider border shrink-0 ${
-                          identifiedAnimal.conservation_status.toLowerCase().includes('endangered')
-                            ? 'bg-red-500/20 text-red-300 border-red-500/40'
-                            : identifiedAnimal.conservation_status.toLowerCase().includes('vulnerable')
-                            ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
-                            : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
-                        }`}>
-                          {identifiedAnimal.conservation_status}
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Scientific Name */}
-                    {identifiedAnimal?.scientific_name && (
-                      <p className="text-xs text-gold-300/90 italic font-serif mb-2">
-                        Taxonomy: {identifiedAnimal.scientific_name}
-                      </p>
-                    )}
-
-                    <p className="text-xs text-ivory-200/80 leading-relaxed line-clamp-2 mb-3">
-                      {activeMarker.description}
-                    </p>
-
-                    {/* Scientific Metric Telemetry Strip */}
-                    {identifiedAnimal && (
-                      <div className="grid grid-cols-3 gap-1.5 p-2 rounded-xl bg-forest-900/70 border border-forest-800 text-[10px] mb-3">
-                        <div className="text-center">
-                          <span className="text-ivory-400 text-[9px] block uppercase font-mono">Diet</span>
-                          <span className="text-gold-300 font-bold truncate block">{identifiedAnimal.diet?.split('(')[0]?.trim() || 'Custom'}</span>
-                        </div>
-                        <div className="text-center border-x border-forest-800">
-                          <span className="text-ivory-400 text-[9px] block uppercase font-mono">Weight</span>
-                          <span className="text-ivory-100 font-bold truncate block">{identifiedAnimal.weight_range || 'N/A'}</span>
-                        </div>
-                        <div className="text-center">
-                          <span className="text-ivory-400 text-[9px] block uppercase font-mono">Lifespan</span>
-                          <span className="text-emerald-300 font-bold truncate block">{identifiedAnimal.lifespan || 'N/A'}</span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* "THE PLACE AROUND IT" Dedicated Geographic Context Card */}
-                  <div className="p-3 rounded-2xl bg-forest-900/90 border border-gold-500/25 space-y-1.5 text-xs">
-                    <div className="flex items-center gap-1.5 text-gold-300 font-bold uppercase tracking-wider text-[10px]">
-                      <MapPin className="w-3.5 h-3.5 text-gold-400" />
-                      <span>The Place Around This Habitat:</span>
-                    </div>
-
-                    <p className="text-[11px] text-ivory-100/90 leading-relaxed font-light">
-                      {activeMarker.surrounding_place || `Natural forested sanctuary zone surrounded by Sal woodlands, water moats, and visitor walking trails.`}
-                    </p>
-
-                    {activeMarker.nearby_landmarks && (
-                      <div className="pt-1.5 border-t border-forest-800/80 flex items-start gap-1.5 text-[10px] text-ivory-300/80">
-                        <Footprints className="w-3 h-3 text-gold-400 shrink-0 mt-0.5" />
-                        <span><strong>Nearby:</strong> {activeMarker.nearby_landmarks}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Actions */}
-                <div className="space-y-2 pt-2">
-                  <button
-                    onClick={() => onOpenLiveCam && onOpenLiveCam(activeMarker)}
-                    className="w-full py-2.5 rounded-xl bg-gradient-to-r from-red-600 via-red-500 to-amber-500 hover:from-red-500 hover:to-amber-400 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-red-600/30 transition-all flex items-center justify-center gap-2 group"
-                  >
-                    <Tv className="w-4 h-4 animate-pulse" />
-                    <span>Watch Fullscreen Live Stream</span>
-                  </button>
-
                   <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-mono text-gold-300">
+                      ID: #{activeMarker.id} • 3D BEACON LOCKED
+                    </span>
                     <button
                       onClick={() => {
-                        handleShowAllAnimals();
                         setActiveMarker(null);
+                        setIsolateMarkerId(null);
                       }}
-                      className="flex-1 py-2.5 rounded-xl bg-forest-900 hover:bg-forest-800 text-ivory-200 hover:text-white text-xs font-semibold uppercase tracking-wider flex items-center justify-center gap-1.5 border border-forest-700 transition-all text-center cursor-pointer"
+                      className="w-6 h-6 rounded-full bg-forest-900 hover:bg-[#C8A96B] text-ivory-200 hover:text-[#071D12] border border-gold-500/30 flex items-center justify-center transition-all cursor-pointer"
+                      title="Close Panel (Full Width Map)"
+                      aria-label="Close details panel"
                     >
-                      <Navigation className="w-3.5 h-3.5 text-gold-400" />
-                      <span>Show All Animals</span>
+                      <X className="w-3.5 h-3.5" />
                     </button>
-
-                    {activeMarker.animal_slug && (
-                      <button
-                        onClick={() => {
-                          if (onSelectAnimalBySlug) onSelectAnimalBySlug(activeMarker.animal_slug);
-                          const el = document.getElementById('explore-animals');
-                          if (el) el.scrollIntoView({ behavior: 'smooth' });
-                        }}
-                        className="flex-1 py-2.5 rounded-xl bg-forest-900 hover:bg-forest-800 text-gold-300 hover:text-gold-200 text-xs font-semibold uppercase tracking-wider flex items-center justify-center gap-1.5 border border-gold-500/30 transition-all text-center cursor-pointer"
-                      >
-                        <Eye className="w-3.5 h-3.5" />
-                        <span>Species Profile</span>
-                      </button>
-                    )}
                   </div>
                 </div>
+
+                {/* LIVE VIDEO STREAM FOR SELECTED ANIMAL */}
+                <div className="relative aspect-video w-full rounded-2xl overflow-hidden border border-gold-500/40 bg-black shadow-xl group">
+                  <video
+                    ref={sideVideoRef}
+                    key={activeMarker.id + (activeMarker.stream_url || '')}
+                    src={activeMarker.stream_url || '/videos/tiger_walking_1080p.webm'}
+                    autoPlay
+                    loop
+                    muted={isMuted}
+                    playsInline
+                    disablePictureInPicture
+                    controlsList="nodownload noplaybackrate nofullscreen noremoteplayback"
+                    className="w-full h-full object-cover"
+                  />
+
+                  {/* Top Right Controls: Mute/Unmute & Expand Modal */}
+                  <div className="absolute top-3 right-3 flex items-center gap-1.5 z-10">
+                    <button
+                      onClick={() => setIsMuted(!isMuted)}
+                      className={`p-1.5 rounded-lg border backdrop-blur-md transition-all shadow-md cursor-pointer ${!isMuted
+                          ? 'bg-emerald-600/90 text-white border-emerald-400'
+                          : 'bg-forest-950/80 hover:bg-forest-900 border-gold-500/30 text-gold-300'
+                        }`}
+                      title={isMuted ? "Unmute Enclosure Sound" : "Mute Sound"}
+                      aria-label="Toggle Enclosure Audio"
+                    >
+                      {isMuted ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5 text-white" />}
+                    </button>
+
+                    <button
+                      onClick={toggleSideVideoPlay}
+                      className="p-1.5 rounded-lg bg-forest-950/80 hover:bg-forest-900 border border-gold-500/30 text-gold-300 transition-all shadow-md cursor-pointer"
+                      title={isPlaying ? "Pause Stream" : "Play Stream"}
+                      aria-label="Play or Pause Stream"
+                    >
+                      {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+                    </button>
+
+                    <button
+                      onClick={() => onOpenLiveCam && onOpenLiveCam(activeMarker)}
+                      className="p-1.5 rounded-lg bg-forest-950/80 hover:bg-forest-900 border border-gold-500/30 text-gold-300 transition-all shadow-md cursor-pointer"
+                      title="Open Fullscreen Cinema Live Modal"
+                      aria-label="Open Fullscreen Live Modal"
+                    >
+                      <Maximize2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+
+                  {/* Bottom Telemetry Bar */}
+                  <div className="absolute bottom-2.5 left-2.5 right-2.5 flex items-center justify-between text-ivory-50 z-10 bg-forest-950/85 backdrop-blur-md px-2.5 py-1 rounded-lg border border-white/10 text-[10px]">
+                    <span className="flex items-center gap-1 text-gold-300 font-semibold truncate">
+                      <Radio className="w-3 h-3 text-red-500 shrink-0 animate-pulse" />
+                      <span className="truncate">{activeMarker.animal_name || activeMarker.title}</span>
+                    </span>
+                    <span className="font-mono text-emerald-400 shrink-0 text-[9px] flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+                      Live Observation Active
+                    </span>
+                  </div>
+                </div>
+
+                {/* IDENTIFIED SPECIES HEADER */}
+                <div className="flex items-center justify-between gap-2 pt-1 pb-1">
+                  <h3 
+                    onClick={() => onOpenLiveCam && onOpenLiveCam(activeMarker)}
+                    className="font-display font-black text-xl sm:text-2xl text-ivory-50 cursor-pointer hover:text-gold-300 transition-colors"
+                    title="Click to view live stream in full player"
+                  >
+                    {activeMarker.animal_name || activeMarker.title}
+                  </h3>
+                  {identifiedAnimal?.conservation_status && (
+                    <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border shrink-0 ${
+                      identifiedAnimal.conservation_status.toLowerCase().includes('endangered')
+                        ? 'bg-red-500/20 text-red-300 border-red-500/40'
+                        : identifiedAnimal.conservation_status.toLowerCase().includes('vulnerable')
+                        ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+                        : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                    }`}>
+                      {identifiedAnimal.conservation_status}
+                    </span>
+                  )}
+                </div>
+
+                {/* Watch Fullscreen Live Stream Button */}
+                <button
+                  onClick={() => onOpenLiveCam && onOpenLiveCam(activeMarker)}
+                  className="w-full py-2.5 sm:py-3 rounded-2xl bg-gradient-to-r from-[#ef4444] via-[#f97316] to-[#f59e0b] hover:from-[#dc2626] hover:via-[#ea580c] hover:to-[#d97706] text-white font-black text-xs uppercase tracking-wider shadow-lg shadow-red-500/30 transition-all flex items-center justify-center gap-2 group cursor-pointer active:scale-[0.98]"
+                  title="Watch Fullscreen Live Stream"
+                >
+                  <Tv className="w-4 h-4 animate-pulse" />
+                  <span>Watch Fullscreen Live Stream</span>
+                </button>
               </div>
             </div>
           )}

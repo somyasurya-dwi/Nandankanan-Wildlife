@@ -7,7 +7,6 @@ import {
   X, 
   ChevronDown, 
   Check, 
-  RefreshCw, 
   Wallet, 
   Bell, 
   Type, 
@@ -72,6 +71,31 @@ export default function Navbar({
   const [walletModalOpen, setWalletModalOpen] = useState(false);
   const [newsNoticeModalOpen, setNewsNoticeModalOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+
+  // Dynamic Eco-Wallet Balance synchronized with WalletModal
+  const [ecoBalance, setEcoBalance] = useState(() => {
+    try {
+      const saved = localStorage.getItem('nkz_eco_balance');
+      return saved ? Number(saved) : 1250;
+    } catch {
+      return 1250;
+    }
+  });
+
+  useEffect(() => {
+    const handleBalanceUpdate = () => {
+      try {
+        const saved = localStorage.getItem('nkz_eco_balance');
+        if (saved) setEcoBalance(Number(saved));
+      } catch {}
+    };
+    window.addEventListener('nkz_eco_balance_updated', handleBalanceUpdate);
+    window.addEventListener('storage', handleBalanceUpdate);
+    return () => {
+      window.removeEventListener('nkz_eco_balance_updated', handleBalanceUpdate);
+      window.removeEventListener('storage', handleBalanceUpdate);
+    };
+  }, []);
 
   // Active section state: dynamically initialized from current route hash or 'hero'
   const [activeSection, setActiveSection] = useState(() => {
@@ -491,15 +515,9 @@ export default function Navbar({
             <div className={`text-right transition-all duration-300 ease-in-out ${
               dignitaryFading ? 'opacity-0 -translate-y-1 scale-[0.98]' : 'opacity-100 translate-y-0 scale-100'
             }`}>
-              <div className="flex items-center justify-end gap-1.5">
+              <div className="flex items-center justify-end">
                 <span className="text-xs sm:text-[13px] font-extrabold text-[#111612] tracking-tight block">
                   {currentDignitary.name}
-                </span>
-                <span 
-                  className="text-[9px] p-0.5 rounded-full bg-emerald-50 text-[#1B6537] border border-emerald-200/80 shadow-xs flex items-center justify-center group-hover:bg-emerald-100 transition-colors"
-                  title="Auto-toggle active (Click to switch now)"
-                >
-                  <RefreshCw className="w-2.5 h-2.5 animate-spin-slow" />
                 </span>
               </div>
 
@@ -555,11 +573,6 @@ export default function Navbar({
                   className={`w-full h-full ${currentDignitary.imgStyle}`}
                 />
               </div>
-
-              {/* Status Indicator Dot with Pulse */}
-              <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full flex items-center justify-center shadow-xs">
-                <span className="w-1 h-1 rounded-full bg-white animate-ping" />
-              </span>
             </div>
           </div>
 
@@ -794,7 +807,7 @@ export default function Navbar({
                 <Wallet className="w-3.5 h-3.5 text-[#C8A96B]" />
                 <span className="hidden xl:inline">{t('nav.wallet')}</span>
                 <span className="text-[10px] font-black font-mono bg-[#C8A96B] text-[#071D12] px-1.5 py-0.5 rounded-md shadow-xs">
-                  ₹1,250
+                  ₹{ecoBalance.toLocaleString('en-IN')}
                 </span>
               </button>
 

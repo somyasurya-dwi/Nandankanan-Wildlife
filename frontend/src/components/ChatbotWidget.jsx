@@ -445,8 +445,19 @@ export default function ChatbotWidget({
 
   const currentLangObj = SUPPORTED_LANGUAGES.find(l => l.id === chatLang) || SUPPORTED_LANGUAGES[0];
 
-  // Completely invisible on the screen while the live camera screen is showing
-  if (isLiveModalOpen) {
+  // Global modal state tracking (e.g. WalletModal, NewsNoticeModal, AuthModal)
+  const [isExternalModalOpen, setIsExternalModalOpen] = useState(false);
+
+  useEffect(() => {
+    const handleModalEvent = (e) => {
+      setIsExternalModalOpen(Boolean(e.detail?.open));
+    };
+    window.addEventListener('nkz_modal_state_change', handleModalEvent);
+    return () => window.removeEventListener('nkz_modal_state_change', handleModalEvent);
+  }, []);
+
+  // Completely invisible on the screen while any full modal is showing (prevents overlap with Done button)
+  if (isLiveModalOpen || isExternalModalOpen) {
     return null;
   }
 

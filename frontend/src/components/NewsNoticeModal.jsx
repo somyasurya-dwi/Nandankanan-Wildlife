@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   X, 
   Bell, 
@@ -17,6 +18,14 @@ export default function NewsNoticeModal({ isOpen, onClose }) {
   const { language, t } = useLanguage();
   const [activeCategory, setActiveCategory] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
+
+  useEffect(() => {
+    if (!isOpen) return;
+    window.dispatchEvent(new CustomEvent('nkz_modal_state_change', { detail: { open: true, type: 'notices' } }));
+    return () => {
+      window.dispatchEvent(new CustomEvent('nkz_modal_state_change', { detail: { open: false, type: 'notices' } }));
+    };
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -77,8 +86,8 @@ export default function NewsNoticeModal({ isOpen, onClose }) {
     return matchesCat && matchesSearch;
   });
 
-  return (
-    <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fadeIn">
       <div 
         className="relative w-full max-w-2xl bg-[#071D12] border border-[#C8A96B]/50 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
@@ -222,6 +231,7 @@ export default function NewsNoticeModal({ isOpen, onClose }) {
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

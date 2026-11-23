@@ -677,37 +677,53 @@ export default function ExploreAnimals({ animals = [], onSponsorAnimal }) {
               data-lenis-prevent-wheel="true"
               data-lenis-prevent-touch="true"
             >
-              {/* Large Photograph Banner */}
-              <div className="relative h-64 sm:h-80 md:h-96 w-full bg-[#071D12] overflow-hidden shrink-0">
+              {/* Large Photograph Banner - Exact 16:9 Cinema Aspect Ratio for Complete Head-to-Paw Visibility */}
+              <div className="relative aspect-video w-full bg-[#071D12] overflow-hidden shrink-0 shadow-inner">
                 <img
                   src={activeAnimalModal.photo_url}
                   alt={activeAnimalModal.name}
                   className="w-full h-full object-cover object-center"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0B2A1A] via-[#0B2A1A]/40 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#071D12]/30 via-transparent to-black/15 pointer-events-none" />
 
-                {/* Floating Bio Summary over Image */}
-                <div className="absolute bottom-6 left-6 right-6 text-[#F5F4EA]">
-                  <div className="flex flex-wrap items-center gap-2 mb-2">
-                    <span className="px-3 py-1 rounded-md bg-[#123D2B]/90 text-xs font-bold uppercase tracking-wider text-[#C8A96B] border border-[#C8A96B]/40">
-                      {activeAnimalModal.category}
+                {/* Floating Category & Group Badges on Top-Left */}
+                <div className="absolute top-4 left-4 flex flex-wrap items-center gap-2 z-10 pointer-events-none">
+                  <span className="px-3 py-1 rounded-lg bg-[#071D12]/90 backdrop-blur-md text-xs font-bold uppercase tracking-wider text-[#C8A96B] border border-[#C8A96B]/40 shadow-md">
+                    {activeAnimalModal.category}
+                  </span>
+                  {activeAnimalModal.group && (
+                    <span className="px-3 py-1 rounded-lg bg-[#071D12]/90 backdrop-blur-md text-xs font-semibold uppercase tracking-wider text-[#F5F4EA]/90 border border-[#26734D] shadow-md">
+                      Group: {activeAnimalModal.group}
                     </span>
-                    {activeAnimalModal.group && (
-                      <span className="px-3 py-1 rounded-md bg-[#071D12]/90 text-xs font-semibold uppercase tracking-wider text-[#F5F4EA]/90 border border-[#26734D]">
-                        Group: {activeAnimalModal.group}
-                      </span>
-                    )}
-                    <span className={`px-3 py-1 rounded-md text-xs font-bold uppercase tracking-wider border ${getStatusColor(activeAnimalModal.conservation_status)}`}>
-                      IUCN: {activeAnimalModal.conservation_status}
-                    </span>
+                  )}
+                </div>
+
+                {/* Floating IUCN Conservation Status on Top-Right */}
+                <div className="absolute top-4 right-4 z-10 pointer-events-none">
+                  <span className={`px-3 py-1 rounded-lg backdrop-blur-md text-xs font-bold uppercase tracking-wider border shadow-md ${getStatusColor(activeAnimalModal.conservation_status)}`}>
+                    IUCN: {activeAnimalModal.conservation_status}
+                  </span>
+                </div>
+              </div>
+
+              {/* Dedicated Bio Header Bar (Below Image - Zero Animal Occlusion) */}
+              <div className="px-6 sm:px-8 py-5 bg-[#071D12] border-b border-[#26734D]/50 text-[#F5F4EA] shrink-0">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div>
+                    <h3 className="font-display font-extrabold text-2xl sm:text-3xl md:text-4xl text-[#F5F4EA] tracking-wide">
+                      {(getAnimalName && getAnimalName(activeAnimalModal)) || activeAnimalModal.name}
+                    </h3>
+                    <p className="font-editorial italic text-[#C8A96B] text-base sm:text-lg mt-0.5">
+                      {activeAnimalModal.scientific_name}
+                    </p>
                   </div>
 
-                  <h3 className="font-display font-extrabold text-3xl sm:text-4xl text-[#F5F4EA]">
-                    {(getAnimalName && getAnimalName(activeAnimalModal)) || activeAnimalModal.name}
-                  </h3>
-                  <p className="font-editorial italic text-[#C8A96B] text-base sm:text-lg mt-0.5">
-                    {activeAnimalModal.scientific_name}
-                  </p>
+                  <div className="flex items-center gap-2 text-xs font-mono text-[#F5F4EA]/70">
+                    <span className="px-3 py-1.5 rounded-xl bg-[#123D2B] border border-[#26734D]/60 text-emerald-400 font-semibold flex items-center gap-1.5 shadow-sm">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                      Sanctuary Monitored
+                    </span>
+                  </div>
                 </div>
               </div>
 

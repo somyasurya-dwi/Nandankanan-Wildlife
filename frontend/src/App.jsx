@@ -341,16 +341,15 @@ export default function App() {
         <ParallaxSectionBreak
           id="parallax-lake-kanjia"
           bgImage="/images/kanjia_lake.jpg"
-          badge="🌿 LAKE KANJIA WETLAND BIO-CORRIDOR • RAMSAR SENSITIVE"
           odiaText="କାଞ୍ଜିଆ ହ୍ରଦ ଓ ସବୁଜ ବନାନୀର ମିଳନସ୍ଥଳ"
           titlePart1="Where Pristine Wetlands Meet"
           titlePart2="Ancient Chandaka Forests"
           description="Spanning 75 hectares of tranquil fresh water, Lake Kanjia forms the beating ecological heart of Nandankanan, providing sanctuary to rare resident and migratory water birds, marsh crocodiles, and lush aquatic flora."
           metrics={[
-            { value: '437 ha', label: 'Protected Reserve' },
-            { value: '75 ha', label: 'Wetland Sanctuary' },
-            { value: '156+', label: 'Protected Species' },
-            { value: '64+', label: 'Avifauna Species' }
+            { icon: '🌲', value: '437 ha', label: 'Protected Reserve' },
+            { icon: '💧', value: '75 ha', label: 'Wetland Sanctuary' },
+            { icon: '🐾', value: '156+', label: 'Protected Species' },
+            { icon: '🦚', value: '64+', label: 'Avifauna Species' }
           ]}
           ctaText="Explore Illustrated Zoo Map"
           ctaHref="#zoo-map-viewport"
@@ -374,16 +373,15 @@ export default function App() {
         <ParallaxSectionBreak
           id="parallax-sal-canopy"
           bgImage="/images/sanctuary_forest.jpg"
-          badge="🐾 GLOBAL BREEDING & RESCUE LEADER • ESTD. 1960"
           odiaText="ବନ୍ୟପ୍ରାଣୀ ସଂରକ୍ଷଣର ଗୌରବମୟ ଇତିହାସ"
           titlePart1="A Living Heritage of"
-          titlePart2="Compassion & Conservation"
+          titlePart2="Compassion & Wildlife Conservation"
           description="The world's premier captive breeding sanctuary for Royal Bengal Tigers, White Tigers, and the endangered Indian Pangolin. Thoughtfully integrated within the native forest canopy to pioneer species rehabilitation."
           metrics={[
-            { value: '1960', label: 'Estd. Heritage' },
-            { value: '3.5M+', label: 'Annual Visitors' },
-            { value: '100%', label: 'Zero-Plastic Reserve' },
-            { value: '24/7', label: 'Veterinary Hospital' }
+            { icon: '🏛️', value: '1960', label: 'Estd. Heritage' },
+            { icon: '👥', value: '3.5M+', label: 'Annual Visitors' },
+            { icon: '🌿', value: '100%', label: 'Zero-Plastic Reserve' },
+            { icon: '🩺', value: '24/7', label: 'Veterinary Hospital' }
           ]}
           ctaText="Become an Animal Guardian"
           ctaHref="#sponsorship-flow"

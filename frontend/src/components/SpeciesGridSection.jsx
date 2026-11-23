@@ -295,11 +295,11 @@ export default function SpeciesGridSection({ language, onOpenTickets }) {
             </button>
 
             <div className="grid grid-cols-1 md:grid-cols-12">
-              <div className="md:col-span-5 relative aspect-square md:aspect-auto h-64 md:h-full bg-black">
+              <div className="md:col-span-5 relative aspect-video md:aspect-auto h-64 md:h-full bg-black overflow-hidden">
                 <img
                   src={selectedAnimal.photo_url}
                   alt={selectedAnimal.name}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover object-center"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#071D12] via-transparent to-transparent" />
                 <div className="absolute bottom-4 left-4 right-4 text-white">

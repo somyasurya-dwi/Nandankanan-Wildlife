@@ -124,7 +124,7 @@ export default function ParallaxSectionBreak({
         {/* Grand Headline with Editorial Styling */}
         <h2 className="font-display font-black text-2xl sm:text-4xl md:text-5xl text-[#F5F4EA] tracking-tight leading-tight mb-4 drop-shadow-2xl">
           {titlePart1}{' '}
-          <span className="font-editorial italic font-normal text-[#C8A96B] block sm:inline">
+          <span className="font-editorial italic font-normal text-[#C8A96B] block mt-1.5 sm:mt-2">
             {titlePart2}
           </span>
         </h2>
@@ -142,8 +142,13 @@ export default function ParallaxSectionBreak({
             {metrics.map((m, idx) => (
               <div 
                 key={idx}
-                className="px-4 py-2.5 rounded-2xl bg-[#071D12]/80 border border-[#C8A96B]/30 backdrop-blur-md shadow-lg flex items-center gap-3 transition-transform hover:-translate-y-1"
+                className="px-4 py-2.5 rounded-2xl bg-[#071D12]/80 border border-[#C8A96B]/30 backdrop-blur-md shadow-lg flex items-center gap-2.5 sm:gap-3 transition-transform hover:-translate-y-1 hover:border-[#C8A96B]/60"
               >
+                {m.icon && (
+                  <span className="text-sm sm:text-base shrink-0 flex items-center select-none" aria-hidden="true">
+                    {m.icon}
+                  </span>
+                )}
                 <span className="text-[#C8A96B] font-display font-black text-base sm:text-xl">
                   {m.value}
                 </span>
@@ -166,7 +171,7 @@ export default function ParallaxSectionBreak({
                   onCtaClick(e);
                 }
               }}
-              className="btn-accent px-6 sm:px-8 py-3.5 rounded-2xl text-xs sm:text-sm tracking-wider uppercase inline-flex items-center gap-3 cursor-pointer"
+              className="btn-accent px-6 sm:px-8 py-3.5 rounded-2xl text-xs sm:text-sm tracking-wider uppercase inline-flex items-center gap-3 cursor-pointer shadow-[0_0_25px_rgba(200,169,107,0.35)] hover:shadow-[0_0_35px_rgba(200,169,107,0.55)] transition-all hover:scale-105 active:scale-95"
             >
               <CtaIcon className="w-4 h-4 text-[#071D12]" />
               <span>{ctaText}</span>
