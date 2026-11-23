@@ -224,19 +224,18 @@ export default function LiveStreaming({
                     className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
                   />
 
-                  {/* Smooth Hover Video Preview Stream */}
+                  {/* Real-Time Continuous Live Video Stream */}
                   <video
                     ref={(el) => (videoRefs.current[camera.id] = el)}
                     src={primaryStream}
+                    autoPlay
                     muted
                     loop
                     playsInline
                     disablePictureInPicture
                     controlsList="nodownload noplaybackrate nofullscreen noremoteplayback"
                     preload="metadata"
-                    className={`absolute inset-0 w-full h-full object-cover object-center pointer-events-none transition-opacity duration-300 ${
-                      isPreviewing ? 'opacity-100' : 'opacity-0'
-                    }`}
+                    className="absolute inset-0 w-full h-full object-cover object-center pointer-events-none transition-transform duration-700 group-hover:scale-105"
                   />
 
                   {/* Dark gradient overlay */}

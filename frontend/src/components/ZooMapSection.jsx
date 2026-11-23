@@ -34,7 +34,7 @@ export default function ZooMapSection({ language }) {
       title: "White Tiger Sanctuary",
       category: "carnivore",
       coords: [20.4030, 85.8175],
-      photo: "/images/white_tiger.jpg?v=20261123_front",
+      photo: "/images/white_tiger.jpg?v=20261123",
       timings: "08:00 AM - 05:00 PM",
       desc: "Birthplace of the world's first captive-bred white tiger lineage from normal parents (1980).",
       highlight: "Historic birthplace"

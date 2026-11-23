@@ -220,7 +220,7 @@ export default function VirtualExperience() {
     {
       title: "The Legendary White Tiger of Nandankanan",
       category: "Heritage",
-      src: "/images/white_tiger.jpg?v=20261123_front",
+      src: "/images/white_tiger.jpg?v=20261123",
       location: "White Tiger Heritage Habitat"
     },
     {
