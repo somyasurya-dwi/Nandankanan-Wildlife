@@ -239,7 +239,7 @@ export default function SubscriptionModal({
           ========================================================================= */}
       {!showDemoGateway ? (
         <div 
-          className="relative w-full max-w-4xl lg:max-w-5xl bg-[#071D12] border-2 border-[#C8A96B] rounded-2xl sm:rounded-3xl p-3 sm:p-4 lg:p-4.5 shadow-2xl text-[#F5F4EA] flex flex-col justify-between overflow-hidden"
+          className="relative w-full max-w-3xl lg:max-w-[780px] bg-[#071D12] border-2 border-[#C8A96B] rounded-2xl sm:rounded-3xl p-3 sm:p-3.5 lg:p-4 shadow-2xl text-[#F5F4EA] flex flex-col justify-between overflow-hidden"
           onClick={(e) => e.stopPropagation()}
         >
           
@@ -311,7 +311,7 @@ export default function SubscriptionModal({
           </div>
 
           {/* 3 Pricing Cards Grid (1 Month | 3 Months | 6 Months) */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 sm:gap-3 lg:gap-3.5 items-stretch mb-2 sm:mb-2.5">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 items-stretch mb-2 sm:mb-2.5">
             {SUBSCRIPTION_PLANS.map((plan) => {
               const isSelected = plan.id === selectedPlanId;
               const price = plan.prices ? (plan.prices[selectedTier] || plan.prices['1_user']) : (plan.totalPrice || 249);
@@ -393,7 +393,7 @@ export default function SubscriptionModal({
           </div>
 
           {/* Feature Strip (Under Cards) */}
-          <div className="p-1.5 sm:p-2 rounded-xl bg-[#06180E]/90 border border-[#C8A96B]/30 shadow-md grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-2.5 items-center mb-2 sm:mb-2.5">
+          <div className="p-1.5 sm:p-2 rounded-xl bg-[#06180E]/90 border border-[#C8A96B]/30 shadow-md grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5 items-center mb-2 sm:mb-2.5">
             <div className="flex items-center gap-2">
               <Binoculars className="w-4 h-4 sm:w-4.5 sm:h-4.5 stroke-[1.8] text-[#E5C378] shrink-0" />
               <div>
