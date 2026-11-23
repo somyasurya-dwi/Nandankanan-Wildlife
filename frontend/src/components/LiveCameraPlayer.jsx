@@ -1632,25 +1632,25 @@ export default function LiveCameraPlayer({
                     </div>
 
                     {/* Live Stream Status Badge */}
-                    <div className="px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-[9px] sm:text-[10px] font-mono text-emerald-300 font-bold flex items-center gap-1 shadow-lg backdrop-blur-md pointer-events-none uppercase tracking-wider shrink-0">
+                    <div className="px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-xl bg-black/80 border border-emerald-500/50 text-[9px] sm:text-[10px] font-mono text-emerald-400 font-bold flex items-center gap-1 shadow-lg backdrop-blur-md pointer-events-none uppercase tracking-wider shrink-0">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
                       <span>LIVE</span>
                     </div>
 
                     {/* 5-Second Free Preview Countdown / Subscription Plan Badge (e.g. 3 Months Plan, 1 Month Plan, 6 Months Plan) */}
                     {!isSubscribed ? (
-                      <div className="px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-xl bg-amber-500/20 border border-amber-500/40 text-[9px] sm:text-[10px] font-mono text-amber-300 font-bold flex items-center gap-1 shadow-lg backdrop-blur-md pointer-events-none shrink-0 whitespace-nowrap">
+                      <div className="px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-xl bg-black/85 border border-amber-500/60 text-[9px] sm:text-[10px] font-mono text-amber-300 font-bold flex items-center gap-1 shadow-lg backdrop-blur-md pointer-events-none shrink-0 whitespace-nowrap">
                         <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse shrink-0" />
                         <span>{Math.max(0, Math.ceil(remainingSeconds))}s<span className="hidden sm:inline"> Preview</span></span>
                       </div>
                     ) : (
                       <div 
-                        className="px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-xl bg-[#C8A96B]/20 border border-[#C8A96B]/40 text-[9px] sm:text-[10px] font-mono text-[#C8A96B] font-bold flex items-center gap-1 shadow-lg backdrop-blur-md pointer-events-none shrink-0 whitespace-nowrap"
+                        className="px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-xl bg-black/90 border border-[#C8A96B] text-[10px] sm:text-[11px] font-mono text-[#F5F4EA] font-extrabold flex items-center gap-1.5 shadow-xl backdrop-blur-md pointer-events-none shrink-0 whitespace-nowrap"
                         title={`VIP Unlimited Access — ${activePlanLabel}`}
                         aria-label={`VIP ${activePlanLabel}`}
                       >
-                        <Sparkles className="w-3 h-3 text-[#C8A96B] shrink-0" />
-                        <span>{activePlanLabel}</span>
+                        <Sparkles className="w-3.5 h-3.5 text-[#C8A96B] shrink-0 fill-[#C8A96B]/30" />
+                        <span className="text-[#F5F4EA] font-extrabold">{activePlanLabel}</span>
                       </div>
                     )}
                   </div>
