@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   X, 
   Heart, 
@@ -9,8 +9,7 @@ import {
   AlertCircle,
   CreditCard,
   Lock,
-  Plus,
-  ChevronDown
+  Plus
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
@@ -130,70 +129,60 @@ export const FOOD_CONTRIBUTIONS = [
     id: 'green-leaves',
     name: 'Green Leaves',
     emoji: '🥬',
-    desc: 'Fresh leafy fodder',
     price: 20
   },
   {
     id: 'chicken-leg',
     name: 'Chicken Leg',
     emoji: '🍗',
-    desc: 'Approved meat diet',
     price: 50
   },
   {
     id: 'chicken-breast',
     name: 'Chicken Breast',
     emoji: '🍗',
-    desc: 'Lean protein source',
     price: 70
   },
   {
     id: 'buffalo-meat',
     name: 'Buffalo Meat',
     emoji: '🥩',
-    desc: 'Approved carnivore diet',
     price: 100
   },
   {
     id: 'fruit-basket',
     name: 'Fruit Basket',
     emoji: '🍎',
-    desc: 'Seasonal fruits',
     price: 40
   },
   {
     id: 'vegetable-basket',
     name: 'Vegetable Basket',
     emoji: '🥕',
-    desc: 'Fresh vegetables',
     price: 30
   },
   {
     id: 'hay-dry-grass',
     name: 'Hay / Dry Grass',
     emoji: '🌾',
-    desc: 'Herbivore fodder',
     price: 25
   },
   {
     id: 'bird-food-mix',
     name: 'Bird Food Mix',
     emoji: '🐦',
-    desc: 'Species-approved seeds',
     price: 35
   },
   {
     id: 'fresh-fish',
     name: 'Fresh Fish',
     emoji: '🐟',
-    desc: 'Fresh aquatic feed',
     price: 60
   },
   {
     id: 'honey-treat',
     name: 'Honey & Treat',
     emoji: '🍯',
-    desc: 'Enrichment nutrition treat',
     price: 80
   }
 ];
@@ -276,16 +265,6 @@ export default function ContributionModal({
   });
   const [isCustom, setIsCustom] = useState(initialAmount === 'custom');
   const [customInput, setCustomInput] = useState(initialAmount === 'custom' ? '200' : '');
-
-  const foodScrollRef = useRef(null);
-  const [canScrollDown, setCanScrollDown] = useState(true);
-
-  const handleScrollCheck = () => {
-    if (foodScrollRef.current) {
-      const { scrollTop, scrollHeight, clientHeight } = foodScrollRef.current;
-      setCanScrollDown(scrollTop + clientHeight < scrollHeight - 8);
-    }
-  };
 
   const handleFoodSelect = (food) => {
     setIsCustom(false);
@@ -433,59 +412,37 @@ export default function ContributionModal({
               </span>
             </div>
 
-            <div className="relative">
-              <div 
-                ref={foodScrollRef}
-                onScroll={handleScrollCheck}
-                className="max-h-56 sm:max-h-60 overflow-y-auto pr-1 space-y-2 custom-scrollbar scroll-smooth"
-              >
-                <div className="grid grid-cols-2 gap-2">
-                  {FOOD_CONTRIBUTIONS.map((food) => {
-                    const isSelected = !isCustom && selectedFoodId === food.id;
-                    return (
-                      <button
-                        key={food.id}
-                        type="button"
-                        onClick={() => handleFoodSelect(food)}
-                        className={`relative p-2.5 rounded-xl border text-left transition-all duration-150 cursor-pointer flex flex-col justify-between ${
-                          isSelected
-                            ? 'bg-[#C8A96B] text-[#071D12] border-[#C8A96B] shadow-md shadow-[#C8A96B]/30 scale-[1.01]'
-                            : 'bg-[#06180E]/90 text-[#F5F4EA] border-white/10 hover:border-[#C8A96B]/50 hover:bg-[#0B2A1A]'
-                        }`}
-                      >
-                        <div className="flex items-start justify-between w-full mb-1">
-                          <span className="text-xl sm:text-2xl leading-none">{food.emoji}</span>
-                          {isSelected && (
-                            <span className="w-4 h-4 rounded-full bg-[#071D12] text-[#C8A96B] flex items-center justify-center shrink-0 shadow-sm">
-                              <Check className="w-2.5 h-2.5 stroke-[3]" />
-                            </span>
-                          )}
-                        </div>
-                        <div className="my-1">
-                          <div className={`font-serif font-bold text-xs sm:text-[13px] leading-tight ${isSelected ? 'text-[#071D12]' : 'text-[#F5F4EA]'}`}>
-                            {food.name}
-                          </div>
-                          <div className={`text-[10px] sm:text-[10.5px] line-clamp-1 mt-0.5 ${isSelected ? 'text-[#071D12]/85 font-medium' : 'text-[#A7D7A9]'}`}>
-                            {food.desc}
-                          </div>
-                        </div>
-                        <div className={`font-mono font-extrabold text-sm sm:text-base mt-1 ${isSelected ? 'text-[#071D12]' : 'text-[#C8A96B]'}`}>
-                          ₹{food.price}
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Floating scroll down indicator */}
-              {canScrollDown && (
-                <div className="flex justify-center -mt-2.5 relative z-10 pointer-events-none">
-                  <div className="w-6 h-6 rounded-full bg-black/85 border border-[#C8A96B]/40 flex items-center justify-center text-[#C8A96B] shadow-lg animate-bounce">
-                    <ChevronDown className="w-3.5 h-3.5" />
-                  </div>
-                </div>
-              )}
+            <div className="grid grid-cols-2 gap-1.5 sm:gap-2">
+              {FOOD_CONTRIBUTIONS.map((food) => {
+                const isSelected = !isCustom && selectedFoodId === food.id;
+                return (
+                  <button
+                    key={food.id}
+                    type="button"
+                    onClick={() => handleFoodSelect(food)}
+                    className={`relative p-2 sm:p-2.5 rounded-xl border text-left transition-all duration-150 cursor-pointer flex flex-col justify-between ${
+                      isSelected
+                        ? 'bg-[#C8A96B] text-[#071D12] border-[#C8A96B] shadow-md shadow-[#C8A96B]/30 scale-[1.01]'
+                        : 'bg-[#06180E]/90 text-[#F5F4EA] border-white/10 hover:border-[#C8A96B]/50 hover:bg-[#0B2A1A]'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between w-full mb-0.5">
+                      <span className="text-xl sm:text-2xl leading-none">{food.emoji}</span>
+                      {isSelected && (
+                        <span className="w-4 h-4 rounded-full bg-[#071D12] text-[#C8A96B] flex items-center justify-center shrink-0 shadow-sm">
+                          <Check className="w-2.5 h-2.5 stroke-[3]" />
+                        </span>
+                      )}
+                    </div>
+                    <div className={`font-serif font-bold text-xs sm:text-[13px] leading-tight truncate my-0.5 ${isSelected ? 'text-[#071D12]' : 'text-[#F5F4EA]'}`}>
+                      {food.name}
+                    </div>
+                    <div className={`font-mono font-extrabold text-xs sm:text-sm mt-0.5 ${isSelected ? 'text-[#071D12]' : 'text-[#C8A96B]'}`}>
+                      ₹{food.price}
+                    </div>
+                  </button>
+                );
+              })}
             </div>
 
             {/* Custom Amount Option */}
