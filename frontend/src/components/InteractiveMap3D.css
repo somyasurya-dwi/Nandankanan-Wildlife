@@ -24,6 +24,16 @@
   box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7);
 }
 
+.osd-viewport-container.is-fullscreen {
+  height: 100% !important;
+  min-height: 100% !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  border-radius: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
 @media (max-width: 640px) {
   .osd-viewport-container {
     height: 380px;

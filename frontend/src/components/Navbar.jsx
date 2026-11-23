@@ -273,6 +273,9 @@ export default function Navbar({
     // Notify any open modals (such as the animal details modal) to close cleanly on navigation
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('close-animal-modal'));
+      if (link.key === 'zooMap' || link.sectionId === 'interactive-map' || link.scrollTarget === 'zoo-map-viewport') {
+        window.dispatchEvent(new CustomEvent('start-zoo-map-orbit'));
+      }
     }
 
     if (link.onClick) {

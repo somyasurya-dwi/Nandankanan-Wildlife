@@ -377,7 +377,12 @@ export default function SpeciesGridSection({ language, onOpenTickets }) {
                 <div className="pt-4 border-t border-white/10 flex items-center justify-between">
                   <a
                     href="#interactive-map"
-                    onClick={() => setSelectedAnimal(null)}
+                    onClick={() => {
+                      if (typeof window !== 'undefined') {
+                        window.dispatchEvent(new CustomEvent('reset-zoo-map-view'));
+                      }
+                      setSelectedAnimal(null);
+                    }}
                     className="text-xs font-semibold text-[#A7D7A9] hover:text-white flex items-center gap-1"
                   >
                     <MapPin className="w-3.5 h-3.5" />

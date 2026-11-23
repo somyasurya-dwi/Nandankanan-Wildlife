@@ -168,7 +168,7 @@ export default function LiveCameraPlayer({
   const isElephant = animal?.slug === 'asian-elephant' || animal?.id === 3 || animal?.animal_name?.toLowerCase().includes('elephant');
   const isDeer = animal?.slug === 'spotted-deer' || animal?.id === 4;
   const isBear = animal?.slug === 'sloth-bear' || animal?.id === 5 || animal?.animal_name?.toLowerCase().includes('bear');
-  const isBird = animal?.slug === 'birds' || animal?.id === 6 || animal?.animal_name?.toLowerCase().includes('bird');
+  const isBird = animal?.slug === 'birds' || animal?.slug === 'peacock' || animal?.id === 6 || animal?.animal_name?.toLowerCase().includes('bird') || animal?.animal_name?.toLowerCase().includes('peacock');
   const isPangolin = animal?.slug === 'indian-pangolin' || animal?.id === 8 || animal?.animal_name?.toLowerCase().includes('pangolin');
   const isGharial = animal?.slug === 'gharial' || animal?.id === 9 || animal?.animal_name?.toLowerCase().includes('gharial') || animal?.animal_name?.toLowerCase().includes('crocodile');
   const isCobra = animal?.slug === 'king-cobra' || animal?.id === 10 || animal?.animal_name?.toLowerCase().includes('cobra');
@@ -602,7 +602,7 @@ export default function LiveCameraPlayer({
   // Initialize continuous multi-camera physical location tracker
   const tracker = useMemo(() => {
     return new MultiCameraTracker({
-      animalName: animal?.animal_name || (isElephant ? "Elephant" : isBird ? "Birds" : isBear ? "Bear" : isDeer ? "Deer" : isLion ? "Asiatic Lion" : "Royal Bengal Tiger"),
+      animalName: animal?.animal_name || (isElephant ? "Elephant" : isBird ? "Peacock" : isBear ? "Bear" : isDeer ? "Deer" : isLion ? "Asiatic Lion" : "Royal Bengal Tiger"),
       individualId: animal?.resident_id || (isElephant ? "NKZ-E-01" : isBird ? "NKZ-B-12" : isBear ? "NKZ-B-05" : isDeer ? "NKZ-D-08" : isLion ? "NKZ-L-02" : "NKZ-T-04"),
       callsign: animal?.callsign || (isElephant ? "Basanti" : isBird ? "Mayur" : isBear ? "Baloo" : isDeer ? "Chitra" : isLion ? "Suraj" : "Kanha"),
       species: animal?.scientific_name || (isElephant ? "Elephas maximus" : isBird ? "Pavo cristatus" : isBear ? "Melursus ursinus" : isDeer ? "Axis axis" : isLion ? "Panthera leo persica" : "Panthera tigris tigris"),
@@ -1546,7 +1546,7 @@ export default function LiveCameraPlayer({
                   <video
                     ref={videoRefContinuous}
                     key={`${animal?.id || 'cam'}-continuous`}
-                    poster={animal?.thumbnail_url || animal?.photo_url || (isWhiteTiger ? '/images/white_tiger.jpg' : isPangolin ? '/images/pangolin.jpg' : isGharial ? '/images/gharial.jpg' : isCobra ? '/images/king_cobra.jpg' : '/images/royal_bengal_tiger.jpg')}
+                    poster={animal?.thumbnail_url || animal?.photo_url || (isWhiteTiger ? '/images/white_tiger.jpg?v=20261124' : isPangolin ? '/images/pangolin.jpg' : isGharial ? '/images/gharial.jpg' : isCobra ? '/images/king_cobra.jpg' : '/images/royal_bengal_tiger.jpg')}
                     autoPlay
                     loop
                     muted={isMuted}

@@ -225,6 +225,9 @@ export default function CinematicVideoHero({ onExploreClick, onMapClick, onWatch
             <a
               href="#interactive-map"
               onClick={(e) => {
+                if (typeof window !== 'undefined') {
+                  window.dispatchEvent(new CustomEvent('reset-zoo-map-view'));
+                }
                 if (onMapClick) {
                   e.preventDefault();
                   onMapClick();
