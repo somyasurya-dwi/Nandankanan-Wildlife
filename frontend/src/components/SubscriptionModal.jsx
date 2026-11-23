@@ -110,6 +110,7 @@ export default function SubscriptionModal({
                 animal,
                 amount: planPrice,
                 planTitle: `${targetAnimalName} ${currentPlan.title} Live Stream Pass`,
+                planName: currentPlan.title,
                 days: currentPlan.days,
                 isDemo: false
               });
@@ -172,6 +173,7 @@ export default function SubscriptionModal({
         animal,
         amount: planPrice,
         planTitle: `${targetAnimalName} ${currentPlan.title} Live Stream Pass`,
+        planName: currentPlan.title,
         days: currentPlan.days,
         isDemo: true
       });

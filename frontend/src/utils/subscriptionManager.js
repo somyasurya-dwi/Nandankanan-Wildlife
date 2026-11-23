@@ -122,19 +122,21 @@ class SubscriptionManager {
       const map = this.getSubscriptionsMap();
       if (!map['tiger'] || !map['tiger'].is_active) {
         const now = new Date();
-        const expiresAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+        const expiresAt = new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000);
         map['tiger'] = {
           id: 'SUB-TIGER-30D',
           animal_key: 'tiger',
           animal_name: 'Royal Bengal Tiger',
-          plan: 'Royal Bengal Tiger Live Stream Pass (30 Days)',
-          amount: 50,
+          plan: 'Royal Bengal Tiger Live Stream Pass (3 Months)',
+          plan_title: '3 Months Plan',
+          amount: 249,
           currency: 'INR',
           status: 'active',
           is_active: true,
           starts_at: now.toISOString(),
           expires_at: expiresAt.toISOString(),
-          days_remaining: 30
+          days: 90,
+          days_remaining: 90
         };
         localStorage.setItem(STORAGE_KEYS.SUBSCRIPTIONS_MAP, JSON.stringify(map));
       }
@@ -149,19 +151,21 @@ class SubscriptionManager {
       // Seed Tiger subscription as confirmed active by the user
       if (!map['tiger'] || !map['tiger'].is_active) {
         const now = new Date();
-        const expiresAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+        const expiresAt = new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000);
         map['tiger'] = {
           id: 'SUB-TIGER-30D',
           animal_key: 'tiger',
           animal_name: 'Royal Bengal Tiger',
-          plan: 'Royal Bengal Tiger Live Stream Pass (30 Days)',
-          amount: 50,
+          plan: 'Royal Bengal Tiger Live Stream Pass (3 Months)',
+          plan_title: '3 Months Plan',
+          days: 90,
+          days_remaining: 90,
+          amount: 249,
           currency: 'INR',
           status: 'active',
           is_active: true,
           starts_at: now.toISOString(),
-          expires_at: expiresAt.toISOString(),
-          days_remaining: 30
+          expires_at: expiresAt.toISOString()
         };
         try {
           localStorage.setItem(STORAGE_KEYS.SUBSCRIPTIONS_MAP, JSON.stringify(map));
@@ -174,7 +178,10 @@ class SubscriptionManager {
           id: 'SUB-TIGER-30D',
           animal_key: 'tiger',
           animal_name: 'Royal Bengal Tiger',
-          plan: 'Royal Bengal Tiger Live Stream Pass (30 Days)',
+          plan: 'Royal Bengal Tiger Live Stream Pass (3 Months)',
+          plan_title: '3 Months Plan',
+          days: 90,
+          days_remaining: 90,
           is_active: true
         }
       };
@@ -209,15 +216,45 @@ class SubscriptionManager {
   }
 
   /**
+   * Returns human-readable subscription plan duration label (e.g. "3 Months Plan", "1 Month Plan", "6 Months Plan").
+   */
+  getSubscriptionPlanLabel(animal = null) {
+    const sub = this.getSubscription(animal);
+    if (!sub) return null;
+    if (sub.plan_title) {
+      const t = sub.plan_title.trim();
+      return t.toLowerCase().includes('plan') ? t : `${t} Plan`;
+    }
+    const days = Number(sub.days || sub.days_remaining || 0);
+    const planStr = (sub.plan || '').toLowerCase();
+    if (days >= 300 || planStr.includes('12 month') || planStr.includes('365 day') || planStr.includes('year')) {
+      return '12 Months Plan';
+    }
+    if (days >= 150 || planStr.includes('6 month') || planStr.includes('180 day')) {
+      return '6 Months Plan';
+    }
+    if (days >= 60 || planStr.includes('3 month') || planStr.includes('90 day') || planStr.includes('3m')) {
+      return '3 Months Plan';
+    }
+    if (days >= 20 || planStr.includes('1 month') || planStr.includes('30 day') || planStr.includes('1m')) {
+      return '1 Month Plan';
+    }
+    return '3 Months Plan';
+  }
+
+  /**
    * Activates an individual animal subscription in persistent storage for 30 days.
    */
   activateSubscription(subData, animal = null) {
     try {
       const key = this.normalizeAnimalKey(animal || subData.animal_key || subData.animal_name);
       const map = this.getSubscriptionsMap();
+      const numDays = Number(subData.days || subData.days_remaining || 30);
+      const computedTitle = subData.plan_title || (numDays >= 300 ? '12 Months Plan' : numDays >= 150 ? '6 Months Plan' : numDays >= 60 ? '3 Months Plan' : '1 Month Plan');
       map[key] = {
         ...subData,
         animal_key: key,
+        plan_title: computedTitle,
         is_active: true,
         updated_at: new Date().toISOString()
       };
@@ -396,7 +433,7 @@ class SubscriptionManager {
     };
   }
 
-  async verifyPayment({ orderId, paymentId, signature, email, name, animal = null, isDemo = false, amount = 353, planTitle = null, days = 90 }) {
+  async verifyPayment({ orderId, paymentId, signature, email, name, animal = null, isDemo = false, amount = 353, planTitle = null, days = 90, planName = null }) {
     const key = this.normalizeAnimalKey(animal);
     const animalDisplayName = animal?.animal_name || (key.charAt(0).toUpperCase() + key.slice(1));
     const effectivePlanTitle = planTitle || `${animalDisplayName} Live Stream Pass (${days || 30} Days)`;
@@ -418,8 +455,15 @@ class SubscriptionManager {
       if (res.ok) {
         const data = await res.json();
         if (data.success && data.subscription) {
-          this.activateSubscription(data.subscription, key);
-          return { success: true, subscription: data.subscription };
+          const numDays = days || 30;
+          const planTitleLabel = planName ? (planName.toLowerCase().includes('plan') ? planName : `${planName} Plan`) : (numDays >= 300 ? '12 Months Plan' : numDays >= 150 ? '6 Months Plan' : numDays >= 60 ? '3 Months Plan' : '1 Month Plan');
+          const enriched = {
+            ...data.subscription,
+            plan_title: planTitleLabel,
+            days: numDays
+          };
+          this.activateSubscription(enriched, key);
+          return { success: true, subscription: enriched };
         }
       }
     } catch (err) {
@@ -430,6 +474,7 @@ class SubscriptionManager {
       const now = new Date();
       const numDays = days || 30;
       const expiresAt = new Date(now.getTime() + numDays * 24 * 60 * 60 * 1000);
+      const computedPlanTitle = planName ? (planName.toLowerCase().includes('plan') ? planName : `${planName} Plan`) : (numDays >= 300 ? '12 Months Plan' : numDays >= 150 ? '6 Months Plan' : numDays >= 60 ? '3 Months Plan' : '1 Month Plan');
       const subData = {
         id: 'SUB-' + key.toUpperCase() + '-' + Math.random().toString(36).substring(2, 8).toUpperCase(),
         animal_key: key,
@@ -437,6 +482,8 @@ class SubscriptionManager {
         user_name: name || 'Wildlife Supporter',
         user_email: email || 'visitor@nandankanan.org',
         plan: effectivePlanTitle,
+        plan_title: computedPlanTitle,
+        days: numDays,
         amount,
         currency: 'INR',
         status: 'active',

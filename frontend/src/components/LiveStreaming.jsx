@@ -263,8 +263,11 @@ export default function LiveStreaming({
 
                     {/* Individual Animal Subscription Status Badge */}
                     {subscriptionManager.isSubscribed(camera) && (
-                      <span className="px-1.5 py-0.2 rounded-md bg-[#C8A96B]/25 border border-[#C8A96B]/50 text-[#C8A96B] font-mono text-[8.5px] font-bold backdrop-blur-md">
-                        VIP UNLIMITED
+                      <span 
+                        className="px-1.5 py-0.2 rounded-md bg-[#C8A96B]/25 border border-[#C8A96B]/50 text-[#C8A96B] font-mono text-[8.5px] font-bold backdrop-blur-md uppercase tracking-wider"
+                        title={`VIP Unlimited Access — ${subscriptionManager.getSubscriptionPlanLabel(camera) || '3 Months Plan'}`}
+                      >
+                        {(subscriptionManager.getSubscriptionPlanLabel(camera) || '3 Months Plan').toUpperCase()}
                       </span>
                     )}
                   </div>
