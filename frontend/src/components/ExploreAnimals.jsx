@@ -767,49 +767,6 @@ export default function ExploreAnimals({ animals = [], onSponsorAnimal }) {
                   </div>
                 )}
 
-                {/* Available Video Footage Preview */}
-                {activeAnimalModal.video_url && (
-                  <div>
-                    <h4 className="font-display font-bold text-base text-[#F5F4EA] mb-3 flex items-center gap-2">
-                      <Tv className="w-4 h-4 text-[#C8A96B]" />
-                      Sanctuary Observation Footage
-                    </h4>
-                    <div className="relative aspect-video rounded-2xl overflow-hidden bg-black border border-[#26734D]/40 shadow-md">
-                      <video
-                        src={activeAnimalModal.video_url}
-                        controls
-                        playsInline
-                        disablePictureInPicture
-                        controlsList="nodownload noplaybackrate nofullscreen noremoteplayback"
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  </div>
-                )}
-
-                {/* Bottom Actions Bar */}
-                <div className="pt-6 border-t border-[#26734D]/40 flex flex-col sm:flex-row items-center justify-between gap-4">
-                  <button
-                    onClick={() => setActiveAnimalModal(null)}
-                    className="w-full sm:w-auto px-6 py-3 rounded-xl bg-[#123D2B] hover:bg-[#1a563c] text-[#F5F4EA]/90 hover:text-white font-bold text-xs uppercase tracking-wider transition-all border border-[#26734D] hover:border-[#C8A96B]/40 flex items-center justify-center gap-2 cursor-pointer"
-                  >
-                    <ArrowLeft className="w-4 h-4" />
-                    <span>Back to Species List</span>
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      const animal = activeAnimalModal;
-                      setActiveAnimalModal(null);
-                      onSponsorAnimal && onSponsorAnimal(animal);
-                    }}
-                    className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-gradient-to-r from-[#C8A96B] to-[#b39352] hover:from-[#d8b87a] hover:to-[#C8A96B] text-[#071D12] font-black text-xs uppercase tracking-widest shadow-lg shadow-[#C8A96B]/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
-                  >
-                    <HeartHandshake className="w-4 h-4" />
-                    <span>Sponsor {(getAnimalName && getAnimalName(activeAnimalModal)) || activeAnimalModal.name}</span>
-                  </button>
-                </div>
-
               </div>
             </div>
 

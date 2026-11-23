@@ -131,7 +131,6 @@ export default function Navbar({
       'live-wildlife',
       'interactive-map',
       'explore-animals',
-      'virtual-experience',
       'conservation-stories',
       'notices',
       'sponsorship-portal',
@@ -438,7 +437,6 @@ export default function Navbar({
     { key: 'liveViews', name: t('nav.liveViews') || t('nav.liveCameras'), href: '#live-wildlife', sectionId: 'live-wildlife', scrollTarget: 'live-cameras-grid' },
     { key: 'zooMap', name: t('nav.zooMap'), href: '#interactive-map', sectionId: 'interactive-map', scrollTarget: 'zoo-map-viewport' },
     { key: 'species', name: t('nav.species'), href: '#explore-animals', sectionId: 'explore-animals', scrollTarget: 'species-grid' },
-    { key: 'virtualTour', name: t('nav.virtualTour'), href: '#virtual-experience', sectionId: 'virtual-experience', scrollTarget: 'virtual-tour-viewer' },
     { key: 'stories', name: t('nav.stories'), href: '#conservation-stories', sectionId: 'conservation-stories', scrollTarget: 'stories-grid' },
     { key: 'notices', name: t('nav.newsNotice'), href: '#notices', sectionId: 'notices', scrollTarget: 'notices-bulletin-box' },
     { key: 'adopt', name: t('nav.adopt'), href: '#sponsorship-portal', sectionId: 'sponsorship-portal', scrollTarget: 'sponsorship-flow' },
@@ -831,11 +829,11 @@ export default function Navbar({
                 </button>
               )}
 
-              {/* Fast-Track Explore Action Button */}
+              {/* Fast-Track Explore Action Button (Redirects to Live Videos) */}
               <a
-                href="#explore-animals"
-                onClick={(e) => handleNavClick(e, { key: 'species', href: '#explore-animals', sectionId: 'explore-animals', scrollTarget: 'species-grid' })}
-                className="px-3 xl:px-4 py-1.5 rounded-lg bg-gradient-to-r from-[#C8A96B] to-[#b39352] hover:from-[#d8b87a] hover:to-[#C8A96B] text-[#071D12] font-black text-[11px] xl:text-xs uppercase tracking-wider shadow-md hover:scale-105 active:scale-95 transition-all whitespace-nowrap"
+                href="#live-wildlife"
+                onClick={(e) => handleNavClick(e, { key: 'liveViews', href: '#live-wildlife', sectionId: 'live-wildlife', scrollTarget: 'live-cameras-grid' })}
+                className="px-3 xl:px-4 py-1.5 rounded-lg bg-gradient-to-r from-[#C8A96B] to-[#b39352] hover:from-[#d8b87a] hover:to-[#C8A96B] text-[#071D12] font-black text-[11px] xl:text-xs uppercase tracking-wider shadow-md hover:scale-105 active:scale-95 transition-all whitespace-nowrap cursor-pointer"
               >
                 <span>{t('nav.exploreNow')}</span>
               </a>
