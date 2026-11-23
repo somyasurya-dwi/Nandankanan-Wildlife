@@ -1446,7 +1446,7 @@ export default function LiveCameraPlayer({
         {/* =========================================================================
             MAIN DASHBOARD BODY (Full Width Panoramic Video Surveillance View)
             ========================================================================= */}
-        <main className="w-full max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 xl:px-10 py-1.5 sm:py-2 flex-1 flex flex-col justify-center items-center" >
+        <main className="w-full max-w-7xl mx-auto xl:max-w-[1480px] 2xl:max-w-[1680px] px-2 sm:px-4 lg:px-6 xl:px-8 py-1.5 sm:py-2 flex-1 flex flex-col justify-center items-center" >
 
           {/* Main Top Section: Full Width High-Definition Live Camera Viewport & Controls */}
           <div className="w-full flex-1 flex flex-col justify-center items-center" >
@@ -1457,12 +1457,11 @@ export default function LiveCameraPlayer({
             <div
               ref={videoPlayerContainerRef}
               style={!isFullscreen ? {
-                aspectRatio: '16 / 9',
-                maxWidth: 'calc((100vh - 125px) * 16 / 9)'
+                height: 'min(calc(100vh - 125px), 820px)'
               } : undefined}
               className={`relative bg-black w-full mx-auto overflow-hidden group select-none transition-all duration-300 ${isFullscreen
                 ? 'fixed inset-0 z-50 h-screen w-screen rounded-none max-h-none border-none'
-                : 'max-h-[calc(100vh-125px)] rounded-2xl shadow-2xl border border-white/10'
+                : 'aspect-video md:aspect-auto max-h-[calc(100vh-125px)] min-h-[360px] rounded-2xl shadow-2xl border border-white/10'
                 }`}
             >
 
