@@ -353,27 +353,27 @@ export default function ContributionModal({
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md animate-fadeIn overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/85 backdrop-blur-md animate-fadeIn overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
       <div 
-        className="relative w-full max-w-md sm:max-w-lg rounded-2xl bg-gradient-to-b from-[#0B2A1A] to-[#071D12] border border-[#C8A96B]/50 shadow-2xl p-3.5 sm:p-4.5 text-[#F5F4EA] my-auto max-h-[92vh] overflow-y-auto"
+        className="relative w-full max-w-md sm:max-w-lg rounded-2xl bg-gradient-to-b from-[#0B2A1A] to-[#071D12] border border-[#C8A96B]/50 shadow-2xl p-3 sm:p-3.5 text-[#F5F4EA] my-auto max-h-[96vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
         onClick={(e) => e.stopPropagation()}
       >
         
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-3.5 right-3.5 sm:top-4 sm:right-4 p-1.5 rounded-full bg-white/10 text-white/70 hover:text-white hover:bg-white/20 transition-all cursor-pointer"
+          className="absolute top-3 right-3 sm:top-3.5 sm:right-3.5 p-1.5 rounded-full bg-white/10 text-white/70 hover:text-white hover:bg-white/20 transition-all cursor-pointer"
           aria-label="Close"
         >
           <X className="w-4 h-4" />
         </button>
 
         {/* Modal Header */}
-        <div className="flex items-center gap-2.5 mb-2.5">
+        <div className="flex items-center gap-2 mb-2">
           <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#C8A96B] to-[#997736] flex items-center justify-center text-lg shadow-md shadow-[#C8A96B]/30 shrink-0">
             {selectedAnimal?.emoji || <Heart className="w-4 h-4 text-[#071D12] fill-current" />}
           </div>
@@ -392,27 +392,27 @@ export default function ContributionModal({
         </div>
 
         {/* Zoo-Approved Welfare Notice */}
-        <div className="mb-2.5 p-2 rounded-lg bg-forest-900/80 border border-[#C8A96B]/20 text-[10px] sm:text-[10.5px] text-[#A7D7A9] flex items-start gap-1.5 leading-snug">
+        <div className="mb-2 p-1.5 sm:p-2 rounded-lg bg-forest-900/80 border border-[#C8A96B]/20 text-[10px] sm:text-[10.5px] text-[#A7D7A9] flex items-start gap-1.5 leading-snug">
           <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
           <span>
             <strong>Official Care Protocol:</strong> Donations support zoo-approved animal nutrition, veterinary care, & enrichment diets managed by Nandankanan wildlife experts. Visitors do not directly feed animals.
           </span>
         </div>
 
-        <form onSubmit={handleFormSubmit} className="space-y-2.5">
+        <form onSubmit={handleFormSubmit} className="space-y-2">
           
           {/* SELECT FOOD CONTRIBUTION */}
           <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="text-[11px] sm:text-xs font-mono uppercase tracking-wider text-[#C8A96B] font-bold">
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-[11px] font-mono uppercase tracking-wider text-[#C8A96B] font-bold">
                 Select Food Contribution:
               </label>
-              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-950/80 border border-emerald-500/30 text-emerald-400">
+              <span className="text-[10px] font-semibold px-2 py-0.2 rounded-full bg-emerald-950/80 border border-emerald-500/30 text-emerald-400">
                 10 options
               </span>
             </div>
 
-            <div className="grid grid-cols-2 gap-1.5 sm:gap-2">
+            <div className="grid grid-cols-2 gap-1.5">
               {FOOD_CONTRIBUTIONS.map((food) => {
                 const isSelected = !isCustom && selectedFoodId === food.id;
                 return (
@@ -420,25 +420,27 @@ export default function ContributionModal({
                     key={food.id}
                     type="button"
                     onClick={() => handleFoodSelect(food)}
-                    className={`relative p-2 sm:p-2.5 rounded-xl border text-left transition-all duration-150 cursor-pointer flex flex-col justify-between ${
+                    className={`px-2.5 py-1.5 rounded-lg border text-left transition-all duration-150 cursor-pointer flex items-center justify-between gap-1.5 ${
                       isSelected
-                        ? 'bg-[#C8A96B] text-[#071D12] border-[#C8A96B] shadow-md shadow-[#C8A96B]/30 scale-[1.01]'
+                        ? 'bg-[#C8A96B] text-[#071D12] border-[#C8A96B] shadow-sm shadow-[#C8A96B]/30 font-bold scale-[1.01]'
                         : 'bg-[#06180E]/90 text-[#F5F4EA] border-white/10 hover:border-[#C8A96B]/50 hover:bg-[#0B2A1A]'
                     }`}
                   >
-                    <div className="flex items-center justify-between w-full mb-0.5">
-                      <span className="text-xl sm:text-2xl leading-none">{food.emoji}</span>
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <span className="text-base shrink-0 leading-none">{food.emoji}</span>
+                      <span className={`font-serif font-bold text-[11px] sm:text-xs truncate ${isSelected ? 'text-[#071D12]' : 'text-[#F5F4EA]'}`}>
+                        {food.name}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0 ml-1">
+                      <span className={`font-mono font-bold text-[11px] sm:text-xs ${isSelected ? 'text-[#071D12]' : 'text-[#C8A96B]'}`}>
+                        ₹{food.price}
+                      </span>
                       {isSelected && (
-                        <span className="w-4 h-4 rounded-full bg-[#071D12] text-[#C8A96B] flex items-center justify-center shrink-0 shadow-sm">
-                          <Check className="w-2.5 h-2.5 stroke-[3]" />
+                        <span className="w-3.5 h-3.5 rounded-full bg-[#071D12] text-[#C8A96B] flex items-center justify-center shrink-0">
+                          <Check className="w-2 h-2 stroke-[3]" />
                         </span>
                       )}
-                    </div>
-                    <div className={`font-serif font-bold text-xs sm:text-[13px] leading-tight truncate my-0.5 ${isSelected ? 'text-[#071D12]' : 'text-[#F5F4EA]'}`}>
-                      {food.name}
-                    </div>
-                    <div className={`font-mono font-extrabold text-xs sm:text-sm mt-0.5 ${isSelected ? 'text-[#071D12]' : 'text-[#C8A96B]'}`}>
-                      ₹{food.price}
                     </div>
                   </button>
                 );
@@ -526,7 +528,7 @@ export default function ContributionModal({
                 type="button"
                 onClick={() => setPaymentMethod('wallet')}
                 disabled={!canPayFromWallet}
-                className={`p-2 rounded-lg border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                className={`p-1.5 sm:p-2 rounded-lg border text-left transition-all cursor-pointer flex flex-col justify-between ${
                   paymentMethod === 'wallet' && canPayFromWallet
                     ? 'bg-[#14532D] border-emerald-400 text-white shadow-sm'
                     : canPayFromWallet
@@ -536,7 +538,7 @@ export default function ContributionModal({
               >
                 <div className="flex items-center gap-1 mb-0.5">
                   <Wallet className="w-3 h-3 text-emerald-400" />
-                  <span className="text-[11px] font-bold">Wildlife Wallet</span>
+                  <span className="text-[10.5px] sm:text-[11px] font-bold">Wildlife Wallet</span>
                 </div>
                 <div className="text-[9.5px] font-mono text-[#C8A96B]">
                   Balance: ₹{walletBalance}
@@ -547,7 +549,7 @@ export default function ContributionModal({
               <button
                 type="button"
                 onClick={() => setPaymentMethod('razorpay')}
-                className={`p-2 rounded-lg border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                className={`p-1.5 sm:p-2 rounded-lg border text-left transition-all cursor-pointer flex flex-col justify-between ${
                   paymentMethod === 'razorpay'
                     ? 'bg-[#14532D] border-[#C8A96B] text-white shadow-sm'
                     : 'bg-black/30 border-white/10 text-[#F5F4EA]/70 hover:border-white/20'
@@ -555,7 +557,7 @@ export default function ContributionModal({
               >
                 <div className="flex items-center gap-1 mb-0.5">
                   <CreditCard className="w-3 h-3 text-[#C8A96B]" />
-                  <span className="text-[11px] font-bold">UPI / Card / NetBanking</span>
+                  <span className="text-[10.5px] sm:text-[11px] font-bold">UPI / Card / NetBanking</span>
                 </div>
                 <span className="text-[9.5px] font-mono text-[#A7D7A9]">
                   Instant Razorpay Demo
@@ -573,11 +575,11 @@ export default function ContributionModal({
           )}
 
           {/* Submit Action */}
-          <div className="pt-1 sm:pt-1.5">
+          <div className="pt-1">
             <button
               type="submit"
               disabled={isSubmitting || effectiveAmount <= 0}
-              className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#C8A96B] via-[#E2CB99] to-[#C8A96B] hover:brightness-105 active:scale-[0.99] text-[#071D12] font-serif font-black text-xs sm:text-sm uppercase tracking-wider transition-all shadow-lg shadow-[#C8A96B]/25 flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+              className="w-full py-2 sm:py-2.5 rounded-xl bg-gradient-to-r from-[#C8A96B] via-[#E2CB99] to-[#C8A96B] hover:brightness-105 active:scale-[0.99] text-[#071D12] font-serif font-black text-xs sm:text-sm uppercase tracking-wider transition-all shadow-lg shadow-[#C8A96B]/25 flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
             >
               {isSubmitting ? (
                 <>
