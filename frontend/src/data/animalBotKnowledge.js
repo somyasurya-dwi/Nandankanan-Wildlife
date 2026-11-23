@@ -171,7 +171,8 @@ Nandankanan spans 437 hectares of natural deciduous forests, encompassing over 3
 ⭐ NANDANKANAN'S HISTORIC MILESTONE:
 On July 28, 1980, Nandankanan achieved global acclaim when normal tawny tigers "Deepak" and "Ganga" gave birth to three white tiger cubs: Debabrata, Sheeba, and Mayuri. Unlike other zoos that relied on inbreeding, Nandankanan revitalized the genetic health of white tigers worldwide.
 
-✨ UNIQUE CHARACTERISTICS:
+🐾 UNIQUE CHARACTERISTICS:
+
 • Not albino: White coloration comes from a rare recessive gene (leucism) with sapphire-blue eyes and dark sepia stripes.
 • Swimmers: Exceptional swimmers who relish bathing in feeder canals linked to Lake Kanjia.
 • Roar: Can be heard up to 3 km away across the sanctuary!`,
@@ -186,7 +187,8 @@ On July 28, 1980, Nandankanan achieved global acclaim when normal tawny tigers "
 ⭐ ନନ୍ଦନକାନନର ଐତିହାସିକ ଗୌରବ:
 ୨୮ ଜୁଲାଇ ୧୯୮୦ରେ ସାଧାରଣ ହଳଦିଆ ରଙ୍ଗର ବାଘ 'ଦୀପକ' ଓ 'ଗଙ୍ଗା'ଙ୍କ ଔରସରୁ ବିଶ୍ୱରେ ପ୍ରଥମ ଥର ପାଇଁ ତିନୋଟି ଧଳା ବାଘ ଛୁଆ (ଦେବବ୍ରତ, ଶିବା ଓ ମୟୂରୀ) ଜନ୍ମ ନେଇ ଇତିହାସ ସୃଷ୍ଟି କରିଥିଲେ।
 
-✨ ବିଶେଷ ବୈଶିଷ୍ଟ୍ୟ:
+🐾 ବିଶେଷ ବୈଶିଷ୍ଟ୍ୟ:
+
 • ଏମାନେ ଆଲବିନୋ ନୁହଁନ୍ତି; ବିରଳ ଲ୍ୟୁସିଜିମ ଜିନ୍ କାରଣରୁ ଏମାନଙ୍କ ଲୋମ ଶୁଭ୍ର ଧଳା ଏବଂ ଆଖି ନୀଳ ରଙ୍ଗର ହୋଇଥାଏ।
 • ପହଁରିବାରେ ଦକ୍ଷ ଏବଂ କାଞ୍ଜିଆ ହ୍ରଦର ଜଳାଶୟରେ ସ୍ନାନ କରିବାକୁ ଭଲ ପାଆନ୍ତି।
 • ବାଘର ଗର୍ଜନ ପ୍ରାୟ ୩ କିଲୋମିଟର ଦୂର ପର୍ଯ୍ୟନ୍ତ ଶୁଣାଯାଏ!`,
@@ -201,7 +203,8 @@ On July 28, 1980, Nandankanan achieved global acclaim when normal tawny tigers "
 ⭐ নন্দনকাননের ঐতিহাসিক বিশ্বরেকর্ড:
 ২৮ জুলাই ১৯৮০ সালে সাধারণ হলুদ রঙের বাঘ "দীপক" এবং "গঙ্গা" খাঁচায় জন্ম দেয় তিনটি শ্বেতশুভ্র বাঘের ছানা—দেবব্রত, শিবা এবং ময়ূরী। নন্দনকাননই বিশ্বের প্রথম চিড়িয়াখানা যেখানে স্বাভাবিক রঙের বাঘ থেকে সাদা বাঘের জন্ম হয়।
 
-✨ অনন্য বৈশিষ্ট্য:
+🐾 অনন্য বৈশিষ্ট্য:
+
 • এরা অ্যালবিনো নয়; এক বিরল রিসেসিভ জিনের কারণে এদের গায়ের লোম সাদা ও চোখের মণি উজ্জ্বল নীল হয়।
 • জলে সাঁতার কাটতে অত্যন্ত পারদর্শী এবং কাঞ্জিয়া হ্রদের খাঁড়িতে স্নান করতে ভালোবাসে।
 • এদের গর্জন ৩ কিলোমিটার দূর থেকেও শোনা যায়!`,
@@ -216,7 +219,8 @@ On July 28, 1980, Nandankanan achieved global acclaim when normal tawny tigers "
 ⭐ नंदनकानन का ऐतिहासिक विश्व रिकॉर्ड:
 28 जुलाई 1980 को सामान्य रंग के रॉयल बंगाल बाघ "दीपक" और "गंगा" ने तीन सफेद शावकों (देवव्रत, शीबा और मयूरी) को जन्म देकर दुनिया भर में तहलका मचा दिया था।
 
-✨ मुख्य विशेषताएं:
+🐾 मुख्य विशेषताएं:
+
 • ये एल्बिनो नहीं होते; इनका सफेद रंग एक दुर्लभ ल्यूसिज्म जीन और नीली आंखों की वजह से होता है।
 • उत्कृष्ट तैराक होते हैं और कंजिया झील की नहरों में नहाना पसंद करते हैं।
 • बाघ की दहाड़ 3 किमी दूर तक गूंजती है!`
@@ -231,7 +235,8 @@ On July 28, 1980, Nandankanan achieved global acclaim when normal tawny tigers "
 • Weight: 150 - 220 kg | Lifespan: 16 - 18 years
 • Habitat: 20-hectare protected deciduous forest savanna enclosure
 
-✨ DISTINCTIVE FEATURES:
+🐾 DISTINCTIVE FEATURES:
+
 • Belly Fold: Distinctive longitudinal skin fold along its belly, rarely seen in African lions.
 • Sparser Mane: Shorter male mane exposing the ears clearly.
 • Safari Encounter: Visitors board fortified safari buses to observe the royal pride roaming freely through dry scrublands and resting beneath shade trees.`,
@@ -243,7 +248,8 @@ On July 28, 1980, Nandankanan achieved global acclaim when normal tawny tigers "
 • ଓଜନ: ୧୫୦ - ୨୨୦ କିଗ୍ରା | ଆୟୁଷ: ୧୬ - ୧୮ ବର୍ଷ
 • ଆବାସସ୍ଥଳୀ: ୨୦ ହେକ୍ଟର ବିଶିଷ୍ଟ ପ୍ରାକୃତିକ ସିଂହ ସଫାରୀ
 
-✨ ମୁଖ୍ୟ ବୈଶିଷ୍ଟ୍ୟ:
+🐾 ମୁଖ୍ୟ ବୈଶିଷ୍ଟ୍ୟ:
+
 • ପେଟର ଚର୍ମ ଭାଙ୍ଗ: ଏସିଆଟିକ ସିଂହଙ୍କ ପେଟ ତଳେ ଏକ ସ୍ୱତନ୍ତ୍ର ଲମ୍ବା ଚର୍ମର ଭାଙ୍ଗ (Longitudinal Fold) ଥାଏ।
 • ଛୋଟ କେଶର: ଅଣ୍ଡିରା ସିଂହଙ୍କ କେଶର କାନକୁ ସ୍ପଷ୍ଟ ଭାବେ ଉନ୍ମୁକ୍ତ ରଖିଥାଏ।
 • ସଫାରୀ ଅନୁଭୂତି: ସୁରକ୍ଷିତ ସଫାରୀ ବସରେ ବସି ଆପଣ ସିଂହ ପରିବାରଙ୍କୁ ମୁକ୍ତ ଜଙ୍ଗଲରେ ଶୋଇଥିବା କିମ୍ବା ଚାଲୁଥିବା ଦେଖିପାରିବେ।`,
@@ -255,7 +261,8 @@ On July 28, 1980, Nandankanan achieved global acclaim when normal tawny tigers "
 • ওজন: ১৫০ - ২২০ কেজি | গড় আয়ু: ১৬ - ১৮ বছর
 • বাসস্থান: ২০ হেক্টর বিস্তৃত উন্মুক্ত বনভূমি সাফারি
 
-✨ মূল বৈশিষ্ট্য:
+🐾 মূল বৈশিষ্ট্য:
+
 • পেটের বিশেষ ভাঁজ: আফ্রিকান সিংহের তুলনায় এশিয়াটিক সিংহের পেটের নিচে একটি বিশিষ্ট অনুদৈর্ঘ্য চামড়ার ভাঁজ থাকে।
 • কেশর: এদের কেশর অপেক্ষাকৃত ছোট হওয়ায় কান দুটি পরিষ্কার দেখা যায়।
 • সাফারি অভিজ্ঞতা: বিশেষ সুরক্ষিত বাসে চেপে দর্শনার্থীরা প্রাকৃতিক পরিবেশে সিংহ পরিবারের ঘুরে বেড়ানোর দৃশ্য উপভোগ করতে পারেন।`,
@@ -267,7 +274,8 @@ On July 28, 1980, Nandankanan achieved global acclaim when normal tawny tigers "
 • वजन: 150 - 220 किग्रा | जीवनकाल: 16 - 18 वर्ष
 • आवास: 20 हेक्टेयर में फैली प्राकृतिक झाड़ीदार वन सफारी
 
-✨ प्रमुख विशेषताएं:
+🐾 प्रमुख विशेषताएं:
+
 • पेट की त्वचा की तह: एशियाई शेरों के पेट के नीचे एक अनुदैर्ध्य त्वचा की तह होती है जो अफ्रीकी शेरों में नहीं पाई जाती।
 • अयाल: नर शेर का अयाल छोटा होता है जिससे कान स्पष्ट दिखते हैं।
 • सफारी अनुभव: जालीदार सुरक्षित बसों में बैठकर पर्यटक शेरों के कुनबे को खुले जंगल में स्वच्छंद घूमते हुए देखते हैं।`
@@ -285,7 +293,8 @@ On July 28, 1980, Nandankanan achieved global acclaim when normal tawny tigers "
 🌳 CHANDAKA CORRIDOR CONNECTION:
 Nandankanan borders the famous Chandaka-Dampara Elephant Sanctuary. The park's elephant care facility features expansive mud wallows, bathing troughs, and enriched foraging areas managed by specialized mahouts and veterinary officers.
 
-✨ DID YOU KNOW?
+💡 DID YOU KNOW?
+
 • Trunk Power: An elephant's trunk contains over 40,000 muscles and no bones!
 • Infrasound: They communicate over miles using low-frequency acoustic vibrations undetectable by human ears.`,
 
@@ -299,7 +308,8 @@ Nandankanan borders the famous Chandaka-Dampara Elephant Sanctuary. The park's e
 🌳 ଚନ୍ଦକା ସହିତ ସଂଯୋଗ:
 ନନ୍ଦନକାନନ ପ୍ରସିଦ୍ଧ ଚନ୍ଦକା-ଡମପଡ଼ା ହାତୀ ଅଭୟାରଣ୍ୟ ସହିତ ସଂଲଗ୍ନ। ଏଠାରେ ହାତୀମାନଙ୍କ ପାଇଁ କାଦୁଅ ସ୍ନାନ କୁଣ୍ଡ ଏବଂ ବିଶାଳ ଜଳାଶୟ ରହିଛି।
 
-✨ ଆପଣ ଜାଣନ୍ତି କି?
+💡 ଆପଣ ଜାଣନ୍ତି କି?
+
 • ଶୁଣ୍ଢର ଶକ୍ତି: ହାତୀ ଶୁଣ୍ଢରେ କୌଣସି ହାଡ଼ ନଥାଏ, ମାତ୍ର ୪୦,୦୦୦ରୁ ଅଧିକ ମାଂସପେଶୀ ଥାଏ!
 • ଶବ୍ଦ ତରଙ୍ଗ: ସେମାନେ ଇନଫ୍ରାସାଉଣ୍ଡ (ନିମ୍ନ ତରଙ୍ଗ) ବ୍ୟବହାର କରି କିଲୋମିଟର ଦୂରରେ ଥିବା ସାଥୀଙ୍କ ସହ କଥା ହୁଅନ୍ତି।`,
 
@@ -313,7 +323,8 @@ Nandankanan borders the famous Chandaka-Dampara Elephant Sanctuary. The park's e
 🌳 চন্দকা অভয়ারণ্যের মেলবন্ধন:
 নন্দনকাননের হাতিশালাটি ঐতিহাসিক চন্দকা-ডমপড়া হাতি অভয়ারণ্যের পাশে অবস্থিত। হাতিদের জন্য রয়েছে বিশেষ কাদা-মাটির স্নানাগার ও জলের চৌবাচ্চা।
 
-✨ তথ্য:
+💡 তথ্য:
+
 • শুঁড়ের শক্তি: হাতির শুঁড়ে কোনো হাড় থাকে না, অথচ ৪০,০০০-এর বেশি পেশী থাকে!
 • শব্দতরঙ্গ: এরা অবশ্রাব্য বা ইনফ্রাসাউন্ড শব্দের মাধ্যমে বহু মাইল দূর পর্যন্ত বার্তা আদান-প্রদান করতে পারে।`,
 
@@ -327,7 +338,8 @@ Nandankanan borders the famous Chandaka-Dampara Elephant Sanctuary. The park's e
 🌳 चंदका अभयारण्य से निकटता:
 नंदनकानन ऐतिहासिक चंदका-डंपड़ा हाथी अभयारण्य की सीमा पर स्थित है। यहाँ हाथियों के लिए प्राकृतिक कीचड़ कुंड और विशाल स्नान क्षेत्र बनाए गए हैं।
 
-✨ रोचक तथ्य:
+💡 रोचक तथ्य:
+
 • सूंड़ का चमत्कार: हाथी की सूंड़ में कोई हड्डी नहीं होती, परंतु 40,000 से अधिक मांसपेशियां होती हैं!
 • इन्फ्रासाउंड: ये निम्न आवृत्ति की तरंगों द्वारा मीलों दूर अपने साथियों से संपर्क साधते हैं।`
   },
@@ -344,7 +356,8 @@ Nandankanan borders the famous Chandaka-Dampara Elephant Sanctuary. The park's e
 🏆 NANDANKANAN'S WORLD RECORD:
 Nandankanan is the FIRST AND ONLY zoological institution on Earth to successfully establish a dedicated captive breeding protocol and research center for the elusive Indian Pangolin!
 
-✨ INCREDIBLE BIOLOGY:
+🧬 INCREDIBLE BIOLOGY:
+
 • Keratin Armor: Encased in overlapping scales made of keratin (the same material as human fingernails). When threatened, it rolls into an impenetrable sphere.
 • Super Tongue: Has a sticky 40-cm tongue longer than its body to extract ants from deep tunnels.
 • Forest Purifier: A single adult pangolin consumes approximately 70 million termites and ants every year!`,
@@ -359,7 +372,8 @@ Nandankanan is the FIRST AND ONLY zoological institution on Earth to successfull
 🏆 ନନ୍ଦନକାନନର ବିଶ୍ୱ ରେକର୍ଡ:
 ପୃଥିବୀର ପ୍ରଥମ ତଥା ଏକମାତ୍ର ଚିଡ଼ିଆଖାନା ଭାବରେ ନନ୍ଦନକାନନ ଭାରତୀୟ ବଜ୍ରକାପ୍ତାକୁ ବନ୍ଦୀ ଅବସ୍ଥାରେ ସଫଳତାର ସହ ପ୍ରଜନନ କରାଇ ବିଶ୍ୱସ୍ତରୀୟ ଇତିହାସ ରଚିଛି!
 
-✨ ଚମତ୍କାର ତଥ୍ୟ:
+🧬 ଚମତ୍କାର ତଥ୍ୟ:
+
 • କେରାଟିନ୍ କବଚ: ଏହାର କାତିଗୁଡ଼ିକ ମଣିଷ ନଖ ପରି କେରାଟିନ୍ ପ୍ରୋଟିନରେ ଗଠିତ। ବିପଦ ଦେଖିଲେ ଏହା ଏକ ଅଭେଦ୍ୟ ବଲ୍ ପରି ଗୋଲ ହୋଇଯାଏ।
 • ଲମ୍ବା ଜିଭ: ଶରୀରଠାରୁ ଅଧିକ ଲମ୍ବା (୪୦ ସେମି) ଅଠାଳିଆ ଜିଭ ସାହାଯ୍ୟରେ ଉଇ ଖାଇଥାଏ।
 • ପରିବେଶ ସୁରକ୍ଷା: ଗୋଟିଏ ବୟସ୍କ ବଜ୍ରକାପ୍ତା ବର୍ଷକୁ ପ୍ରାୟ ୭ କୋଟି ଉଇ ଓ ପିମ୍ପୁଡ଼ି ଖାଇ ଜଙ୍ଗଲକୁ ରକ୍ଷା କରେ!`,
@@ -374,7 +388,8 @@ Nandankanan is the FIRST AND ONLY zoological institution on Earth to successfull
 🏆 নন্দনকাননের বিশ্বরেকর্ড:
 পৃথিবীর প্রথম এবং একমাত্র চিড়িয়াখানা হিসেবে নন্দনকানন খাঁচাবন্দী অবস্থায় ভারতীয় প্যাঙ্গোলিনের সফল বংশবৃদ্ধি ঘটিয়ে বৈজ্ঞানিক গবেষণায় বিশ্বসেরা স্বীকৃতি লাভ করেছে!
 
-✨ চমকপ্রদ তথ্য:
+🧬 চমকপ্রদ তথ্য:
+
 • কেরাটিন আঁশ: এর দেহের শক্ত আঁশগুলো মানুষের নখের মতোই কেরাটিন দিয়ে তৈরি। বিপদে পড়লে বলের মতো গোল হয়ে যায়।
 • আঠালো লম্বা জিভ: এর ৪০ সেমি লম্বা আঠালো জিভ মাটির গভীর থেকে উইপোকা বের করে আনে।
 • পরিবেশ বন্ধু: একটি পূর্ণবয়স্ক প্যাঙ্গোলিন বছরে প্রায় ৭ কোটি উইপোকা ও পিঁপড়া খেয়ে অরণ্য রক্ষা করে!`,
@@ -389,7 +404,8 @@ Nandankanan is the FIRST AND ONLY zoological institution on Earth to successfull
 🏆 नंदनकानन का ऐतिहासिक विश्व कीर्तिमान:
 नंदनकानन दुनिया का पहला और एकमात्र ऐसा प्राणी उद्यान है जिसने बाड़े में भारतीय पैंगोलिन का सफल प्रजनन और वैज्ञानिक अनुसंधान केंद्र स्थापित किया है!
 
-✨ अद्भुत विशेषताएं:
+🧬 अद्भुत विशेषताएं:
+
 • केराटिन कवच: इसकी चमड़ी पर इंसानी नाखूनों जैसे मजबूत केराटिन शल्क होते हैं। खतरे में यह गेंद की तरह गोल हो जाता है।
 • 40 सेमी लंबी जीभ: अपने शरीर से भी लंबी चिपचिपी जीभ से दीमक के बिलों को साफ करता है।
 • पर्यावरण का रक्षक: एक वयस्क पैंगोलिन साल भर में लगभग 7 करोड़ दीमक व चींटियां खा जाता है!`
@@ -407,7 +423,8 @@ Nandankanan is the FIRST AND ONLY zoological institution on Earth to successfull
 🏆 NANDANKANAN'S PIONEERING 1980 SUCCESS:
 In 1980, Nandankanan became the first zoo in the world where captive Gharials laid fertile eggs that hatched successfully. This historic milestone established the captive breeding methodology used globally to pull gharials back from the brink of extinction!
 
-✨ UNIQUE ADAPTATIONS:
+🐾 UNIQUE ADAPTATIONS:
+
 • The "Ghara": Adult males develop a large hollow cartilaginous bulb at the tip of their snout resembling an earthen pot ("ghara"), used to produce loud buzzing mating vibrations.
 • Slender Jaws: Needle-thin jaws lined with razor-sharp interlocking teeth cut effortlessly through water to snatch swift river fish.`,
 
@@ -421,7 +438,8 @@ In 1980, Nandankanan became the first zoo in the world where captive Gharials la
 🏆 ନନ୍ଦନକାନନର ୧୯୮୦ ଐତିହାସିକ ସଫଳତା:
 ୧୯୮୦ ମସିହାରେ ନନ୍ଦନକାନନରେ ବିଶ୍ୱରେ ପ୍ରଥମ ଥର ପାଇଁ ବନ୍ଦୀ ଘଡ଼ିଆଳ ଅଣ୍ଡା ଦେଇ ଛୁଆ ଫୁଟାଇବାରେ ସଫଳ ହୋଇଥିଲା। ଏହି ପ୍ରକଳ୍ପ ସମଗ୍ର ବିଶ୍ୱରେ ଘଡ଼ିଆଳ ବଂଶ ବୃଦ୍ଧି ପାଇଁ ଆଦର୍ଶ ପାଲଟିଛି।
 
-✨ ଶାରୀରିକ ବୈଶିଷ୍ଟ୍ୟ:
+🐾 ଶାରୀରିକ ବୈଶିଷ୍ଟ୍ୟ:
+
 • ନାକରେ 'ଘଡ଼ା': ଅଣ୍ଡିରା ଘଡ଼ିଆଳର ଥଣ୍ଟ ଅଗ୍ରଭାଗରେ ଏକ ମାଟି ଘଡ଼ା ପରି ମାଂସପେଶୀ ଗଣ୍ଠି ଥାଏ, ଯାହା ଶବ୍ଦ ତରଙ୍ଗ ସୃଷ୍ଟି କରେ।
 • ସରୁ ଥଣ୍ଟ: ପାଣି ଭିତରେ ଦ୍ରୁତଗତିରେ ମାଛ ଧରିବା ପାଇଁ ଏହାର ସରୁ ଲମ୍ବା ଥଣ୍ଟରେ ତୀକ୍ଷ୍ଣ ଦାନ୍ତ ଥାଏ।`,
 
@@ -435,7 +453,8 @@ In 1980, Nandankanan became the first zoo in the world where captive Gharials la
 🏆 নন্দনকাননের ঐতিহাসিক ১৯৮০ সাল:
 ১৯৮০ সালে নন্দনকানন বিশ্বের প্রথম চিড়িয়াখানা হিসেবে খাঁচায় ঘড়িয়ালের ডিম ফুটিয়ে সফল প্রজনন নিশ্চিত করে। এই যুগান্তকারী সাফল্যের মাধ্যমে ঘড়িয়াল প্রজাতিকে বিলুপ্তির হাত থেকে রক্ষা করা সম্ভব হয়।
 
-✨ বিশেষ বৈশিষ্ট্য:
+🐾 বিশেষ বৈশিষ্ট্য:
+
 • নাকে "ঘড়া": প্রাপ্তবয়স্ক পুরুষ ঘড়িয়ালের নাকের ডগায় মাটির কলসির মতো একটি ফোলা অংশ থাকে যাকে 'ঘড়া' বলা হয়।
 • সরু চোয়াল: জলের বাধা কাটিয়ে সহজে মাছ শিকার করার জন্য এদের চোয়ালটি অত্যন্ত সরু এবং সুতীক্ষ্ণ দাঁতে সজ্জিত।`,
 
@@ -449,7 +468,8 @@ In 1980, Nandankanan became the first zoo in the world where captive Gharials la
 🏆 1980 की विश्व-ऐतिहासिक उपलब्धि:
 1980 में नंदनकानन विश्व का पहला चिड़ियाघर बना जहाँ बाड़े में रखे घड़ियालों ने अंडे दिए और बच्चे निकले। इस परियोजना ने घड़ियालों को विलुप्ति की कगार से वापस लाने में वैश्विक मिसाल कायम की।
 
-✨ विशिष्ट अंग:
+🐾 विशिष्ट अंग:
+
 • थूथन पर 'घड़ा': वयस्क नर घड़ियाल की थूथन पर मिट्टी के घड़े जैसी गांठ होती है, जिससे यह फुफकारने जैसी गूंजती आवाज निकालता है।
 • सुई जैसी संकरी थूथन: पानी में बिना रुकावट तेजी से मछली पकड़ने के लिए इनके जबड़े पतले और नुकीले दांतों से भरे होते हैं।`
   },
@@ -465,7 +485,8 @@ In 1980, Nandankanan became the first zoo in the world where captive Gharials la
 🏆 FIRST IN THE WORLD:
 Nandankanan made herpetological history as the FIRST zoological park in the world to successfully breed King Cobras in captivity!
 
-✨ ASTONISHING FACTS:
+💡 ASTONISHING FACTS:
+
 • Nest Builder: The only snake species in the world that actively builds an above-ground nest out of leaf litter and guards her clutch fiercely until hatching.
 • Hood Expansion: Rises up to one-third of its entire length off the ground and stares down full-grown adult humans eye-to-eye!`,
 
@@ -478,7 +499,8 @@ Nandankanan made herpetological history as the FIRST zoological park in the worl
 🏆 ବିଶ୍ୱରେ ପ୍ରଥମ କୀର୍ତ୍ତିମାନ:
 ନନ୍ଦନକାନନ ହେଉଛି ବିଶ୍ୱର ପ୍ରଥମ ଚିଡ଼ିଆଖାନା ଯିଏ ଅହିରାଜ (କିଙ୍ଗ କୋବ୍ରା)କୁ ବନ୍ଦୀ ଅବସ୍ଥାରେ ସଫଳତାର ସହିତ ପ୍ରଜନନ କରାଇବାର ଗୌରବ ଅର୍ଜନ କରିଛି!
 
-✨ ରୋମାଞ୍ଚକର ତଥ୍ୟ:
+💡 ରୋମାଞ୍ଚକର ତଥ୍ୟ:
+
 • ବସା ବାନ୍ଧୁଥିବା ସାପ: ପୃଥିବୀର ଏକମାତ୍ର ସାପ ଯିଏ ଶୁଖିଲା ପତ୍ର ଗୋଟାଇ ବସା ତିଆରି କରେ ଏବଂ ଅଣ୍ଡା ଫୁଟିବା ଯାଏଁ ତାହାକୁ ଜଗି ରହେ।
 • ଫଣା ଟେକିବା: ନିଜ ଶରୀରର ଏକ-ତୃତୀୟାଂଶ ଅଂଶ ଭୂମିରୁ ଉପରକୁ ଉଠାଇ ମଣିଷ ସହ ସମକକ୍ଷ ଭାବେ ଆଖି ମିଳାଇ ଛିଡ଼ା ହୋଇପାରେ!`,
 
@@ -491,7 +513,8 @@ Nandankanan made herpetological history as the FIRST zoological park in the worl
 🏆 বিশ্বরেকর্ড:
 নন্দনকানন বিশ্বের প্রথম চিড়িয়াখানা যা কৃত্রিম পরিবেশে কিং কোবরার সফল বংশবৃদ্ধি ঘটিয়ে সরীসৃপ গবেষণায় নতুন মাইলফলক স্থাপন করেছে!
 
-✨ অবিশ্বাস্য তথ্য:
+💡 অবিশ্বাস্য তথ্য:
+
 • বাসা বাঁধে: বিশ্বের একমাত্র সাপ যা শুকনো পাতা দিয়ে ডিম পাড়ার জন্য সুন্দর বাসা তৈরি করে এবং পাহারা দেয়।
 • ফণা তোলা: নিজের শরীরের এক-তৃতীয়াংশ মাটি থেকে সোজা উঁচুতে তুলে একজন পূর্ণবয়স্ক মানুষের চোখের দিকে তাকিয়ে ফণা বিস্তার করতে পারে!`,
 
@@ -504,7 +527,8 @@ Nandankanan made herpetological history as the FIRST zoological park in the worl
 🏆 विश्व का पहला सफल प्रजनन:
 नंदनकानन दुनिया का पहला प्राणी उद्यान है जिसने बाड़े में किंग कोबरा का सफल कैप्टिव प्रजनन कराया!
 
-✨ विस्मयकारी तथ्य:
+💡 विस्मयकारी तथ्य:
+
 • घोंसला बनाने वाला सांप: दुनिया की एकमात्र सांप प्रजाति जो सूखे पत्तों को इकट्ठा करके घोंसला बनाती है और अंडों की रक्षा करती है।
 • कद: अपने शरीर का एक-तिहाई हिस्सा जमीन से सीधा ऊपर उठाकर इंसान के आंखों के सामने फन फैला सकता है!`
   },
@@ -517,7 +541,8 @@ Nandankanan made herpetological history as the FIRST zoological park in the worl
 • Conservation Status: Vulnerable | Weight: 80 - 140 kg
 • Lifespan: 20 - 25 years | Habitat: Rocky boulders and termite mounds
 
-✨ FASCINATING ADAPTATIONS:
+🐾 FASCINATING ADAPTATIONS:
+
 • Living Vacuum Cleaner: Lacks upper middle incisors and has a hollow palate. It can close its nostrils at will, creating an acoustic suction that extracts termites right out of concrete-hard mounds!
 • Mother's Backpack: Mother sloth bears carry their young cubs directly on their backs even while climbing trees or galloping.
 • Claws: Equipped with 4-inch curved sickle claws for tearing open logs and anthills.`,
@@ -528,7 +553,8 @@ Nandankanan made herpetological history as the FIRST zoological park in the worl
 • ସଂରକ୍ଷଣ ସ୍ଥିତି: ସମ୍ବେଦନଶୀଳ (Vulnerable) | ଓଜନ: ୮୦ - ୧୪୦ କିଗ୍ରା
 • ଆୟୁଷ: ୨୦ - ୨୫ ବର୍ଷ | ଆବାସ: ପଥୁରିଆ ଗୁମ୍ଫା ଓ ଉଇ ହୁଙ୍କା
 
-✨ ଆଶ୍ଚର୍ଯ୍ୟଜନକ ତଥ୍ୟ:
+💡 ଆଶ୍ଚର୍ଯ୍ୟଜନକ ତଥ୍ୟ:
+
 • ପ୍ରାକୃତିକ ଭ୍ୟାକ୍ୟୁମ୍ କ୍ଲିନର୍: ଉପର ଦାନ୍ତ ନଥିବାରୁ ଏବଂ ନାକ ବନ୍ଦ କରିପାରୁଥିବାରୁ, ଏହା ଜୋରରେ ପବନ ଟାଣି ଉଇ ହୁଙ୍କାରୁ କୀଟ ଖାଇଥାଏ। ଏହାର ଶବ୍ଦ ୧୦୦ ମିଟର ଦୂରରୁ ଶୁଣାଯାଏ!
 • ପିଲାଙ୍କୁ ପିଠିରେ ବୋହିବା: ମା' ଭାଲୁ ତା'ର ଛୁଆମାନଙ୍କୁ ପିଠିରେ ବସାଇ ଦୌଡ଼ିପାରେ ଓ ଗଛ ଚଢ଼ିପାରେ।
 • ତୀକ୍ଷ୍ଣ ନଖ: ଉଇ ହୁଙ୍କା ଭାଙ୍ଗିବା ପାଇଁ ଏହାର ୪ ଇଞ୍ଚ ଲମ୍ବା ବଙ୍କା ନଖ ଥାଏ।`,
@@ -539,7 +565,8 @@ Nandankanan made herpetological history as the FIRST zoological park in the worl
 • সংরক্ষণের অবস্থা: সংবেদনশীল | ওজন: ৮০ - ১৪০ কেজি
 • গড় আয়ু: ২০ - ২৫ বছর | বাসস্থান: পাথুরে গুহা ও উইঢিবি যুক্ত জঙ্গল
 
-✨ চমকপ্রদ তথ্য:
+🧬 চমকপ্রদ তথ্য:
+
 • জৈব ভ্যাকুয়াম ক্লিনার: এদের সামনের দাঁত ফাঁকা থাকায় এরা নাক বন্ধ করে প্রচণ্ড শব্দে উইঢিবি থেকে উইপোকা চুষে খেয়ে নেয়!
 • পিঠে চড়ে ঘুরে বেড়ানো: মা ভাল্লুক তার শাবকদের নিজের পিঠে চাপিয়ে দ্রুত দৌড়াতে এবং গাছে চড়তে পারে।
 • বাঁকানো নখ: ৪ ইঞ্চি লম্বা কাস্তের মতো নখ দিয়ে শক্ত উইঢিবি নিমেষেই ভেঙে ফেলে।`,
@@ -550,7 +577,8 @@ Nandankanan made herpetological history as the FIRST zoological park in the worl
 • संरक्षण स्थिति: संवेदनशील | वजन: 80 - 140 किग्रा
 • जीवनकाल: 20 - 25 वर्ष | आवास: चट्टानी कंदराएं और दीमक के टीले
 
-✨ अनोखी विशेषताएं:
+🐾 अनोखी विशेषताएं:
+
 • प्राकृतिक वैक्यूम क्लीनर: सामने के दांत न होने और नथुने बंद करने की क्षमता के कारण यह दीमकों को सूंड़ जैसी आवाज के साथ वैक्यूम की तरह चूस लेता है!
 • बच्चों की सवारी: मादा भालू अपने शावकों को अपनी पीठ पर लादकर दौड़ती और पेड़ पर चढ़ती है।
 • विशाल पंजे: इसके 4 इंच लंबे दरांती जैसे पंजे सख्त से सख्त दीमक के टीलों को तोड़ देते हैं।`
@@ -564,10 +592,11 @@ Nandankanan made herpetological history as the FIRST zoological park in the worl
 • Conservation Status: Least Concern | Lifespan: 12 - 15 years
 • Diet: Herbivore (Grasses, tender foliage, fallen forest flowers)
 
-✨ THE HERBIVORE PARADISE:
+🌿 THE HERBIVORE PARADISE:
 In Nandankanan's spacious Herbivore Safari, vast herds of Chital graze peacefully alongside towering Sambar (Rusa unicolor), elegant Blackbuck, and Barking Deer.
 
-✨ REMARKABLE TRAITS:
+🐾 REMARKABLE TRAITS:
+
 • Permanent Spots: Unlike most deer whose fawn spots vanish in adulthood, the Indian Chital keeps its luminous white spots for life!
 • Langur Symbiosis: Chital maintain a famous mutual partnership with Langur monkeys: langurs drop succulent leaves from tree branches and scream loud alarm calls when a leopard or tiger approaches!`,
 
@@ -577,10 +606,11 @@ In Nandankanan's spacious Herbivore Safari, vast herds of Chital graze peacefull
 • ସଂରକ୍ଷଣ ସ୍ଥିତି: ସୁରକ୍ଷିତ (Least Concern) | ଆୟୁଷ: ୧୨ - ୧୫ ବର୍ଷ
 • ଖାଦ୍ୟ: ଶାକାହାରୀ (ଘାସ, କଅଁଳ ପତ୍ର ଓ ମହୁଲ ଫୁଲ)
 
-✨ ତୃଣଭୋଜୀ ସ୍ୱର୍ଗ:
+🌿 ତୃଣଭୋଜୀ ସ୍ୱର୍ଗ:
 ନନ୍ଦନକାନନର ମୁକ୍ତ ତୃଣଭୋଜୀ ସଫାରୀରେ ଚିତଳ ହରିଣ, ବିଶାଳକାୟ ସମ୍ବର, କୃଷ୍ଣସାର ମୃଗ ଓ କୁଟୁରା ସ୍ୱଚ୍ଛନ୍ଦରେ ଚରନ୍ତି।
 
-✨ ବିଶେଷତା:
+🐾 ବିଶେଷତା:
+
 • ଚିରସ୍ଥାୟୀ ଧଳା ଟୋପା: ଅଧିକାଂଶ ହରିଣଙ୍କ ଛୁଆ ଅବସ୍ଥାର ଦାଗ ବଡ଼ ହେଲେ ଲିଭିଯାଏ, ମାତ୍ର ଚିତଳ ହରିଣର ଧଳା ଟୋପା ଚିରଦିନ ରହିଥାଏ।
 • ମାଙ୍କଡ଼ଙ୍କ ସହ ମିତ୍ରତା: ଗଛ ଉପରେ ଥିବା ହନୁ ମାଙ୍କଡ଼ମାନେ ବାଘ ବା ଚିତାବାଘକୁ ଦେଖିଲେ ଚିତ୍କାର କରି ହରିଣମାନଙ୍କୁ ସତର୍କ କରାଇ ଦିଅନ୍ତି।`,
 
@@ -590,10 +620,11 @@ In Nandankanan's spacious Herbivore Safari, vast herds of Chital graze peacefull
 • সংরক্ষণের অবস্থা: কম ঝুঁকিপূর্ণ | গড় আয়ু: ১২ - ১৫ বছর
 • খাদ্য: ঘাস, কচি পাতা ও বনের ফুল
 
-✨ তৃণভোজী উন্মুক্ত সাফারি:
+🌿 তৃণভোজী উন্মুক্ত সাফারি:
 নন্দনকাননের বিশাল তৃণভোজী সাফারিতে চিত্রা হরিণের সুবিশাল দল, সুঠাম সাম্বার, বার্কিং ডিয়ার ও রাজকীয় কৃষ্ণসার হরিণ একসঙ্গে চরে বেড়ায়।
 
-✨ বিশেষ বৈশিষ্ট্য:
+🐾 বিশেষ বৈশিষ্ট্য:
+
 • চিরস্থায়ী সাদা ফোঁটা: অধিকাংশ হরিণের বয়সের সাথে সাথে গায়ের ফোঁটা মিলিয়ে গেলেও চিত্রা হরিণের গায়ে আজীবন এই সাদা ফোঁটাগুলি স্পষ্ট থাকে।
 • হনুমানের সাথে সখ্যতা: গাছে থাকা হনুমানেরা ওপর থেকে কচি ডালপালা নিচে ফেলে এবং বাঘ-চিতার আগমন দেখলেই বিশেষ চিৎকারে হরিণদের সতর্ক করে দেয়।`,
 
@@ -603,10 +634,11 @@ In Nandankanan's spacious Herbivore Safari, vast herds of Chital graze peacefull
 • संरक्षण स्थिति: सुरक्षित | जीवनकाल: 12 - 15 वर्ष
 • आहार: घास, ताजी पत्तियां और जंगल के गिरे हुए फूल
 
-✨ शाकाहारी सफारी का विहंगम दृश्य:
+🌿 शाकाहारी सफारी का विहंगम दृश्य:
 नंदनकानन की विशाल हर्बिवोर सफारी में चीतल के विशाल झुंड, ऊंचे कद वाले सांभर, काले हिरण (ब्लैकबक) और काकड़ एक साथ शांतिपूर्वक विचरण करते हैं।
 
-✨ रोचक विशेषताएं:
+🐾 रोचक विशेषताएं:
+
 • स्थायी सफेद चकत्ते: ज्यादातर हिरणों के चकत्ते बड़े होने पर गायब हो जाते हैं, लेकिन चीतल के सफेद चकत्ते जीवन भर चमकदार रहते हैं।
 • लंगूरों से मित्रता: लंगूर पेड़ों से ताजे पत्ते गिराते हैं और शेर या तेंदुए को देखते ही जोर से अलार्म कॉल देकर चीतलों को चौकन्ना कर देते हैं।`
   },
@@ -618,7 +650,8 @@ In Nandankanan's spacious Herbivore Safari, vast herds of Chital graze peacefull
 • Scientific Name: Pavo cristatus (Indian Peafowl)
 • National Bird of India | Lifespan: 15 - 20 years
 
-✨ THE MASSIVE 2,000 m² WALK-THROUGH AVIARY DOME:
+🦜 THE MASSIVE 2,000 m² WALK-THROUGH AVIARY DOME:
+
 One of Nandankanan's greatest crown jewels is its massive 2,000 square meter walk-through aviary dome! Visitors walk on elevated walkways surrounded by free-flying Painted Storks, White Ibises, Great Hornbills, Cockatoos, and Macaws.
 
 🌊 66-HECTARE LAKE KANJIA WETLAND BASIN:
@@ -629,7 +662,8 @@ Declared an ecologically vital wetland, Lake Kanjia inside the park serves as a 
 • ବୈଜ୍ଞାନିକ ନାମ: Pavo cristatus (ଭାରତର ଜାତୀୟ ପକ୍ଷୀ)
 • ଆୟୁଷ: ୧୫ - ୨୦ ବର୍ଷ
 
-✨ ୨,୦୦୦ ବର୍ଗମିଟର ବିଶାଳ ୱାକ୍-ଥ୍ରୁ ଆଭିଆରୀ ଡୋମ୍:
+🦜 ୨,୦୦୦ ବର୍ଗମିଟର ବିଶାଳ ୱାକ୍-ଥ୍ରୁ ଆଭିଆରୀ ଡୋମ୍:
+
 ନନ୍ଦନକାନନର ସବୁଠାରୁ ଆକର୍ଷଣୀୟ ସ୍ଥାନ ହେଉଛି ଏହି ବିଶାଳ ପକ୍ଷୀଶାଳା ଡୋମ୍! ଏଠାରେ ପର୍ଯ୍ୟଟକମାନେ ଉନ୍ମୁକ୍ତ ପକ୍ଷୀମାନଙ୍କ ମଧ୍ୟରେ ଚାଲି ଚାଲି ବୁଲିପାରନ୍ତି। ରଙ୍ଗୀନ ସାରସ, ଧନେଶ ପକ୍ଷୀ, ଶଙ୍ଖ ଚିଲ ଓ ବିଦେଶୀ ପକ୍ଷୀମାନେ ଏଠାରେ ଉଡ଼ିବୁଲନ୍ତି।
 
 🌊 ୬୬ ହେକ୍ଟର ବିଶିଷ୍ଟ କାଞ୍ଜିଆ ହ୍ରଦ:
@@ -640,7 +674,8 @@ Declared an ecologically vital wetland, Lake Kanjia inside the park serves as a 
 • বৈজ্ঞানিক নাম: Pavo cristatus (ভারতের জাতীয় পাখি)
 • গড় আয়ু: ১৫ - ২০ বছর
 
-✨ সুবিশাল ২,০০০ বর্গমিটার ওয়াক-থ্রু অ্যাভিয়ারি ডোম:
+🦜 সুবিশাল ২,০০০ বর্গমিটার ওয়াক-থ্রু অ্যাভিয়ারি ডোম:
+
 নন্দনকাননের অন্যতম প্রধান আকর্ষণ হলো এই বিশাল পাখি প্রদর্শনী ডোম। দর্শনার্থীরা এই ডোমটির ভেতরে প্রবেশ করে মুক্ত বাতাসে ওড়া শামুকখোল, ধনেশ পাখি, সাদা ইবিস ও রঙিন ম্যাকাওদের চোখের সামনে উড়তে দেখতে পারেন।
 
 🌊 ঐতিহাসিক কাঞ্জিয়া হ্রদের পরিযায়ী পাখি:
@@ -651,7 +686,8 @@ Declared an ecologically vital wetland, Lake Kanjia inside the park serves as a 
 • वैज्ञानिक नाम: Pavo cristatus (भारत का राष्ट्रीय पक्षी)
 • जीवनकाल: 15 - 20 वर्ष
 
-✨ 2,000 वर्ग मीटर का विशाल वॉक-थ्रू एवियरी डोम:
+🦜 2,000 वर्ग मीटर का विशाल वॉक-थ्रू एवियरी डोम:
+
 नंदनकानन का एवियरी डोम देश के सबसे बड़े पक्षी विहारों में से एक है! पर्यटक इसके अंदर बने पुलों पर चलते हुए खुले उड़ते हुए पेंटेड स्टॉर्क, हॉर्नबिल, पेलिकन और मकाऊ पक्षियों को निहार सकते हैं।
 
 🌊 66 हेक्टेयर की कंजिया झील:
@@ -666,7 +702,8 @@ Declared an ecologically vital wetland, Lake Kanjia inside the park serves as a 
 • Conservation Status: Least Concern | Lifespan: 25 - 35 years
 • Weight: 2.5 - 5 kg | Habitat: Freshwater marshes, slow streams, and ponds
 
-✨ NATURE'S LAKE PURIFIERS:
+🌊 NATURE'S LAKE PURIFIERS:
+
 Living in the freshwater channels of Lake Kanjia, these softshell turtles possess distinctive skin flaps over their retracted hind feet. They act as natural scavengers, keeping Nandankanan's wetlands crystal-clean. During dry spells, they estivate safely beneath deep lake mud!`,
 
     odia: `🐢 ଭାରତୀୟ କଇଁଛ (Indian Flapshell Turtle & କାଞ୍ଜିଆ ହ୍ରଦ)
@@ -1616,7 +1653,8 @@ export function getAnimalBotResponse(query, lang = 'english') {
             coords: "20.4030° N, 85.8185° E",
             habitat: "Historic white tiger lineage enclosure with shaded pools",
             emoji: "🐅",
-            photo: "/images/white_tiger.jpg"
+            photo: "/images/white_tiger.jpg?v=20261123"
+
           }
         }
       };
@@ -1921,7 +1959,8 @@ export function getAnimalBotResponse(query, lang = 'english') {
             video_type: "demo_video",
             status: "LIVE",
             viewer_count: 2410,
-            thumbnail_url: "/images/white_tiger.jpg",
+            thumbnail_url: "/images/white_tiger.jpg?v=20261123",
+
             description: "Continuous observation stream of Nandankanan's world-famous royal white tigers resting by the shaded pool.",
             camera_location: "White Tiger Heritage Enclosure"
           },

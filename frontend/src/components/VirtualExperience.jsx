@@ -220,7 +220,7 @@ export default function VirtualExperience() {
     {
       title: "The Legendary White Tiger of Nandankanan",
       category: "Heritage",
-      src: "/images/white_tiger.jpg",
+      src: "/images/white_tiger.jpg?v=20261123",
       location: "White Tiger Heritage Habitat"
     },
     {
@@ -279,7 +279,7 @@ export default function VirtualExperience() {
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-10">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full glass-badge mb-3">
-            <Sparkles className="w-3.5 h-3.5 text-gold-400" />
+            <Compass className="w-3.5 h-3.5 text-gold-400" />
             <span className="text-[11px] font-bold tracking-[0.2em] uppercase text-gold-300">
               Sensory Sanctuary Portal
             </span>
@@ -336,7 +336,7 @@ export default function VirtualExperience() {
 
         {/* Tab 1: 360 Degree Panoramic Habitat Explorer */}
         {activeTab === '360' && (
-          <div className="animate-fadeIn">
+          <div id="virtual-tour-viewer" className="animate-fadeIn scroll-mt-28">
             <div className="relative rounded-3xl overflow-hidden border border-gold-500/30 shadow-2xl bg-black cursor-grab active:cursor-grabbing">
               
               <canvas

@@ -16,7 +16,7 @@ export default function LiveStreamSection({ language }) {
       viewers: 2840,
       badge: "4K 60FPS",
       src: "/videos/tiger_walking_1080p.webm",
-      poster: "/images/white_tiger.jpg",
+      poster: "/images/white_tiger.jpg?v=20261123",
       status: "LIVE",
       desc: "Live observation of the iconic white tiger cooling off in the water channels of Nandankanan."
     },

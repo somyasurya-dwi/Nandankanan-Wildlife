@@ -12,13 +12,12 @@ import InteractiveMap from './components/InteractiveMap';
 import ExploreAnimals from './components/ExploreAnimals';
 import VirtualExperience from './components/VirtualExperience';
 import ConservationStories from './components/ConservationStories';
-import PlanVisitSection from './components/PlanVisitSection';
+import NewsNoticeSection from './components/NewsNoticeSection';
 import SponsorshipPortal from './components/SponsorshipPortal';
 import ConservationSection from './components/ConservationSection';
 import ParallaxSectionBreak from './components/ParallaxSectionBreak';
 import Footer from './components/Footer';
 import ChatbotWidget from './components/ChatbotWidget';
-import TicketBookingModal from './components/TicketBookingModal';
 import AuthModal from './components/AuthModal';
 import SignInPage from './components/SignInPage';
 import AdminDashboard from './components/AdminDashboard';
@@ -58,7 +57,7 @@ export default function App() {
     }
     return 'hero';
   });
-  const [ticketModalOpen, setTicketModalOpen] = useState(false);
+
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [adminOpen, setAdminOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
@@ -76,7 +75,9 @@ export default function App() {
 
   // Preselected animal for sponsorship portal
   const [sponsorAnimal, setSponsorAnimal] = useState(INITIAL_ANIMALS[0]);
-  const [scrollProgress, setScrollProgress] = useState(0);
+  const progressBarRef = useRef(null);
+
+  const lenisRef = useRef(null);
 
   // Session Persistence: Verify stored token on initial load
   useEffect(() => {
@@ -139,46 +140,35 @@ export default function App() {
     setCurrentUser(null);
   };
 
-  // Track global scroll progress for top viewport indicator
+  // Initialize Lenis Smooth Scroll with Auto-RAF & Synchronize with GSAP ScrollTrigger
   useEffect(() => {
-    if (currentPage !== 'sanctuary') return;
-    const handleScroll = () => {
-      const totalScroll = window.scrollY || document.documentElement.scrollTop;
-      const windowHeight = document.documentElement.scrollHeight - window.innerHeight;
-      if (windowHeight > 0) {
-        setScrollProgress((totalScroll / windowHeight) * 100);
-      }
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [currentPage]);
 
-  const lenisRef = useRef(null);
-
-  // Initialize Lenis Smooth Scroll & Synchronize with GSAP ScrollTrigger
-  useEffect(() => {
     if (currentPage !== 'sanctuary') return;
 
     const lenis = new Lenis({
-      duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      duration: 1.25,
+      easing: (t) => 1 - Math.pow(1 - t, 4),
       orientation: 'vertical',
       gestureOrientation: 'vertical',
       smoothWheel: true,
-      wheelMultiplier: 1.0,
-      touchMultiplier: 2.0,
+      wheelMultiplier: 0.95,
+      touchMultiplier: 1.2,
+      autoRaf: true,
     });
     lenisRef.current = lenis;
     if (typeof window !== 'undefined') window.__lenis = lenis;
 
-    lenis.on('scroll', ScrollTrigger.update);
+    lenisRef.current = lenis;
+    if (typeof window !== 'undefined') window.__lenis = lenis;
 
-    const updateLenis = (time) => {
-      lenis.raf(time * 1000);
-    };
-
-    gsap.ticker.add(updateLenis);
-    gsap.ticker.lagSmoothing(0);
+    // Track scroll progress directly via ref to eliminate heavy App re-renders
+    lenis.on('scroll', (e) => {
+      ScrollTrigger.update();
+      if (progressBarRef.current) {
+        const pct = Math.max(0, Math.min(100, (e.progress || 0) * 100));
+        progressBarRef.current.style.width = `${pct}%`;
+      }
+    });
 
     // Settle loading screen
     const timer = setTimeout(() => {
@@ -188,7 +178,7 @@ export default function App() {
 
     return () => {
       clearTimeout(timer);
-      gsap.ticker.remove(updateLenis);
+
       lenisRef.current = null;
       if (typeof window !== 'undefined') window.__lenis = null;
       lenis.destroy();
@@ -196,8 +186,19 @@ export default function App() {
   }, [currentPage]);
 
   // Universal accurate smooth scroll accounting for sticky navbar offset
-  const scrollToTarget = (targetId) => {
-    setActiveSection(targetId);
+  const scrollToTarget = (targetId, activeNavId) => {
+    // Dismiss any open modal when programmatically navigating between sections
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('close-animal-modal'));
+    }
+
+    if (activeNavId) {
+      setActiveSection(activeNavId);
+    } else {
+      setActiveSection(targetId);
+    }
+
+
     const el = document.getElementById(targetId);
     if (!el) return;
 
@@ -206,14 +207,16 @@ export default function App() {
 
     if (lenisRef.current) {
       lenisRef.current.scrollTo(el, {
-        offset: -headerHeight,
+        offset: -headerHeight - 12,
+
         duration: 1.2,
         immediate: false
       });
     } else {
       const elementPosition = el.getBoundingClientRect().top + window.scrollY;
       window.scrollTo({
-        top: Math.max(0, elementPosition - headerHeight),
+        top: Math.max(0, elementPosition - headerHeight - 12),
+
         behavior: 'smooth'
       });
     }
@@ -221,13 +224,12 @@ export default function App() {
 
   const handleSponsorAnimal = (animal) => {
     setSponsorAnimal(animal);
-    scrollToTarget('sponsorship-portal');
+    scrollToTarget('sponsorship-flow', 'sponsorship-portal');
+
   };
 
   const handleOpenLiveModalFromHero = () => {
-    if (INITIAL_CAMERAS && INITIAL_CAMERAS.length > 0) {
-      setActiveModalCamera(INITIAL_CAMERAS[0]);
-    }
+    scrollToTarget('live-cameras-grid', 'live-wildlife');
   };
 
   const handleLiveCamFromChatbot = (camera) => {
@@ -241,11 +243,8 @@ export default function App() {
     setHighlightedCameraId(camId);
     setInlinePlayingCameraId(camId);
 
-    // 3. Smooth scroll to the Live Section ("THE WILD, LIVE")
-    const liveSection = document.getElementById('live-wildlife');
-    if (liveSection) {
-      liveSection.scrollIntoView({ behavior: 'smooth' });
-    }
+    // 3. Smooth scroll directly to the Live Video Grid
+    scrollToTarget('live-cameras-grid', 'live-wildlife');
 
     // 4. Focus and center the specific camera card
     setTimeout(() => {
@@ -286,6 +285,7 @@ export default function App() {
     }
   };
 
+
   // Full-page SignIn/SignUp screen
   if (currentPage === 'signin') {
     return (
@@ -311,8 +311,10 @@ export default function App() {
     >
       {/* Top Viewport Golden Scroll Progress Indicator */}
       <div 
-        className="fixed top-0 left-0 h-[2.5px] bg-gradient-to-r from-[#C8A96B] via-[#E5A836] to-[#C8A96B] z-[100] transition-all duration-75 ease-out pointer-events-none shadow-[0_0_10px_#C8A96B]"
-        style={{ width: `${scrollProgress}%` }}
+        ref={progressBarRef}
+        className="fixed top-0 left-0 h-[2.5px] bg-gradient-to-r from-[#C8A96B] via-[#E5A836] to-[#C8A96B] z-[100] pointer-events-none shadow-[0_0_10px_#C8A96B]"
+        style={{ width: '0%' }}
+
       />
       
       {/* 1. Green Paw-Print Loading Screen */}
@@ -333,8 +335,9 @@ export default function App() {
         
         {/* 3. Full-Screen Cinematic Royal Bengal Tiger Hero Section (Bilingual Odia + English & Official Logo Crest) */}
         <CinematicVideoHero 
-          onExploreClick={() => scrollToTarget('explore-animals')}
-          onMapClick={() => scrollToTarget('interactive-map')}
+          onExploreClick={() => scrollToTarget('species-grid', 'explore-animals')}
+          onMapClick={() => scrollToTarget('zoo-map-viewport', 'interactive-map')}
+
           onWatchLiveClick={handleOpenLiveModalFromHero}
         />
 
@@ -352,7 +355,8 @@ export default function App() {
         <ParallaxSectionBreak
           id="parallax-lake-kanjia"
           bgImage="/images/kanjia_lake.jpg"
-          badge="LAKE KANJIA WETLAND BIO-CORRIDOR • RAMSAR SENSITIVE"
+          badge="🌿 LAKE KANJIA WETLAND BIO-CORRIDOR • RAMSAR SENSITIVE"
+
           odiaText="କାଞ୍ଜିଆ ହ୍ରଦ ଓ ସବୁଜ ବନାନୀର ମିଳନସ୍ଥଳ"
           titlePart1="Where Pristine Wetlands Meet"
           titlePart2="Ancient Chandaka Forests"
@@ -364,8 +368,9 @@ export default function App() {
             { value: '64+', label: 'Avifauna Species' }
           ]}
           ctaText="Explore Illustrated Zoo Map"
-          ctaHref="#interactive-map"
-          onCtaClick={() => scrollToTarget('interactive-map')}
+          ctaHref="#zoo-map-viewport"
+          onCtaClick={() => scrollToTarget('zoo-map-viewport', 'interactive-map')}
+
         />
 
         {/* 5. Interactive Moveable Zoo Map with Click-to-Stream Animal Habitats */}
@@ -388,7 +393,8 @@ export default function App() {
         <ParallaxSectionBreak
           id="parallax-sal-canopy"
           bgImage="/images/sanctuary_forest.jpg"
-          badge="GLOBAL BREEDING & RESCUE LEADER • ESTD. 1960"
+          badge="🐾 GLOBAL BREEDING & RESCUE LEADER • ESTD. 1960"
+
           odiaText="ବନ୍ୟପ୍ରାଣୀ ସଂରକ୍ଷଣର ଗୌରବମୟ ଇତିହାସ"
           titlePart1="A Living Heritage of"
           titlePart2="Compassion & Conservation"
@@ -400,8 +406,9 @@ export default function App() {
             { value: '24/7', label: 'Veterinary Hospital' }
           ]}
           ctaText="Become an Animal Guardian"
-          ctaHref="#sponsorship-portal"
-          onCtaClick={() => scrollToTarget('sponsorship-portal')}
+          ctaHref="#sponsorship-flow"
+          onCtaClick={() => scrollToTarget('sponsorship-flow', 'sponsorship-portal')}
+
         />
 
         {/* 8. Editorial Conservation Stories: "EVERY LIFE HAS A STORY" */}
@@ -412,11 +419,9 @@ export default function App() {
         {/* 9. Scientific Conservation Impact & Metric Count-Up Counters */}
         <ConservationSection language={language} />
 
-        {/* 10. Plan Your Visit: Timings, Ticket Prices, How to Reach, FAQs Accordion */}
-        <PlanVisitSection 
-          language={language}
-          onOpenTickets={() => setTicketModalOpen(true)}
-        />
+        {/* 10. Official News & Notices Section (Image 2: Bulletins & Live Gazettes) */}
+        <NewsNoticeSection />
+
 
         {/* 11. Virtual Animal Guardianship / Adoption Portal with Live Certificate */}
         <SponsorshipPortal 
@@ -426,23 +431,16 @@ export default function App() {
 
       </main>
 
-      {/* 12. Sanctuary Footer with Verified Info, Social SVG Links, and Credits */}
+      {/* 11. Sanctuary Footer with Verified Info, Social SVG Links, and Credits */}
       <Footer />
 
-      {/* 13. Floating "Ask Nandankanan" AI Assistant Widget */}
+      {/* 12. Floating "Ask Nandankanan" AI Assistant Widget */}
       <ChatbotWidget 
         language={language}
-        onOpenTickets={() => setTicketModalOpen(true)}
         onOpenLiveCam={handleLiveCamFromChatbot}
         onShowOnMap={handleShowAnimalOnMap}
         isLiveModalOpen={Boolean(activeModalCamera)}
-      />
 
-      {/* 14. Online Fast-Track Ticket Booking Modal with Instant QR Pass */}
-      <TicketBookingModal 
-        isOpen={ticketModalOpen}
-        onClose={() => setTicketModalOpen(false)}
-        language={language}
       />
 
       {/* 15. User Authentication Modal */}

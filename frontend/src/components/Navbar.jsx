@@ -82,8 +82,8 @@ export default function Navbar({
     return propActiveSection || 'hero';
   });
 
-  const isManualScrollingRef = useRef(false);
-  const manualScrollTimeoutRef = useRef(null);
+  const isNavigatingUntilRef = useRef(0);
+  const activeSectionRef = useRef(activeSection);
 
   // Accessibility States
   const [fontSize, setFontSize] = useState('normal'); // 'small' | 'normal' | 'large'
@@ -96,8 +96,13 @@ export default function Navbar({
 
   // Keep internal activeSection synchronized with external prop if provided
   useEffect(() => {
-    if (propActiveSection && propActiveSection !== activeSection) {
+    activeSectionRef.current = activeSection;
+  }, [activeSection]);
+
+  useEffect(() => {
+    if (propActiveSection && propActiveSection !== activeSectionRef.current) {
       setActiveSection(propActiveSection);
+      activeSectionRef.current = propActiveSection;
     }
   }, [propActiveSection]);
 
@@ -107,9 +112,12 @@ export default function Navbar({
       const hash = window.location.hash.replace('#', '');
       if (hash) {
         setActiveSection(hash);
+        activeSectionRef.current = hash;
         if (onSectionChange) onSectionChange(hash);
       } else if (window.scrollY < 120) {
         setActiveSection('hero');
+        activeSectionRef.current = 'hero';
+
         if (onSectionChange) onSectionChange('hero');
       }
     };
@@ -117,7 +125,8 @@ export default function Navbar({
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, [onSectionChange]);
 
-  // Dynamic Scrollspy with Intersection Observer & Sticky Navbar Offset
+  // Dynamic Scrollspy with High-Performance Continuous Boundary Tracking
+
   useEffect(() => {
     const sectionIds = [
       'hero',
@@ -126,122 +135,128 @@ export default function Navbar({
       'explore-animals',
       'virtual-experience',
       'conservation-stories',
+      'notices',
       'sponsorship-portal',
     ];
 
-    const getHeaderHeight = () => {
-      const header = document.querySelector('header');
-      return header ? header.offsetHeight : 95;
+    const updateActive = (newSectionId) => {
+      if (newSectionId && newSectionId !== activeSectionRef.current) {
+        activeSectionRef.current = newSectionId;
+        setActiveSection(newSectionId);
+        if (onSectionChange) onSectionChange(newSectionId);
+      }
     };
-
-    let headerHeight = getHeaderHeight();
-
-    // Map storing active intersection entries from IntersectionObserver
-    const intersectionEntries = new Map();
 
     const evaluateActiveSection = () => {
       // Skip updates during smooth programmatic scrolling triggered by navbar clicks
-      if (isManualScrollingRef.current) return;
+      if (Date.now() < isNavigatingUntilRef.current) return;
 
-      // 1. When near the top of the viewport, activate 'hero'
-      if (window.scrollY < 80) {
-        if (activeSection !== 'hero') {
-          setActiveSection('hero');
-          if (onSectionChange) onSectionChange('hero');
-        }
+      const scrollY = window.scrollY || window.pageYOffset || 0;
+
+      // 1. Top of page threshold -> always hero
+      if (scrollY < 120) {
+        updateActive('hero');
         return;
       }
 
-      // 2. When near the bottom of document, activate the last section ('sponsorship-portal')
-      const scrollBottom = window.innerHeight + window.scrollY;
+      // 2. Bottom of page threshold -> always sponsorship-portal
+      const windowHeight = window.innerHeight;
       const docHeight = document.documentElement.scrollHeight;
-      if (scrollBottom >= docHeight - 80) {
-        const lastId = sectionIds[sectionIds.length - 1];
-        if (activeSection !== lastId) {
-          setActiveSection(lastId);
-          if (onSectionChange) onSectionChange(lastId);
-        }
+      if (scrollY + windowHeight >= docHeight - 80) {
+        updateActive('sponsorship-portal');
         return;
       }
 
-      headerHeight = getHeaderHeight();
-      const activationOffset = headerHeight + 60;
+      const header = document.querySelector('header');
+      const headerHeight = header ? header.offsetHeight : 95;
+      const triggerY = headerHeight + Math.min(windowHeight * 0.25, 200);
 
+      // 3. Find which section currently encompasses triggerY
       let candidateId = null;
 
-      // 3. Primary Section Boundary Detection: find section intersecting the sticky header threshold
       for (const id of sectionIds) {
         const el = document.getElementById(id);
         if (el) {
           const rect = el.getBoundingClientRect();
-          if (rect.top <= activationOffset && rect.bottom > activationOffset) {
+          if (rect.top <= triggerY && rect.bottom > triggerY) {
+
             candidateId = id;
             break;
           }
         }
       }
 
-      // 4. Secondary Observer Fallback: highest intersection ratio in viewport
+      // 4. Fallback if between sections (e.g. parallax breaks): pick the last section passed
       if (!candidateId) {
-        let highestRatio = 0;
-        intersectionEntries.forEach((entry, id) => {
-          if (entry.isIntersecting && entry.intersectionRatio > highestRatio) {
-            highestRatio = entry.intersectionRatio;
-            candidateId = id;
+        for (let i = sectionIds.length - 1; i >= 0; i--) {
+          const el = document.getElementById(sectionIds[i]);
+          if (el) {
+            const rect = el.getBoundingClientRect();
+            if (rect.top <= triggerY) {
+              candidateId = sectionIds[i];
+              break;
+            }
           }
-        });
+        }
       }
 
-      // Update state if section changed
-      if (candidateId && candidateId !== activeSection) {
-        setActiveSection(candidateId);
-        if (onSectionChange) onSectionChange(candidateId);
+      if (candidateId) {
+        updateActive(candidateId);
       }
     };
 
-    // Initialize IntersectionObserver with rootMargin accounting for sticky header offset
-    const observerOptions = {
-      root: null,
-      rootMargin: `-${headerHeight}px 0px -40% 0px`,
-      threshold: [0, 0.15, 0.3, 0.5, 0.7, 1.0]
-    };
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        intersectionEntries.set(entry.target.id, entry);
-      });
-      evaluateActiveSection();
-    }, observerOptions);
-
-    sectionIds.forEach((id) => {
-      const el = document.getElementById(id);
-      if (el) observer.observe(el);
-    });
-
-    // Handle scroll events with rAF for instant feedback on rapid trackpad/mousewheel scrolling
+    // Handle scroll events with rAF for instant feedback without layout thrashing
     let scrollTicking = false;
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-      if (scrollTicking) return;
-      scrollTicking = true;
-      window.requestAnimationFrame(() => {
-        evaluateActiveSection();
-        scrollTicking = false;
-      });
+      const scrolled = window.scrollY > 20;
+      setIsScrolled((prev) => (prev === scrolled ? prev : scrolled));
+      if (!scrollTicking) {
+        scrollTicking = true;
+        window.requestAnimationFrame(() => {
+          evaluateActiveSection();
+          scrollTicking = false;
+        });
+      }
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', handleScroll, { passive: true });
+
+    // Also connect directly with Lenis smooth scroll updates
+    let cleanupLenis = null;
+    const setupLenis = () => {
+      if (typeof window !== 'undefined' && window.__lenis) {
+        const onLenisScroll = () => {
+          handleScroll();
+        };
+        window.__lenis.on('scroll', onLenisScroll);
+        cleanupLenis = () => {
+          if (window.__lenis) window.__lenis.off('scroll', onLenisScroll);
+        };
+      }
+    };
+    setupLenis();
+    const lenisTimer = setTimeout(setupLenis, 600);
+
+    // Initial evaluation on mount
     evaluateActiveSection();
 
     return () => {
-      observer.disconnect();
       window.removeEventListener('scroll', handleScroll);
-      if (manualScrollTimeoutRef.current) clearTimeout(manualScrollTimeoutRef.current);
+      window.removeEventListener('resize', handleScroll);
+      if (cleanupLenis) cleanupLenis();
+      clearTimeout(lenisTimer);
     };
-  }, [activeSection, onSectionChange]);
+  }, [onSectionChange]);
 
   // Smooth Navigation Click Handler with Dynamic Sticky Header Offset
   const handleNavClick = (e, link) => {
+    // Notify any open modals (such as the animal details modal) to close cleanly on navigation
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('close-animal-modal'));
+    }
+
+
     if (link.onClick) {
       e.preventDefault();
       link.onClick();
@@ -250,33 +265,34 @@ export default function Navbar({
 
     if (link.href && link.href.startsWith('#')) {
       e.preventDefault();
-      const targetId = link.sectionId || link.href.slice(1);
-
-      // Immediately highlight the selected item on click (0 lag)
-      setActiveSection(targetId);
-      if (onSectionChange) onSectionChange(targetId);
+      const activeId = link.sectionId || link.href.slice(1);
+      const targetId = link.scrollTarget || activeId;
 
       // Lock scroll detection momentarily during smooth animation to prevent intermediate flicker
-      isManualScrollingRef.current = true;
-      if (manualScrollTimeoutRef.current) clearTimeout(manualScrollTimeoutRef.current);
-      manualScrollTimeoutRef.current = setTimeout(() => {
-        isManualScrollingRef.current = false;
-      }, 850);
+      isNavigatingUntilRef.current = Date.now() + 850;
 
-      const targetEl = document.getElementById(targetId);
+      // Immediately highlight the selected item on click (0 lag)
+      activeSectionRef.current = activeId;
+      setActiveSection(activeId);
+      if (onSectionChange) onSectionChange(activeId);
+
+      const targetEl = document.getElementById(targetId) || document.getElementById(activeId);
+
       if (targetEl) {
         const header = document.querySelector('header');
         const headerHeight = header ? header.offsetHeight : 95;
 
         if (window.__lenis) {
           window.__lenis.scrollTo(targetEl, {
-            offset: -headerHeight,
+            offset: -headerHeight - 12,
+
             duration: 1.2,
             immediate: false
           });
         } else {
           const elementPosition = targetEl.getBoundingClientRect().top + window.scrollY;
-          const offsetPosition = Math.max(0, elementPosition - headerHeight + 2);
+          const offsetPosition = Math.max(0, elementPosition - headerHeight - 12);
+
           window.scrollTo({
             top: offsetPosition,
             behavior: 'smooth'
@@ -426,14 +442,15 @@ export default function Navbar({
   const currentDignitary = dignitaryData[dignitaryView] || dignitaryData.cm;
 
   const navLinks = [
-    { key: 'home', name: t('nav.home'), href: '#hero', sectionId: 'hero' },
-    { key: 'liveViews', name: t('nav.liveViews') || t('nav.liveCameras'), href: '#live-wildlife', sectionId: 'live-wildlife' },
-    { key: 'zooMap', name: t('nav.zooMap'), href: '#interactive-map', sectionId: 'interactive-map' },
-    { key: 'species', name: t('nav.species'), href: '#explore-animals', sectionId: 'explore-animals' },
-    { key: 'virtualTour', name: t('nav.virtualTour'), href: '#virtual-experience', sectionId: 'virtual-experience' },
-    { key: 'stories', name: t('nav.stories'), href: '#conservation-stories', sectionId: 'conservation-stories' },
-    { key: 'notices', name: t('nav.newsNotice'), href: '#notices', onClick: () => setNewsNoticeModalOpen(true) },
-    { key: 'adopt', name: t('nav.adopt'), href: '#sponsorship-portal', sectionId: 'sponsorship-portal' },
+    { key: 'home', name: t('nav.home'), href: '#hero', sectionId: 'hero', scrollTarget: 'hero' },
+    { key: 'liveViews', name: t('nav.liveViews') || t('nav.liveCameras'), href: '#live-wildlife', sectionId: 'live-wildlife', scrollTarget: 'live-cameras-grid' },
+    { key: 'zooMap', name: t('nav.zooMap'), href: '#interactive-map', sectionId: 'interactive-map', scrollTarget: 'zoo-map-viewport' },
+    { key: 'species', name: t('nav.species'), href: '#explore-animals', sectionId: 'explore-animals', scrollTarget: 'species-grid' },
+    { key: 'virtualTour', name: t('nav.virtualTour'), href: '#virtual-experience', sectionId: 'virtual-experience', scrollTarget: 'virtual-tour-viewer' },
+    { key: 'stories', name: t('nav.stories'), href: '#conservation-stories', sectionId: 'conservation-stories', scrollTarget: 'stories-grid' },
+    { key: 'notices', name: t('nav.newsNotice'), href: '#notices', sectionId: 'notices', scrollTarget: 'notices-bulletin-box' },
+    { key: 'adopt', name: t('nav.adopt'), href: '#sponsorship-portal', sectionId: 'sponsorship-portal', scrollTarget: 'sponsorship-flow' },
+
     { key: 'wallet', name: t('nav.wallet'), href: '#wallet', onClick: () => setWalletModalOpen(true) },
   ];
 
@@ -826,7 +843,8 @@ export default function Navbar({
               {/* Fast-Track Explore Action Button */}
               <a
                 href="#explore-animals"
-                onClick={(e) => handleNavClick(e, { key: 'species', href: '#explore-animals', sectionId: 'explore-animals' })}
+                onClick={(e) => handleNavClick(e, { key: 'species', href: '#explore-animals', sectionId: 'explore-animals', scrollTarget: 'species-grid' })}
+
                 className="px-3 xl:px-4 py-1.5 rounded-lg bg-gradient-to-r from-[#C8A96B] to-[#b39352] hover:from-[#d8b87a] hover:to-[#C8A96B] text-[#071D12] font-black text-[11px] xl:text-xs uppercase tracking-wider shadow-md hover:scale-105 active:scale-95 transition-all whitespace-nowrap"
               >
                 <span>{t('nav.exploreNow')}</span>

@@ -19,7 +19,7 @@ export default function DonationCelebrationBanner({
 
     // Spawn subtle floating celebratory particles (hearts, paw prints, sparkles)
     const newParticles = [];
-    const emojis = ['❤️', '🐾', '✨', '🌿', '🎉', '💖'];
+    const emojis = ['❤️', '🐾', '🌿', '🎉', '💖', '🦚'];
     for (let i = 0; i < 12; i++) {
       newParticles.push({
         id: 'cp_' + Math.random(),

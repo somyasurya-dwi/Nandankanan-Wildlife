@@ -106,6 +106,7 @@ const NOTICES = [
   }
 ];
 
+
 export default function SponsorshipPortal({ 
   animals, 
   preSelectedAnimal, 
@@ -356,7 +357,7 @@ export default function SponsorshipPortal({
           </div>
         ) : (
           /* Sponsorship Configuration & Checkout Flow */
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          <div id="sponsorship-flow" className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start scroll-mt-28">
             
             {/* Left 7 Columns: Animal Selection & Tier Options */}
             <div className="lg:col-span-7 space-y-8">

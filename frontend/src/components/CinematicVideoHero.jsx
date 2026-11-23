@@ -247,6 +247,7 @@ export default function CinematicVideoHero({ onExploreClick, onMapClick, onWatch
 
           {/* Sanctuary Metric Trust Badges */}
           <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-xs text-[#F5F4EA]/70 font-mono pt-2 border-t border-white/10">
+
             <div className="flex items-center gap-2">
               <span className="text-[#C8A96B] font-bold text-sm">437 ha</span>
               <span>{t('hero.corridorStat')}</span>
@@ -348,6 +349,7 @@ export default function CinematicVideoHero({ onExploreClick, onMapClick, onWatch
         </div>
 
       </div>
+
 
       {/* Organic Curved Forest Elevation Wave Transition into Next Section */}
       <div className="absolute bottom-0 left-0 right-0 z-20 pointer-events-none overflow-hidden leading-none">

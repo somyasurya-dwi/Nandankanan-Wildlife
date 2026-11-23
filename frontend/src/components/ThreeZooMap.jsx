@@ -43,7 +43,9 @@ export default function ThreeZooMap({
   onOpenLiveCam = null,
   isolateMarkerId = null,
   focusTrigger = 0,
-  onResetIsolate = null
+  onResetIsolate = null,
+  isFullscreen = false
+
 }) {
   const mountRef = useRef(null);
   const sceneRef = useRef(null);
@@ -440,7 +442,28 @@ export default function ThreeZooMap({
     controls.maxPolarAngle = Math.PI * 0.44; // Don't allow camera to dip below terrain
     controls.minPolarAngle = 0.05; // Overhead
     controls.target.set(0, 0, 0);
+
+    // Prevent accidental wheel zoom hijacking when user scrolls the webpage
+    controls.enableZoom = false;
+
+    // Prevent accidental single-finger rotation while scrolling on touch devices (2 fingers to dolly/pan)
+    controls.touches = {
+      ONE: THREE.TOUCH.NONE,
+      TWO: THREE.TOUCH.DOLLY_PAN
+    };
+
     controlsRef.current = controls;
+
+    // Allow intentional Ctrl+Wheel or Meta+Wheel zoom without hijacking normal page scrolling
+    const onCanvasWheel = (e) => {
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        const factor = e.deltaY < 0 ? 0.88 : 1.14;
+        handleZoom(factor);
+      }
+    };
+    renderer.domElement.addEventListener('wheel', onCanvasWheel, { passive: false });
+
 
     // 5. Lighting Setup (Crisp Directional Sunlight + Ambient Canopy Bounce)
     const ambientLight = new THREE.AmbientLight(0xd1fae5, 1.4);
@@ -769,8 +792,12 @@ export default function ThreeZooMap({
     return () => {
       resizeObserver.disconnect();
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
-      if (renderer.domElement && container.contains(renderer.domElement)) {
-        container.removeChild(renderer.domElement);
+      if (renderer.domElement) {
+        renderer.domElement.removeEventListener('wheel', onCanvasWheel);
+        if (container.contains(renderer.domElement)) {
+          container.removeChild(renderer.domElement);
+        }
+
       }
       renderer.dispose();
       terrainGeo.dispose();
@@ -778,7 +805,8 @@ export default function ThreeZooMap({
       waterGeo.dispose();
       scene.clear();
     };
-  }, [getTerrainElevation, get3DCoords, markers, selectedCategory]);
+  }, [getTerrainElevation, get3DCoords, markers, selectedCategory, handleZoom]);
+
 
   const animalBio = activeMarker
     ? INITIAL_ANIMALS.find(
@@ -789,7 +817,8 @@ export default function ThreeZooMap({
     : null;
 
   return (
-    <div className="relative w-full h-[680px] sm:h-[800px] lg:h-[880px] bg-forest-950 overflow-hidden select-none">
+    <div className={`relative w-full ${isFullscreen ? 'h-full flex-1 min-h-screen' : 'h-[280px] sm:h-[330px] lg:h-[370px]'} bg-forest-950 overflow-hidden select-none`}>
+
 
       {/* Three.js Canvas Container */}
       <div
@@ -808,7 +837,12 @@ export default function ThreeZooMap({
             </div>
 
             {/* Animal Common & Scientific Name */}
-            <div className="flex items-baseline gap-2 truncate">
+            <div 
+              onClick={() => onOpenLiveCam && onOpenLiveCam(activeMarker)}
+              className="flex items-baseline gap-2 truncate cursor-pointer hover:text-gold-300 transition-colors pointer-events-auto"
+              title="Click to view live stream"
+            >
+
               <span className="text-sm sm:text-base font-display font-black text-ivory-50 tracking-wide truncate">
                 {activeMarker.animal_name || activeMarker.title}
               </span>
@@ -827,10 +861,11 @@ export default function ThreeZooMap({
             )}
 
             {/* Live Camera Shortcut */}
-            {onOpenLiveCam && activeMarker.live_cam_available && (
+            {onOpenLiveCam && (
               <button
                 onClick={() => onOpenLiveCam(activeMarker)}
-                className="ml-auto px-2.5 py-1 rounded-lg bg-red-600/90 hover:bg-red-500 text-white text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 shadow-md transition-all shrink-0 pointer-events-auto"
+                className="ml-auto px-2.5 py-1 rounded-lg bg-red-600/90 hover:bg-red-500 text-white text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 shadow-md transition-all shrink-0 pointer-events-auto cursor-pointer"
+
                 title="Launch Live Observation Modal"
               >
                 <Tv className="w-3 h-3 animate-pulse" />
@@ -848,7 +883,8 @@ export default function ThreeZooMap({
             <span className="text-ivory-400/50 hidden sm:inline">•</span>
             <span className="text-emerald-400 hidden sm:inline">3D TERRAIN BEACON: ACTIVE</span>
             <span className="text-ivory-400/50 hidden sm:inline">•</span>
-            <span className="hidden sm:inline">Drag to Orbit | Scroll to Zoom</span>
+            <span className="hidden sm:inline">Drag to Orbit • Ctrl + Scroll / ± to Zoom</span>
+
           </div>
 
           {/* ISOLATED REGION ONLY BADGE + SHOW ALL ANIMALS TOGGLE */}
@@ -971,11 +1007,12 @@ export default function ThreeZooMap({
         })}
       </div>
 
-      {/* GOOGLE EARTH 3D COMPASS ROSE (TOP RIGHT) */}
-      <div className="absolute top-4 right-4 z-20 flex flex-col items-center gap-2">
+      {/* GOOGLE EARTH 3D COMPASS ROSE (TOP RIGHT - POSITIONED SAFELY CLEAR OF FULLSCREEN / CLOSE BUTTONS) */}
+      <div className={`absolute top-4 ${isFullscreen ? 'right-24 sm:right-28' : 'right-20 sm:right-24'} z-20 flex flex-col items-center gap-1.5 select-none pointer-events-auto`}>
         <button
           onClick={resetNorth}
-          className="relative w-12 h-12 rounded-full bg-forest-950/90 hover:bg-forest-900 border border-gold-500/40 p-1 shadow-2xl backdrop-blur-md transition-all duration-200 group flex items-center justify-center"
+          className="relative w-11 h-11 rounded-full bg-forest-950/90 hover:bg-forest-900 border border-gold-500/40 p-1 shadow-2xl backdrop-blur-md transition-all duration-200 group flex items-center justify-center cursor-pointer"
+
           title="3D Compass: Click to Reset North (0°)"
           aria-label="Reset North heading"
         >
@@ -1013,14 +1050,15 @@ export default function ThreeZooMap({
       {/* GOOGLE EARTH-STYLE FLOATING HUD CONTROLS (BOTTOM RIGHT) */}
       <div className="absolute bottom-4 right-4 z-20 flex flex-col items-end gap-2">
 
-        {/* 3D / 2D Google Earth Switcher Button */}
+        {/* 3D Google Earth Perspective Switcher / Reset Button */}
         <button
           onClick={toggle2D3D}
-          className="px-3 py-1.5 rounded-xl bg-forest-950/92 hover:bg-forest-900 border border-gold-500/40 text-gold-300 hover:text-gold-200 text-xs font-mono font-bold uppercase tracking-wider shadow-2xl backdrop-blur-md transition-all flex items-center gap-1.5 group"
-          title={is3DMode ? "Switch to 2D Top-Down View" : "Switch to 3D Oblique Google Earth View"}
+          className="px-3 py-1.5 rounded-xl bg-forest-950/92 hover:bg-forest-900 border border-gold-500/40 text-gold-300 hover:text-gold-200 text-xs font-mono font-bold uppercase tracking-wider shadow-2xl backdrop-blur-md transition-all flex items-center gap-1.5 group cursor-pointer"
+          title={is3DMode ? "3D View Active (Click for Overhead Angle)" : "Overhead View (Click for 3D Angle)"}
         >
           <Layers className="w-3.5 h-3.5 text-gold-400 group-hover:rotate-12 transition-transform" />
-          <span>{is3DMode ? "2D VIEW" : "3D VIEW"}</span>
+          <span>3D VIEW</span>
+
         </button>
 
         {/* Navigation Gizmo Stack */}

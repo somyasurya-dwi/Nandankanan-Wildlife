@@ -1380,7 +1380,7 @@ export default function LiveCameraPlayer({
             1. CLEAN HEADER BAR (Sticky Top Navigation)
             ========================================================================= */}
         <header className="sticky top-0 z-40 bg-[#06180E]/95 backdrop-blur-xl border-b border-[#14532D]/80 shadow-lg shrink-0">
-          <div className="w-full px-2.5 sm:px-6 lg:px-8 xl:px-10 py-2 sm:py-3 flex items-center justify-between gap-2 sm:gap-3">
+          <div className="w-full px-2.5 sm:px-6 lg:px-8 xl:px-10 py-1.5 sm:py-2 flex items-center justify-between gap-2 sm:gap-3">
             <div className="flex items-center gap-2 sm:gap-3 min-w-0">
               <span className="px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-red-600 text-white text-[9px] sm:text-[11px] font-bold tracking-widest uppercase flex items-center gap-1 sm:gap-1.5 shadow-md shadow-red-600/30 shrink-0">
                 <span className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-white animate-pulse" />
@@ -1437,19 +1437,23 @@ export default function LiveCameraPlayer({
         {/* =========================================================================
             MAIN DASHBOARD BODY (Full Width Panoramic Video Surveillance View)
             ========================================================================= */}
-        <main className="w-full max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 xl:px-10 py-2 sm:py-3.5 flex-1 flex flex-col justify-center" >
+        <main className="w-full max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 xl:px-10 py-1.5 sm:py-2 flex-1 flex flex-col justify-center items-center" >
 
           {/* Main Top Section: Full Width High-Definition Live Camera Viewport & Controls */}
-          <div className="w-full flex-1 flex flex-col justify-center" >
+          <div className="w-full flex-1 flex flex-col justify-center items-center" >
 
             {/* =========================================================================
                   2. MAIN LIVE VIDEO PLAYER (Prominent, High Definition, Clean Overlays)
                   ========================================================================= */}
             <div
               ref={videoPlayerContainerRef}
+              style={!isFullscreen ? {
+                aspectRatio: '16 / 9',
+                maxWidth: 'calc((100vh - 125px) * 16 / 9)'
+              } : undefined}
               className={`relative bg-black w-full mx-auto overflow-hidden group select-none transition-all duration-300 ${isFullscreen
                 ? 'fixed inset-0 z-50 h-screen w-screen rounded-none max-h-none border-none'
-                : 'h-[clamp(460px,76vh,880px)] min-h-[460px] sm:min-h-[540px] rounded-2xl shadow-2xl border border-white/10'
+                : 'max-h-[calc(100vh-125px)] rounded-2xl shadow-2xl border border-white/10'
                 }`}
             >
 
@@ -1517,7 +1521,7 @@ export default function LiveCameraPlayer({
                     onPlay={() => setIsBuffering(false)}
                     onError={() => { setIsBuffering(false); setHasStreamError(true); }}
                     style={{
-                      objectPosition: layoutConfig.focalPosition,
+                      objectPosition: zoomLevel > 1 ? layoutConfig.focalPosition : 'center center',
                       transform: `scale(${zoomLevel})`,
                       transformOrigin: layoutConfig.focalPosition,
                       transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), filter 0.3s ease',
@@ -1563,12 +1567,12 @@ export default function LiveCameraPlayer({
               {/* Real-Time Camera Movement Handover Notification (Displayed at the Top of Live Video) */}
               {cameraMovementNotification && !isFullscreen && (
                 <div
-                  className="absolute top-2.5 sm:top-3.5 inset-x-0 mx-auto w-fit max-w-[94%] z-40 animate-fadeIn select-none pointer-events-auto"
+                  className="absolute top-13 sm:top-14 inset-x-0 mx-auto w-fit max-w-[90%] z-30 animate-fadeIn select-none pointer-events-auto"
                   data-movement-notification="true"
                 >
-                  <div className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-2xl bg-black/90 backdrop-blur-xl border border-[#C8A96B]/80 text-[#F5F4EA] shadow-[0_8px_32px_rgba(0,0,0,0.85)] flex items-center gap-2 sm:gap-2.5 text-xs font-mono ring-1 ring-[#C8A96B]/40">
-                    <div className="w-6 h-6 rounded-lg bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center shrink-0">
-                      <Radar className="w-3.5 h-3.5 text-emerald-400 animate-spin" />
+                  <div className="px-2.5 sm:px-3 py-1 rounded-full bg-black/85 backdrop-blur-xl border border-[#C8A96B]/70 text-[#F5F4EA] shadow-xl flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs font-mono ring-1 ring-[#C8A96B]/40">
+                    <div className="w-4 h-4 rounded-full bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center shrink-0">
+                      <Radar className="w-2.5 h-2.5 text-emerald-400 animate-spin" />
                     </div>
                     <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2">
                       <span className="font-bold text-[#C8A96B] flex items-center gap-1.5">
@@ -1579,72 +1583,74 @@ export default function LiveCameraPlayer({
                         )}
                         <span>{animal?.animal_name || 'Animal'}</span>
                       </span>
-                      <span className="hidden sm:inline text-white/40">•</span>
-                      <span className="text-white font-medium flex items-center gap-1.5">
-                        <span>moving from <strong className="text-amber-300">Cam {cameraMovementNotification.fromCam}</strong></span>
-                        <ArrowRight className="w-3.5 h-3.5 text-[#C8A96B] shrink-0" />
-                        <span><strong className="text-emerald-400">Cam {cameraMovementNotification.toCam}</strong></span>
-                      </span>
-                      {cameraMovementNotification.zone && (
-                        <span className="hidden md:inline text-[#A7D7A9] text-[10.5px]">
-                          ({cameraMovementNotification.zone})
-                        </span>
-                      )}
                     </div>
+                    <span className="text-white font-medium flex items-center gap-1.5 whitespace-nowrap">
+                      <span>Handover: <strong className="text-amber-300 font-bold">Cam {cameraMovementNotification.fromCam}</strong></span>
+                      <ArrowRight className="w-3 h-3 text-[#C8A96B] shrink-0" />
+                      <span><strong className="text-emerald-400 font-bold">Cam {cameraMovementNotification.toCam}</strong></span>
+                    </span>
+                    {cameraMovementNotification.toAngle && (
+                      <span className="hidden sm:inline text-[#A7D7A9] text-[10.5px]">
+                        ({cameraMovementNotification.toAngle})
+
+                      </span>
+                    )}
                     <button
                       type="button"
                       onClick={() => setCameraMovementNotification(null)}
-                      className="ml-1 p-1 rounded-lg hover:bg-white/10 text-white/60 hover:text-white transition-colors cursor-pointer"
+                      className="ml-0.5 p-0.5 rounded hover:bg-white/10 text-white/60 hover:text-white transition-colors cursor-pointer"
                       title="Dismiss notification"
                       aria-label="Dismiss notification"
                     >
-                      <X className="w-3.5 h-3.5" />
+                      <X className="w-3 h-3" />
                     </button>
                   </div>
                 </div>
               )}
 
-              {/* Clean, Non-Cluttering Top Over-Video Badges */}
-              {!isFullscreen && (
-                <div className="absolute top-2.5 left-2.5 sm:top-4 sm:left-4 z-20 pointer-events-auto flex items-center flex-wrap gap-1.5 sm:gap-2 max-w-[calc(100%-110px)] sm:max-w-none">
-                  <div className="px-2.5 sm:px-3 py-1 rounded-xl bg-black/75 backdrop-blur-md border border-[#C8A96B]/30 text-[10px] sm:text-[11px] font-mono text-[#F5F4EA] flex items-center gap-1.5 sm:gap-2 shadow-lg pointer-events-none">
-                    <span className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-red-500 animate-pulse shrink-0" />
-                    <span className="text-[#C8A96B] font-bold truncate max-w-[110px] sm:max-w-none">{animal?.animal_name}</span>
-                    <span className="text-white/40 hidden sm:inline">•</span>
-                    <span className="text-white hidden sm:inline">{currentCam.name}</span>
-                    <span className="text-white/40 hidden xl:inline">•</span>
-                    <span className="text-emerald-400 hidden xl:inline">{displayBitrate}</span>
-                  </div>
-
-                  {/* Live Stream Status Badge */}
-                  <div className="px-2 sm:px-2.5 py-1 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-[9px] sm:text-[11px] font-mono text-emerald-300 font-bold flex items-center gap-1 sm:gap-1.5 shadow-lg backdrop-blur-md pointer-events-none uppercase tracking-wider">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
-                    <span>LIVE</span>
-                  </div>
-
-                  {/* 5-Second Free Preview Countdown / VIP Unlimited Badge */}
-                  {!isSubscribed ? (
-                    <div className="px-2.5 py-1 rounded-xl bg-amber-500/20 border border-amber-500/40 text-[9px] sm:text-[11px] font-mono text-amber-300 font-bold flex items-center gap-1.5 shadow-lg backdrop-blur-md pointer-events-none">
-                      <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse shrink-0" />
-                      <span>{Math.max(0, Math.ceil(remainingSeconds))}s Free Preview</span>
+              {/* Top Over-Video Overlay Bar: Left Badges & Right Controls (Unified Non-Overlapping Responsive Flex Layout) */}
+              <div className="absolute top-2.5 sm:top-3.5 inset-x-2.5 sm:inset-x-3.5 z-20 pointer-events-none flex items-center justify-between gap-2">
+                {/* Clean, Non-Cluttering Top Over-Video Badges */}
+                {!isFullscreen && (
+                  <div className="pointer-events-auto flex items-center flex-nowrap gap-1.5 sm:gap-2 min-w-0 flex-1 overflow-hidden">
+                    <div className="px-2 sm:px-2.5 py-1 rounded-xl bg-black/75 backdrop-blur-md border border-[#C8A96B]/30 text-[10px] sm:text-[11px] font-mono text-[#F5F4EA] flex items-center gap-1.5 shadow-lg pointer-events-none shrink min-w-0">
+                      <span className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-red-500 animate-pulse shrink-0" />
+                      <span className="text-[#C8A96B] font-bold truncate max-w-[85px] sm:max-w-[120px] md:max-w-[150px]">{animal?.animal_name}</span>
+                      <span className="text-white/40 hidden md:inline">•</span>
+                      <span className="text-white hidden md:inline truncate max-w-[80px] lg:max-w-[110px]">{currentCam.camera_name || currentCam.name}</span>
+                      <span className="text-white/40 hidden 2xl:inline">•</span>
+                      <span className="text-emerald-400 hidden 2xl:inline">{displayBitrate}</span>
                     </div>
-                  ) : (
-                    <div className="px-2.5 py-1 rounded-xl bg-[#C8A96B]/20 border border-[#C8A96B]/40 text-[9px] sm:text-[11px] font-mono text-[#C8A96B] font-bold flex items-center gap-1.5 shadow-lg backdrop-blur-md pointer-events-none">
-                      <Sparkles className="w-3 h-3 text-[#C8A96B] shrink-0" />
-                      <span>VIP Unlimited Access</span>
-                    </div>
-                  )}
-                </div>
-              )}
 
-              {/* Top-Right Corner Live Video Controls: Watching Badge, Quality Selector & Interactive Digital Zoom */}
-              <div className="absolute top-2.5 right-2.5 sm:top-4 sm:right-4 z-20 pointer-events-auto flex items-center gap-1.5 sm:gap-2">
+                    {/* Live Stream Status Badge */}
+                    <div className="px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-[9px] sm:text-[10px] font-mono text-emerald-300 font-bold flex items-center gap-1 shadow-lg backdrop-blur-md pointer-events-none uppercase tracking-wider shrink-0">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+                      <span>LIVE</span>
+                    </div>
+
+                    {/* 5-Second Free Preview Countdown / VIP Unlimited Badge */}
+                    {!isSubscribed ? (
+                      <div className="px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-xl bg-amber-500/20 border border-amber-500/40 text-[9px] sm:text-[10px] font-mono text-amber-300 font-bold flex items-center gap-1 shadow-lg backdrop-blur-md pointer-events-none shrink-0 whitespace-nowrap">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse shrink-0" />
+                        <span>{Math.max(0, Math.ceil(remainingSeconds))}s<span className="hidden sm:inline"> Preview</span></span>
+                      </div>
+                    ) : (
+                      <div className="px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-xl bg-[#C8A96B]/20 border border-[#C8A96B]/40 text-[9px] sm:text-[10px] font-mono text-[#C8A96B] font-bold flex items-center gap-1 shadow-lg backdrop-blur-md pointer-events-none shrink-0 whitespace-nowrap">
+                        <Sparkles className="w-3 h-3 text-[#C8A96B] shrink-0" />
+                        <span>VIP<span className="hidden sm:inline"> Unlimited</span></span>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Top-Right Corner Live Video Controls: Watching Badge, Quality Selector & Interactive Digital Zoom */}
+                <div className="pointer-events-auto flex items-center gap-1.5 sm:gap-2 shrink-0 ml-auto">
                 {/* Live Viewers Watching Badge */}
                 {!isFullscreen && (
                   <div className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl bg-black/75 hover:bg-black/90 backdrop-blur-md border border-[#C8A96B]/40 text-[10px] sm:text-xs text-[#A7D7A9] font-mono shrink-0 shadow-lg select-none">
                     <Eye className="w-3.5 h-3.5 text-[#C8A96B] shrink-0" />
                     <span className="font-bold text-[#F5F4EA]">{animal?.viewer_count?.toLocaleString() || '1,420'}</span>
-                    <span className="hidden xs:inline text-[#A7D7A9]">watching</span>
+                    <span className="hidden md:inline text-[#A7D7A9]">watching</span>
                   </div>
                 )}
 
@@ -1791,45 +1797,46 @@ export default function LiveCameraPlayer({
                   )}
                 </div>
               </div>
+            </div>
 
-              {/* On-Screen Video Zoom Notification Toast */}
-              {zoomNotification && (
-                <div className="absolute top-12 sm:top-14 inset-x-0 mx-auto w-fit z-30 px-3.5 py-1.5 rounded-full bg-black/85 backdrop-blur-md border border-[#C8A96B]/60 text-[#F5F4EA] shadow-2xl flex items-center gap-2 text-xs font-mono animate-fadeIn pointer-events-none">
-                  <ZoomIn className="w-3.5 h-3.5 text-[#C8A96B] animate-pulse" />
-                  <span className="text-white/80">Digital Zoom:</span>
-                  <span className="text-emerald-400 font-bold">{zoomNotification}</span>
-                </div>
-              )}
+            {/* On-Screen Video Zoom Notification Toast */}
+            {zoomNotification && (
+              <div className={`absolute ${cameraMovementNotification ? 'top-22 sm:top-24' : 'top-13 sm:top-14'} inset-x-0 mx-auto w-fit z-30 px-3.5 py-1.5 rounded-full bg-black/85 backdrop-blur-md border border-[#C8A96B]/60 text-[#F5F4EA] shadow-2xl flex items-center gap-2 text-xs font-mono animate-fadeIn pointer-events-none`}>
+                <ZoomIn className="w-3.5 h-3.5 text-[#C8A96B] animate-pulse" />
+                <span className="text-white/80">Digital Zoom:</span>
+                <span className="text-emerald-400 font-bold">{zoomNotification}</span>
+              </div>
+            )}
 
-              {/* On-Screen Video Quality Notification Toast */}
-              {qualityNotification && (
-                <div className="absolute top-12 sm:top-14 inset-x-0 mx-auto w-fit z-30 px-3.5 py-1.5 rounded-full bg-black/85 backdrop-blur-md border border-[#C8A96B]/60 text-[#F5F4EA] shadow-2xl flex items-center gap-2 text-xs font-mono animate-fadeIn pointer-events-none">
-                  <SlidersHorizontal className="w-3.5 h-3.5 text-[#C8A96B] animate-spin" />
-                  <span className="text-white/80">Stream Quality:</span>
-                  <span className="text-emerald-400 font-bold">{qualityNotification}</span>
-                </div>
-              )}
+            {/* On-Screen Video Quality Notification Toast */}
+            {qualityNotification && (
+              <div className={`absolute ${cameraMovementNotification ? 'top-22 sm:top-24' : 'top-13 sm:top-14'} inset-x-0 mx-auto w-fit z-30 px-3.5 py-1.5 rounded-full bg-black/85 backdrop-blur-md border border-[#C8A96B]/60 text-[#F5F4EA] shadow-2xl flex items-center gap-2 text-xs font-mono animate-fadeIn pointer-events-none`}>
+                <SlidersHorizontal className="w-3.5 h-3.5 text-[#C8A96B] animate-spin" />
+                <span className="text-white/80">Stream Quality:</span>
+                <span className="text-emerald-400 font-bold">{qualityNotification}</span>
+              </div>
+            )}
 
-              {/* Audio Volume / Mute Toast Notification */}
-              {audioNotification && (
-                <div className="absolute top-12 sm:top-14 inset-x-0 mx-auto w-fit z-30 px-3.5 py-1.5 rounded-full bg-black/85 backdrop-blur-md border border-[#C8A96B]/60 text-[#F5F4EA] shadow-2xl flex items-center gap-2 text-xs font-mono animate-fadeIn pointer-events-none">
-                  {isMuted || volume === 0 ? (
-                    <VolumeX className="w-3.5 h-3.5 text-rose-400" />
-                  ) : (
-                    <Volume2 className="w-3.5 h-3.5 text-[#C8A96B] animate-pulse" />
-                  )}
-                  <span className="text-white/80">Audio:</span>
-                  <span className="text-emerald-400 font-bold">{audioNotification}</span>
-                </div>
-              )}
+            {/* Audio Volume / Mute Toast Notification */}
+            {audioNotification && (
+              <div className={`absolute ${cameraMovementNotification ? 'top-22 sm:top-24' : 'top-13 sm:top-14'} inset-x-0 mx-auto w-fit z-30 px-3.5 py-1.5 rounded-full bg-black/85 backdrop-blur-md border border-[#C8A96B]/60 text-[#F5F4EA] shadow-2xl flex items-center gap-2 text-xs font-mono animate-fadeIn pointer-events-none`}>
+                {isMuted || volume === 0 ? (
+                  <VolumeX className="w-3.5 h-3.5 text-rose-400" />
+                ) : (
+                  <Volume2 className="w-3.5 h-3.5 text-[#C8A96B] animate-pulse" />
+                )}
+                <span className="text-white/80">Audio:</span>
+                <span className="text-emerald-400 font-bold">{audioNotification}</span>
+              </div>
+            )}
 
-              {/* Share Live Stream Notification Toast */}
-              {shareToast && (
-                <div className="absolute top-12 sm:top-14 inset-x-0 mx-auto w-fit z-30 px-3.5 py-1.5 rounded-full bg-black/85 backdrop-blur-md border border-[#C8A96B]/60 text-[#F5F4EA] shadow-2xl flex items-center gap-2 text-xs font-mono animate-fadeIn pointer-events-none">
-                  <Share2 className="w-3.5 h-3.5 text-[#C8A96B]" />
-                  <span className="text-emerald-400 font-bold">{shareToast}</span>
-                </div>
-              )}
+            {/* Share Live Stream Notification Toast */}
+            {shareToast && (
+              <div className={`absolute ${cameraMovementNotification ? 'top-22 sm:top-24' : 'top-13 sm:top-14'} inset-x-0 mx-auto w-fit z-30 px-3.5 py-1.5 rounded-full bg-black/85 backdrop-blur-md border border-[#C8A96B]/60 text-[#F5F4EA] shadow-2xl flex items-center gap-2 text-xs font-mono animate-fadeIn pointer-events-none`}>
+                <Share2 className="w-3.5 h-3.5 text-[#C8A96B]" />
+                <span className="text-emerald-400 font-bold">{shareToast}</span>
+              </div>
+            )}
 
 
 
@@ -2084,7 +2091,7 @@ export default function LiveCameraPlayer({
         {/* =========================================================================
             6. SANCTUARY FOOTER
             ========================================================================= */}
-        <footer className="w-full bg-[#06180E] border-t border-[#14532D]/80 shadow-2xl py-3 px-3 sm:px-6 lg:px-8 xl:px-10 shrink-0 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-[#A7D7A9] font-mono">
+        <footer className="w-full bg-[#06180E] border-t border-[#14532D]/80 shadow-2xl py-1.5 sm:py-2 px-3 sm:px-6 lg:px-8 xl:px-10 shrink-0 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-[#A7D7A9] font-mono">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
             <span>NANDANKANAN ZOOLOGICAL PARK • 24/7 LIVE WILDLIFE SURVEILLANCE</span>
