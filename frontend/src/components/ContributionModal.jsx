@@ -381,12 +381,9 @@ export default function ContributionModal({
             <h3 className="font-serif font-bold text-base sm:text-lg text-[#F5F4EA] leading-tight">
               Share Happiness, Feed {selectedAnimal?.name || 'Wildlife'}
             </h3>
-            <p className="text-[11px] sm:text-xs text-[#C8A96B] font-mono flex items-center gap-1.5 flex-wrap">
-              <span>{selectedAnimal?.desc || 'Support approved animal nutrition & welfare programs'}</span>
-              <span className="text-[9.5px] text-[#A7D7A9] bg-black/40 px-1.5 py-0.5 rounded border border-white/5 inline-flex items-center gap-1">
-                Approved rations: {selectedAnimal?.shareEmoji || '🥩'} {selectedAnimal?.careEmoji || '🍖'}
-              </span>
-              <span>❤️</span>
+            {/* Animal ration profile reference: selectedAnimal?.shareEmoji || selectedAnimal?.careEmoji */}
+            <p className="text-[11px] sm:text-xs text-[#C8A96B] font-mono">
+              {selectedAnimal?.desc || 'Support approved animal nutrition & welfare programs'}
             </p>
           </div>
         </div>
