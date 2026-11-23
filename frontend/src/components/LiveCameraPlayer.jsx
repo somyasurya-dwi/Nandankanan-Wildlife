@@ -1677,20 +1677,20 @@ export default function LiveCameraPlayer({
                     }}
                     className={`px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl text-[10px] sm:text-xs font-semibold backdrop-blur-md transition-all border flex items-center gap-1.5 cursor-pointer shrink-0 shadow-lg select-none ${showTopQualityMenu
                       ? 'bg-[#C8A96B] text-[#071D12] border-[#C8A96B] font-bold shadow-md shadow-[#C8A96B]/25'
-                      : 'bg-black/75 hover:bg-black/90 text-[#F5F4EA] border-[#C8A96B]/40 hover:border-[#C8A96B]'
+                      : 'bg-[#06180E]/85 hover:bg-[#0B2A1A] text-[#F5F4EA] border-[#C8A96B]/40 hover:border-[#C8A96B]'
                       }`}
                     title={`Video Stream Quality: ${displayResolution} (Click to change)`}
                     aria-label="Change Video Stream Quality"
                   >
                     <SlidersHorizontal className={`w-3.5 h-3.5 ${showTopQualityMenu ? 'text-[#071D12]' : 'text-[#C8A96B]'} shrink-0`} />
                     {!isFullscreen && (
-                      <span className="hidden xs:inline font-mono font-bold text-emerald-300">
+                      <span className={`hidden xs:inline font-mono font-bold ${showTopQualityMenu ? 'text-[#071D12]' : 'text-[#F5F4EA]'}`}>
                         {streamQuality === 'auto' ? 'Auto' : streamQuality.toUpperCase()}
                       </span>
                     )}
-                    <span className={`px-1 py-0.2 rounded text-[9px] font-mono font-bold ${showTopQualityMenu
-                      ? 'bg-black/20 text-[#071D12]'
-                      : 'bg-black/40 text-amber-300 border border-amber-400/30'
+                    <span className={`px-1.5 py-0.2 rounded text-[9px] font-mono font-bold ${showTopQualityMenu
+                      ? 'bg-[#071D12] text-[#C8A96B]'
+                      : 'bg-[#C8A96B]/20 text-[#C8A96B] border border-[#C8A96B]/40'
                       }`}>
                       {streamQuality === '480p' || streamQuality === '360p' ? 'SD' : 'HD'}
                     </span>
@@ -1699,20 +1699,20 @@ export default function LiveCameraPlayer({
                   {/* Top-Right Quality Dropdown Popover */}
                   {showTopQualityMenu && (
                     <div
-                      className="absolute top-full right-0 mt-1.5 w-48 sm:w-52 bg-[#06180E]/95 backdrop-blur-xl border border-[#C8A96B]/50 rounded-xl shadow-2xl p-1.5 z-50 text-xs font-mono animate-fadeIn pointer-events-auto max-h-[50vh] overflow-y-auto scrollbar-thin"
+                      className="absolute top-full right-0 mt-1.5 w-44 sm:w-48 bg-[#06180E]/95 backdrop-blur-xl border border-[#C8A96B]/50 rounded-xl shadow-2xl p-1.5 z-50 text-xs font-mono animate-fadeIn pointer-events-auto max-h-[50vh] overflow-y-auto scrollbar-thin shadow-black/80"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      <div className="flex items-center justify-between px-2 py-1 text-[9.5px] text-white/60 uppercase tracking-wider border-b border-white/10 mb-1 font-bold">
-                        <span className="flex items-center gap-1.5 text-[#C8A96B]">
+                      <div className="flex items-center justify-between px-2 py-1 text-[9.5px] border-b border-[#C8A96B]/20 mb-1 font-bold">
+                        <span className="flex items-center gap-1.5 text-[#C8A96B] uppercase tracking-wider">
                           <SlidersHorizontal className="w-3 h-3 text-[#C8A96B]" />
                           Video Stream Quality
                         </span>
-                        <span className="text-emerald-400 font-mono">
+                        <span className="text-[10px] font-mono font-bold px-1.5 py-0.2 rounded-full bg-[#C8A96B]/20 text-[#C8A96B] border border-[#C8A96B]/40">
                           {streamQuality.toUpperCase()}
                         </span>
                       </div>
 
-                      <div className="space-y-0.5">
+                      <div className="space-y-1">
                         {QUALITY_OPTIONS.map((q) => {
                           const isSelected = streamQuality === q.id;
                           return (
@@ -1720,15 +1720,12 @@ export default function LiveCameraPlayer({
                               key={q.id}
                               type="button"
                               onClick={() => handleSelectQuality(q.id)}
-                              className={`w-full text-left px-2.5 py-1.5 rounded-lg flex items-center justify-between transition-all cursor-pointer ${isSelected
-                                ? 'bg-gradient-to-r from-[#C8A96B] to-[#DFCA98] text-[#071D12] font-bold shadow-sm'
-                                : 'text-white/80 hover:bg-white/10 hover:text-white'
+                              className={`w-full text-left px-2.5 py-1.5 rounded-lg flex items-center justify-between transition-all duration-150 cursor-pointer ${isSelected
+                                ? 'bg-[#C8A96B] text-[#071D12] font-black border border-[#C8A96B] shadow-sm shadow-[#C8A96B]/25'
+                                : 'bg-[#06180E]/90 text-[#F5F4EA] border border-white/5 hover:border-[#C8A96B]/50 hover:bg-[#0B2A1A] hover:text-[#C8A96B]'
                                 }`}
                             >
-                              <span className={`text-[10px] px-2 py-0.5 rounded font-bold font-mono ${isSelected
-                                ? 'bg-black/20 text-[#071D12]'
-                                : 'bg-white/10 text-emerald-400'
-                                }`}>
+                              <span className={`text-[11px] font-mono font-bold tracking-wider ${isSelected ? 'text-[#071D12]' : 'text-[#F5F4EA]'}`}>
                                 {q.badge}
                               </span>
                               {isSelected && <CheckCircle2 className="w-3.5 h-3.5 text-[#071D12] shrink-0" />}
@@ -1749,7 +1746,7 @@ export default function LiveCameraPlayer({
                     }}
                     className={`px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl text-[10px] sm:text-xs font-semibold backdrop-blur-md transition-all border flex items-center gap-1.5 cursor-pointer shrink-0 shadow-lg select-none ${showZoomMenu || zoomLevel > 1
                       ? 'bg-[#C8A96B] text-[#071D12] border-[#C8A96B] font-bold shadow-md shadow-[#C8A96B]/25'
-                      : 'bg-black/75 hover:bg-black/90 text-[#F5F4EA] border-[#C8A96B]/40 hover:border-[#C8A96B]'
+                      : 'bg-[#06180E]/85 hover:bg-[#0B2A1A] text-[#F5F4EA] border-[#C8A96B]/40 hover:border-[#C8A96B]'
                       }`}
                     title={`Digital Zoom: ${zoomLevel}x (Click to change zoom level)`}
                     aria-label="Change Video Zoom Level"
@@ -1760,7 +1757,7 @@ export default function LiveCameraPlayer({
                       <ZoomIn className={`w-3.5 h-3.5 ${showZoomMenu || zoomLevel > 1 ? 'text-[#071D12]' : 'text-[#C8A96B]'}`} />
                     )}
                     {!isFullscreen && (
-                      <span className="font-mono font-bold text-emerald-300">
+                      <span className={`font-mono font-bold ${showZoomMenu || zoomLevel > 1 ? 'text-[#071D12]' : 'text-[#F5F4EA]'}`}>
                         {zoomLevel}x
                       </span>
                     )}
@@ -1769,20 +1766,20 @@ export default function LiveCameraPlayer({
                   {/* Top-Right Zoom Dropdown Popover */}
                   {showZoomMenu && (
                     <div
-                      className="absolute top-full right-0 mt-1.5 w-48 sm:w-52 bg-[#06180E]/95 backdrop-blur-xl border border-[#C8A96B]/50 rounded-xl shadow-2xl p-1.5 z-50 text-xs font-mono animate-fadeIn pointer-events-auto max-h-[50vh] overflow-y-auto scrollbar-thin"
+                      className="absolute top-full right-0 mt-1.5 w-44 sm:w-48 bg-[#06180E]/95 backdrop-blur-xl border border-[#C8A96B]/50 rounded-xl shadow-2xl p-1.5 z-50 text-xs font-mono animate-fadeIn pointer-events-auto max-h-[50vh] overflow-y-auto scrollbar-thin shadow-black/80"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      <div className="flex items-center justify-between px-2 py-1 text-[9.5px] text-white/60 uppercase tracking-wider border-b border-white/10 mb-1 font-bold">
-                        <span className="flex items-center gap-1.5 text-[#C8A96B]">
+                      <div className="flex items-center justify-between px-2 py-1 text-[9.5px] border-b border-[#C8A96B]/20 mb-1 font-bold">
+                        <span className="flex items-center gap-1.5 text-[#C8A96B] uppercase tracking-wider">
                           <ZoomIn className="w-3 h-3 text-[#C8A96B]" />
                           Optical & Digital Zoom
                         </span>
-                        <span className="text-emerald-400 font-mono">
+                        <span className="text-[10px] font-mono font-bold px-1.5 py-0.2 rounded-full bg-[#C8A96B]/20 text-[#C8A96B] border border-[#C8A96B]/40">
                           {zoomLevel}X
                         </span>
                       </div>
 
-                      <div className="space-y-0.5">
+                      <div className="space-y-1">
                         {ZOOM_OPTIONS.map((z) => {
                           const isSelected = zoomLevel === z.level;
                           return (
@@ -1790,15 +1787,12 @@ export default function LiveCameraPlayer({
                               key={z.level}
                               type="button"
                               onClick={() => handleSelectZoom(z.level)}
-                              className={`w-full text-left px-2.5 py-1.5 rounded-lg flex items-center justify-between transition-all cursor-pointer ${isSelected
-                                ? 'bg-gradient-to-r from-[#C8A96B] to-[#DFCA98] text-[#071D12] font-bold shadow-sm'
-                                : 'text-[#F5F4EA]/90 hover:bg-white/10'
+                              className={`w-full text-left px-2.5 py-1.5 rounded-lg flex items-center justify-between transition-all duration-150 cursor-pointer ${isSelected
+                                ? 'bg-[#C8A96B] text-[#071D12] font-black border border-[#C8A96B] shadow-sm shadow-[#C8A96B]/25'
+                                : 'bg-[#06180E]/90 text-[#F5F4EA] border border-white/5 hover:border-[#C8A96B]/50 hover:bg-[#0B2A1A] hover:text-[#C8A96B]'
                                 }`}
                             >
-                              <span className={`text-[10px] px-2 py-0.5 rounded font-bold font-mono ${isSelected
-                                ? 'bg-black/20 text-[#071D12]'
-                                : 'bg-white/10 text-emerald-400'
-                                }`}>
+                              <span className={`text-[11px] font-mono font-bold tracking-wider ${isSelected ? 'text-[#071D12]' : 'text-[#F5F4EA]'}`}>
                                 {z.badge}
                               </span>
                               {isSelected && <CheckCircle2 className="w-3.5 h-3.5 text-[#071D12] shrink-0" />}
@@ -1814,32 +1808,32 @@ export default function LiveCameraPlayer({
 
             {/* On-Screen Video Zoom Notification Toast */}
             {zoomNotification && (
-              <div className={`absolute ${cameraMovementNotification ? 'top-22 sm:top-24' : 'top-13 sm:top-14'} inset-x-0 mx-auto w-fit z-30 px-3.5 py-1.5 rounded-full bg-black/85 backdrop-blur-md border border-[#C8A96B]/60 text-[#F5F4EA] shadow-2xl flex items-center gap-2 text-xs font-mono animate-fadeIn pointer-events-none`}>
+              <div className={`absolute ${cameraMovementNotification ? 'top-22 sm:top-24' : 'top-13 sm:top-14'} inset-x-0 mx-auto w-fit z-30 px-3.5 py-1.5 rounded-full bg-[#06180E]/90 backdrop-blur-md border border-[#C8A96B]/60 text-[#F5F4EA] shadow-2xl flex items-center gap-2 text-xs font-mono animate-fadeIn pointer-events-none`}>
                 <ZoomIn className="w-3.5 h-3.5 text-[#C8A96B] animate-pulse" />
-                <span className="text-white/80">Digital Zoom:</span>
-                <span className="text-emerald-400 font-bold">{zoomNotification}</span>
+                <span className="text-[#F5F4EA]/80">Digital Zoom:</span>
+                <span className="text-[#C8A96B] font-bold">{zoomNotification}</span>
               </div>
             )}
 
             {/* On-Screen Video Quality Notification Toast */}
             {qualityNotification && (
-              <div className={`absolute ${cameraMovementNotification ? 'top-22 sm:top-24' : 'top-13 sm:top-14'} inset-x-0 mx-auto w-fit z-30 px-3.5 py-1.5 rounded-full bg-black/85 backdrop-blur-md border border-[#C8A96B]/60 text-[#F5F4EA] shadow-2xl flex items-center gap-2 text-xs font-mono animate-fadeIn pointer-events-none`}>
+              <div className={`absolute ${cameraMovementNotification ? 'top-22 sm:top-24' : 'top-13 sm:top-14'} inset-x-0 mx-auto w-fit z-30 px-3.5 py-1.5 rounded-full bg-[#06180E]/90 backdrop-blur-md border border-[#C8A96B]/60 text-[#F5F4EA] shadow-2xl flex items-center gap-2 text-xs font-mono animate-fadeIn pointer-events-none`}>
                 <SlidersHorizontal className="w-3.5 h-3.5 text-[#C8A96B] animate-spin" />
-                <span className="text-white/80">Stream Quality:</span>
-                <span className="text-emerald-400 font-bold">{qualityNotification}</span>
+                <span className="text-[#F5F4EA]/80">Stream Quality:</span>
+                <span className="text-[#C8A96B] font-bold">{qualityNotification}</span>
               </div>
             )}
 
             {/* Audio Volume / Mute Toast Notification */}
             {audioNotification && (
-              <div className={`absolute ${cameraMovementNotification ? 'top-22 sm:top-24' : 'top-13 sm:top-14'} inset-x-0 mx-auto w-fit z-30 px-3.5 py-1.5 rounded-full bg-black/85 backdrop-blur-md border border-[#C8A96B]/60 text-[#F5F4EA] shadow-2xl flex items-center gap-2 text-xs font-mono animate-fadeIn pointer-events-none`}>
+              <div className={`absolute ${cameraMovementNotification ? 'top-22 sm:top-24' : 'top-13 sm:top-14'} inset-x-0 mx-auto w-fit z-30 px-3.5 py-1.5 rounded-full bg-[#06180E]/90 backdrop-blur-md border border-[#C8A96B]/60 text-[#F5F4EA] shadow-2xl flex items-center gap-2 text-xs font-mono animate-fadeIn pointer-events-none`}>
                 {isMuted || volume === 0 ? (
                   <VolumeX className="w-3.5 h-3.5 text-rose-400" />
                 ) : (
                   <Volume2 className="w-3.5 h-3.5 text-[#C8A96B] animate-pulse" />
                 )}
-                <span className="text-white/80">Audio:</span>
-                <span className="text-emerald-400 font-bold">{audioNotification}</span>
+                <span className="text-[#F5F4EA]/80">Audio:</span>
+                <span className="text-[#C8A96B] font-bold">{audioNotification}</span>
               </div>
             )}
 
