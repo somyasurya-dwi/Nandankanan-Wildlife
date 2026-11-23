@@ -246,7 +246,7 @@ export default function CinematicVideoHero({ onExploreClick, onMapClick, onWatch
           </div>
 
           {/* Sanctuary Metric Trust Badges */}
-          <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-xs text-[#F5F4EA]/70 font-mono pt-2 border-t border-white/10">
+          <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-xs text-[#F5F4EA]/70 font-mono pt-3 border-t border-white/10">
             <div className="flex items-center gap-2">
               <span className="text-[#C8A96B] font-bold text-sm">437 ha</span>
               <span>{t('hero.corridorStat')}</span>
@@ -266,73 +266,38 @@ export default function CinematicVideoHero({ onExploreClick, onMapClick, onWatch
         </div>
       </div>
 
-      {/* 3. Multi-Animal Video Transitions Controls (Clean, Minimal Frosted Bar) */}
-      <div 
-        className="absolute bottom-5 sm:bottom-7 md:bottom-8 left-4 sm:left-6 lg:left-8 z-30 flex items-center gap-2 bg-[#06180E]/90 border border-[#26734D]/50 rounded-xl px-2.5 sm:px-3 py-1.5 backdrop-blur-md shadow-xl max-w-[calc(100vw-2rem)] select-none"
-        onMouseEnter={() => setIsControlsHovered(true)}
-        onMouseLeave={() => setIsControlsHovered(false)}
-      >
-        
-        {/* Active Scene Indicator */}
-        <div className="hidden sm:flex items-center gap-1.5 pr-2.5 border-r border-white/10 text-xs text-[#F5F4EA] font-medium">
-          <span className="text-sm">{currentScene.emoji}</span>
-          <span className="text-[#C8A96B] font-bold text-xs tracking-wide whitespace-nowrap">
-            {currentScene.animal}
-          </span>
-        </div>
+      {/* 3. Hero Video Play/Pause & Sound Controls (Shifted upwards to align horizontally with Watch Live) */}
+      <div className="absolute bottom-38 sm:bottom-44 md:bottom-48 right-8 sm:right-12 md:right-14 z-30 flex items-center gap-2.5">
+        {/* 1. Play / Pause Button */}
+        <button
+          onClick={togglePlay}
+          className="p-2.5 sm:p-3 rounded-xl bg-[#06180E]/85 hover:bg-[#123D2B] text-[#F5F4EA] hover:text-[#C8A96B] border border-[#26734D]/60 hover:border-[#C8A96B]/80 backdrop-blur-md shadow-xl transition-all cursor-pointer flex items-center justify-center group hover:scale-105 active:scale-95"
+          title={isPlaying ? "Pause Video" : "Play Video"}
+          aria-label={isPlaying ? "Pause Video" : "Play Video"}
+        >
+          {isPlaying ? (
+            <Pause className="w-4 h-4 sm:w-5 sm:h-5 text-[#F5F4EA]/80 group-hover:text-white" />
+          ) : (
+            <Play className="w-4 h-4 sm:w-5 sm:h-5 text-[#C8A96B]" />
+          )}
+        </button>
 
-        {/* Animal Scene Carousel Switcher Pills with 10s Timeline Progress Bar */}
-        <div className="flex items-center gap-1 sm:gap-1.5">
-          {scenes.map((s, idx) => {
-            const isCurr = idx === activeSceneIndex;
-            return (
-              <button
-                key={s.id}
-                onClick={() => switchScene(idx)}
-                className={`relative overflow-hidden px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 cursor-pointer ${
-                  isCurr
-                    ? 'bg-[#C8A96B] text-[#071D12] font-bold shadow-sm'
-                    : 'bg-[#123D2B]/80 text-[#F5F4EA]/80 hover:text-white hover:bg-[#1B6537]'
-                }`}
-                title={`Switch to ${s.animal} video`}
-              >
-                <span>{s.emoji}</span>
-                <span className="hidden md:inline">{s.animal.split(' ')[0]}</span>
-
-                {/* 10-Second Story Bar Filling along the bottom of the active pill */}
-                {isCurr && isPlaying && (
-                  <span 
-                    key={`story-timeline-${activeSceneIndex}`}
-                    className="absolute bottom-0 left-0 h-[2px] bg-[#071D12] w-full origin-left animate-timeline-progress" 
-                  />
-                )}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Video Control Buttons: Play/Pause + Mute/Unmute */}
-        <div className="flex items-center gap-1 pl-1.5 sm:pl-2 border-l border-white/10">
-          <button
-            onClick={togglePlay}
-            className="p-1.5 rounded-lg bg-[#123D2B]/80 text-[#F5F4EA] hover:text-[#C8A96B] hover:bg-[#1B6537] transition-colors cursor-pointer"
-            title={isPlaying ? "Pause Video" : "Play Video"}
-            aria-label="Play or Pause Video"
-          >
-            {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
-          </button>
-
-          <button
-            onClick={toggleMute}
-            className="p-1.5 rounded-lg bg-[#123D2B]/80 text-[#F5F4EA] hover:text-[#C8A96B] hover:bg-[#1B6537] transition-colors cursor-pointer"
-            title={isMuted ? "Unmute Video" : "Mute Video"}
-            aria-label="Mute or Unmute Video"
-          >
-            {isMuted ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5 text-[#C8A96B]" />}
-          </button>
-        </div>
-
+        {/* 2. Volume / Mute Button */}
+        <button
+          onClick={toggleMute}
+          className="p-2.5 sm:p-3 rounded-xl bg-[#06180E]/85 hover:bg-[#123D2B] text-[#F5F4EA] hover:text-[#C8A96B] border border-[#26734D]/60 hover:border-[#C8A96B]/80 backdrop-blur-md shadow-xl transition-all cursor-pointer flex items-center justify-center group hover:scale-105 active:scale-95"
+          title={isMuted ? "Unmute Video" : "Mute Video"}
+          aria-label={isMuted ? "Unmute Video" : "Mute Video"}
+        >
+          {isMuted ? (
+            <VolumeX className="w-4 h-4 sm:w-5 sm:h-5 text-[#F5F4EA]/80 group-hover:text-white" />
+          ) : (
+            <Volume2 className="w-4 h-4 sm:w-5 sm:h-5 text-[#C8A96B] animate-pulse" />
+          )}
+        </button>
       </div>
+
+
 
       {/* Organic Curved Forest Elevation Wave Transition into Next Section */}
       <div className="absolute bottom-0 left-0 right-0 z-20 pointer-events-none overflow-hidden leading-none">

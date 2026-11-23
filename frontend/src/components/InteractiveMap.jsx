@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import L from 'leaflet';
 import ThreeZooMap from './ThreeZooMap';
 import InteractiveMap3D from './InteractiveMap3D';
@@ -45,6 +46,7 @@ export default function InteractiveMap({
 }) {
   const { t, getAnimalName } = useLanguage();
   const mapContainerRef = useRef(null);
+  const fullscreenMapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const markersGroupRef = useRef(null);
   const sideVideoRef = useRef(null);
@@ -66,11 +68,9 @@ export default function InteractiveMap({
   const ILLUSTRATED_BOUNDS = [[0, 0], [571, 1024]];
 
   const categories = [
-    { key: 'all', label: (t && t('map.categories.all')) || 'All Sanctuary Highlights' },
+    { key: 'all', label: (t && t('map.categories.all')) || 'All 12 Live Animals' },
     { key: 'safari_zone', label: (t && t('map.categories.safari_zone')) || '🐅 Safari Zones' },
-    { key: 'animal_habitat', label: (t && t('map.categories.animal_habitat')) || '🐾 Enclosures' },
-    { key: 'water_body', label: (t && t('map.categories.water_body')) || '🌊 Kanjia Lake' },
-    { key: 'visitor_facility', label: (t && t('map.categories.visitor_facility')) || '🏛️ Facilities & Rides' }
+    { key: 'animal_habitat', label: (t && t('map.categories.animal_habitat')) || '🐾 Habitats & Enclosures' }
   ];
 
   // Satellite tile layer
@@ -119,6 +119,31 @@ export default function InteractiveMap({
       focusOnAnimal(activeMarkerProp, Boolean(activeMarkerProp._isolate));
     }
   }, [activeMarkerProp, focusOnAnimal]);
+
+  // Fullscreen escape key, scroll lock, and Leaflet resize
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && isFullscreenMap) {
+        setIsFullscreenMap(false);
+      }
+    };
+    if (isFullscreenMap) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    if (mapInstanceRef.current) {
+      const timer = setTimeout(() => {
+        mapInstanceRef.current.invalidateSize();
+      }, 150);
+      return () => clearTimeout(timer);
+    }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = '';
+    };
+  }, [isFullscreenMap]);
 
   // Render Markers on Leaflet Map (for 2D modes)
   const renderMarkers = useCallback((map, markersGroup, isIllustrated) => {
@@ -253,10 +278,10 @@ export default function InteractiveMap({
     });
   }, [markers, selectedCategory, activeMarker, focusOnAnimal, isolateMarkerId]);
 
-  // Initialize Leaflet Map Instance (adapting to mapStyle)
+  // Initialize Leaflet Map Instance (adapting to mapStyle and fullscreen container)
   useEffect(() => {
-    // If in 3D mode, clean up Leaflet map
-    if (mapStyle === '3d') {
+    // If in 3D or deepzoom mode, clean up Leaflet map
+    if (mapStyle === '3d' || mapStyle === 'deepzoom') {
       if (mapInstanceRef.current) {
         mapInstanceRef.current.remove();
         mapInstanceRef.current = null;
@@ -264,7 +289,8 @@ export default function InteractiveMap({
       return;
     }
 
-    if (!mapContainerRef.current) return;
+    const containerEl = isFullscreenMap ? fullscreenMapContainerRef.current : mapContainerRef.current;
+    if (!containerEl) return;
 
     if (mapInstanceRef.current) {
       mapInstanceRef.current.remove();
@@ -275,12 +301,12 @@ export default function InteractiveMap({
     const isIllustrated = (mapStyle === 'illustrated');
 
     if (isIllustrated) {
-      map = L.map(mapContainerRef.current, {
+      map = L.map(containerEl, {
         crs: L.CRS.Simple,
         minZoom: -0.75,
         maxZoom: 2.5,
         zoomSnap: 0.25,
-        scrollWheelZoom: true,
+        scrollWheelZoom: false,
         dragging: true,
         touchZoom: true,
         doubleClickZoom: true,
@@ -294,12 +320,12 @@ export default function InteractiveMap({
       L.imageOverlay('/images/nandankanan_zoo_map_4k.jpg', ILLUSTRATED_BOUNDS).addTo(map);
       map.fitBounds(ILLUSTRATED_BOUNDS, { padding: [10, 10] });
     } else {
-      map = L.map(mapContainerRef.current, {
+      map = L.map(containerEl, {
         center: NANDANKANAN_CENTER,
         zoom: 15,
         minZoom: 11,
         maxZoom: 19,
-        scrollWheelZoom: true,
+        scrollWheelZoom: false,
         dragging: true,
         touchZoom: true,
         doubleClickZoom: true,
@@ -320,13 +346,21 @@ export default function InteractiveMap({
 
     renderMarkers(map, markersGroup, isIllustrated);
 
+    // Ensure map properly recalculates dimensions
+    const resizeTimer = setTimeout(() => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.invalidateSize();
+      }
+    }, 150);
+
     return () => {
+      clearTimeout(resizeTimer);
       if (mapInstanceRef.current) {
         mapInstanceRef.current.remove();
         mapInstanceRef.current = null;
       }
     };
-  }, [mapStyle, selectedCategory, renderMarkers]);
+  }, [mapStyle, isFullscreenMap, selectedCategory, renderMarkers]);
 
   // Zoom and Pan Handlers (for Leaflet 2D)
   const handleZoomIn = () => {
@@ -363,29 +397,29 @@ export default function InteractiveMap({
   };
 
   return (
-    <section id="interactive-map" className="py-20 sm:py-24 bg-forest-900 text-ivory-50 relative overflow-hidden">
+    <section id="interactive-map" className="py-8 sm:py-12 bg-forest-900 text-ivory-50 relative overflow-hidden">
 
       {/* Background Ambience */}
       <div className="absolute top-10 right-0 w-96 h-96 bg-gold-600/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-10 left-0 w-96 h-96 bg-emerald-600/10 rounded-full blur-3xl pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 relative z-10">
 
         {/* Section Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-6">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-4 gap-3">
           <div>
-            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full glass-badge mb-3">
+            <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full glass-badge mb-2">
               <Compass className="w-3.5 h-3.5 text-gold-400" />
-              <span className="text-[11px] font-bold tracking-[0.2em] uppercase text-gold-300">
+              <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-gold-300">
                 Official Sanctuary Guide Map
               </span>
             </div>
 
-            <h2 className="font-display font-black text-3xl sm:text-5xl tracking-wide text-ivory-50">
+            <h2 className="font-display font-black text-2xl sm:text-4xl tracking-wide text-ivory-50">
               EXPLORE ALL ANIMALS <span className="text-gold-400">ON THE 3D MAP</span>
             </h2>
 
-            <p className="mt-3 text-ivory-200/80 text-sm sm:text-base max-w-2xl font-light">
+            <p className="mt-1.5 text-ivory-200/80 text-xs sm:text-sm max-w-2xl font-light">
               Experience Nandankanan in <strong>3D Google Earth-class terrain</strong>. Click any animal to <strong>identify the species</strong>, activate the 3D habitat beacon, swoop the 3D camera into its enclosure, and stream live habitat observation feeds.
             </p>
           </div>
@@ -448,38 +482,16 @@ export default function InteractiveMap({
                 <span>SATELLITE</span>
               </button>
             </div>
-
-            <button
-              onClick={handleShowAllAnimals}
-              className="px-4 py-2.5 rounded-xl bg-forest-800/90 hover:bg-forest-700 text-[#FAF9F5] border border-[#C8A96B]/40 text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-lg backdrop-blur-md"
-              title="Reset view to see all animals across the full park"
-            >
-              <Navigation className="w-4 h-4 text-[#C8A96B]" />
-              <span>SHOW ALL</span>
-            </button>
-
-            <button
-              onClick={() => setIsDoubleScreen(!isDoubleScreen)}
-              className={`px-4 py-2.5 rounded-xl border text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-lg backdrop-blur-md ${
-                isDoubleScreen
-                  ? 'bg-[#C8A96B] text-[#071810] border-[#C8A96B] shadow-[#C8A96B]/30 ring-2 ring-[#C8A96B]'
-                  : 'bg-forest-800/90 hover:bg-forest-700 text-[#FAF9F5] border-[#C8A96B]/40'
-              }`}
-              title="Toggle Double Screen (Full Width Cinema Mode)"
-            >
-              <Maximize2 className="w-4 h-4 text-[#C8A96B]" />
-              <span>{isDoubleScreen ? "◫ SPLIT VIEW" : "📐 DOUBLE SCREEN"}</span>
-            </button>
           </div>
         </div>
 
         {/* Category Filter Pills */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-4 scrollbar-none">
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 mb-2 scrollbar-none">
           {categories.map((cat) => (
             <button
               key={cat.key}
               onClick={() => {
-                setSelectedCategory(cat.key);
+                setSelectedCategory((prev) => (prev === cat.key ? 'all' : cat.key));
                 setIsolateMarkerId(null);
               }}
               className={`px-4 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider whitespace-nowrap transition-all ${selectedCategory === cat.key
@@ -492,25 +504,27 @@ export default function InteractiveMap({
           ))}
         </div>
 
-        {/* Quick Animal Jump Strip (All Animals) */}
-        <div className="mb-6 flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+        {/* Quick Animal Jump Strip (All 12 Live Sanctuary Animals) */}
+        <div className="mb-3 flex items-center gap-2 overflow-x-auto pb-1.5 scrollbar-none">
           <span className="text-[11px] font-bold text-gold-400 uppercase tracking-widest shrink-0 flex items-center gap-1 mr-1">
             <Compass className="w-3.5 h-3.5" />
-            <span>Identify Animal:</span>
+            <span>Select Animal to View Live:</span>
           </span>
           {markers.map((m) => {
-            const isCurrent = activeMarker && activeMarker.id === m.id;
+            const isCurrent = activeMarker && (activeMarker.id === m.id || activeMarker.animal_slug === m.animal_slug);
             return (
               <button
-                key={m.id}
+                key={m.id || m.animal_slug}
                 onClick={() => focusOnAnimal(m)}
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs whitespace-nowrap transition-all shrink-0 ${isCurrent
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs whitespace-nowrap transition-all shrink-0 cursor-pointer ${isCurrent
                     ? 'bg-gold-500 text-forest-950 font-bold shadow-lg shadow-gold-500/30 ring-2 ring-gold-400 scale-105'
                     : 'bg-forest-950/70 border border-forest-800 hover:border-gold-500/40 text-ivory-200 hover:text-white'
                   }`}
+                title={`Click to view ${m.animal_name || m.title} live video`}
               >
                 <span>{m.emoji || '🐾'}</span>
-                <span>{m.animal_name || m.title.split(' ')[0]}</span>
+                <span>{m.animal_name || m.title}</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse ml-0.5" />
               </button>
             );
           })}
@@ -522,9 +536,8 @@ export default function InteractiveMap({
           {/* Map View Box (Span 12 when Double Screen or no activeMarker, or Span 7-8 Cols when activeMarker) */}
           <div 
             id="zoo-map-viewport"
-            className={`${isDoubleScreen || !activeMarker ? "w-full" : "lg:col-span-7 xl:col-span-8"} relative rounded-3xl overflow-hidden zoo-map-frame bg-forest-950 transition-all ${isFullscreenMap ? 'fixed inset-4 z-50 rounded-2xl shadow-2xl' : ''
-            }`}>
-
+            className={`${isDoubleScreen || !activeMarker ? "w-full" : "lg:col-span-7 xl:col-span-8"} relative rounded-3xl overflow-hidden zoo-map-frame bg-forest-950 transition-all scroll-mt-28`}
+          >
             {/* Render 4K Deep Zoom OR 3D Google Earth WebGL canvas OR 2D Leaflet Container */}
             {mapStyle === 'deepzoom' ? (
               <InteractiveMap3D
@@ -534,6 +547,7 @@ export default function InteractiveMap({
                 onOpenLiveCam={onOpenLiveCam}
                 onSelectMarker={focusOnAnimal}
                 embedded={true}
+                isFullscreen={false}
               />
             ) : mapStyle === '3d' ? (
               <ThreeZooMap
@@ -545,12 +559,13 @@ export default function InteractiveMap({
                 isolateMarkerId={isolateMarkerId}
                 focusTrigger={focusTrigger}
                 onResetIsolate={() => setIsolateMarkerId(null)}
+                isFullscreen={false}
               />
             ) : (
               <>
                 <div
                   ref={mapContainerRef}
-                  className="w-full h-[680px] sm:h-[800px] lg:h-[880px] z-10 map-canvas-interactive zoo-map-container"
+                  className="w-full h-[280px] sm:h-[330px] lg:h-[370px] z-10 map-canvas-interactive zoo-map-container"
                   style={{ background: '#0B2419' }}
                 />
 
@@ -592,21 +607,22 @@ export default function InteractiveMap({
 
             {/* Fullscreen Map Toggle (Top Far-Right) */}
             <button
-              onClick={() => setIsFullscreenMap(!isFullscreenMap)}
-              className="absolute top-4 right-4 z-20 p-2.5 rounded-2xl bg-forest-950/90 hover:bg-forest-900 border border-gold-500/40 text-gold-300 hover:text-gold-200 transition-all shadow-xl backdrop-blur-md"
-              title={isFullscreenMap ? "Exit Fullscreen" : "Fullscreen Map"}
+              onClick={() => setIsFullscreenMap(true)}
+              className="absolute top-4 right-4 z-30 p-2.5 rounded-2xl bg-forest-950/95 hover:bg-forest-900 border border-gold-500/40 text-gold-300 hover:text-gold-200 transition-all shadow-xl backdrop-blur-md cursor-pointer hover:scale-105 active:scale-95"
+              title="Fullscreen Map"
+              aria-label="Fullscreen Map"
             >
-              {isFullscreenMap ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+              <Maximize2 className="w-4 h-4" />
             </button>
           </div>
 
           {/* Right Cols / Bottom Section: Active Animal Live Video Stream Card & "SPECIES IDENTIFIED" Dossier */}
           {activeMarker && (
-            <div className={`${isDoubleScreen ? "w-full" : "lg:col-span-5 xl:col-span-4"} bg-forest-950/95 border border-gold-500/30 rounded-3xl p-5 sm:p-6 backdrop-blur-xl shadow-2xl flex flex-col justify-between min-h-[680px] sm:min-h-[800px] lg:min-h-[880px] animate-fadeIn`}>
-              <div className="flex flex-col justify-between h-full space-y-4">
+            <div className={`${isDoubleScreen ? "w-full" : "lg:col-span-5 xl:col-span-4"} bg-forest-950/95 border border-gold-500/30 rounded-3xl p-3.5 backdrop-blur-xl shadow-2xl flex flex-col justify-between min-h-[280px] sm:min-h-[330px] lg:min-h-[370px] max-h-[370px] overflow-y-auto scrollbar-thin animate-fadeIn`}>
+              <div className="flex flex-col justify-between h-full space-y-2.5">
                 <div>
                   {/* "SPECIES IDENTIFIED" TOP HUD BADGE */}
-                  <div className="flex items-center justify-between mb-2 pb-2 border-b border-forest-800/80">
+                  <div className="flex items-center justify-between mb-1.5 pb-1.5 border-b border-forest-800/80">
                     <div className="flex items-center gap-1.5">
                       <div className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
                       <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-400">
@@ -632,7 +648,7 @@ export default function InteractiveMap({
                   </div>
 
                   {/* LIVE VIDEO STREAM FOR SELECTED ANIMAL */}
-                  <div className="relative aspect-[16/10] w-full rounded-2xl overflow-hidden mb-3 border border-gold-500/40 bg-black shadow-2xl group">
+                  <div className="relative aspect-video max-h-[110px] w-full rounded-xl overflow-hidden mb-2 border border-gold-500/40 bg-black shadow-xl group">
                     <video
                       ref={sideVideoRef}
                       key={activeMarker.id + (activeMarker.stream_url || '')}
@@ -703,7 +719,11 @@ export default function InteractiveMap({
                   {/* IDENTIFIED SPECIES SCIENTIFIC PROFILE */}
                   <div className="mb-2">
                     <div className="flex items-center justify-between gap-2 mb-1">
-                      <h3 className="font-display font-black text-xl sm:text-2xl text-ivory-50">
+                      <h3 
+                        onClick={() => onOpenLiveCam && onOpenLiveCam(activeMarker)}
+                        className="font-display font-black text-xl sm:text-2xl text-ivory-50 cursor-pointer hover:text-gold-300 transition-colors"
+                        title="Click to view live stream in full player"
+                      >
                         {activeMarker.animal_name || activeMarker.title}
                       </h3>
                       {identifiedAnimal?.conservation_status && (
@@ -813,6 +833,214 @@ export default function InteractiveMap({
         </div>
 
       </div>
+
+      {/* FULLSCREEN MAP PORTAL OVERLAY */}
+      {isFullscreenMap && typeof document !== 'undefined' && createPortal(
+        <div 
+          className="fixed inset-0 z-[999999] w-screen h-screen bg-forest-950 flex flex-col overflow-hidden select-none animate-fadeIn"
+          data-lenis-prevent="true"
+          data-lenis-prevent-wheel="true"
+          data-lenis-prevent-touch="true"
+        >
+          {/* Top Bar with Mode Switcher & Clearly Visible Close (✕) Button */}
+          <div className="absolute top-4 inset-x-4 z-[1000000] flex items-center justify-between pointer-events-none gap-3">
+            {/* Left: Map Mode Switcher */}
+            <div className="pointer-events-auto flex items-center gap-1.5 sm:gap-2 bg-forest-950/90 backdrop-blur-xl border border-gold-500/40 rounded-2xl p-1.5 shadow-2xl">
+              <button
+                onClick={() => setMapStyle('3d')}
+                className={`px-2.5 sm:px-3 py-1.5 rounded-xl font-mono text-xs font-bold uppercase transition-all flex items-center gap-1.5 cursor-pointer ${
+                  mapStyle === '3d'
+                    ? 'bg-gradient-to-r from-gold-500 to-gold-600 text-forest-950 shadow-md'
+                    : 'text-ivory-200 hover:text-gold-300 hover:bg-forest-900/60'
+                }`}
+              >
+                <Compass className="w-3.5 h-3.5" />
+                <span>3D GLOBE</span>
+              </button>
+              <button
+                onClick={() => setMapStyle('deepzoom')}
+                className={`px-2.5 sm:px-3 py-1.5 rounded-xl font-mono text-xs font-bold uppercase transition-all flex items-center gap-1.5 cursor-pointer ${
+                  mapStyle === 'deepzoom'
+                    ? 'bg-gradient-to-r from-gold-500 to-gold-600 text-forest-950 shadow-md'
+                    : 'text-ivory-200 hover:text-gold-300 hover:bg-forest-900/60'
+                }`}
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span className="hidden xs:inline">4K </span><span>DEEP ZOOM</span>
+              </button>
+              <button
+                onClick={() => setMapStyle('illustrated')}
+                className={`px-2.5 sm:px-3 py-1.5 rounded-xl font-mono text-xs font-bold uppercase transition-all flex items-center gap-1.5 cursor-pointer ${
+                  mapStyle === 'illustrated'
+                    ? 'bg-gradient-to-r from-gold-500 to-gold-600 text-forest-950 shadow-md'
+                    : 'text-ivory-200 hover:text-gold-300 hover:bg-forest-900/60'
+                }`}
+              >
+                <MapIcon className="w-3.5 h-3.5" />
+                <span>2D MAP</span>
+              </button>
+              <button
+                onClick={() => setMapStyle('satellite')}
+                className={`px-2.5 sm:px-3 py-1.5 rounded-xl font-mono text-xs font-bold uppercase transition-all flex items-center gap-1.5 cursor-pointer ${
+                  mapStyle === 'satellite'
+                    ? 'bg-gradient-to-r from-gold-500 to-gold-600 text-forest-950 shadow-md'
+                    : 'text-ivory-200 hover:text-gold-300 hover:bg-forest-900/60'
+                }`}
+              >
+                <Layers className="w-3.5 h-3.5" />
+                <span>SATELLITE</span>
+              </button>
+            </div>
+
+            {/* Right: Clearly Visible Close (✕) Button */}
+            <button
+              onClick={() => setIsFullscreenMap(false)}
+              className="pointer-events-auto flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-forest-900/95 hover:bg-forest-800 border-2 border-gold-400 text-gold-300 hover:text-gold-100 shadow-2xl backdrop-blur-xl transition-all cursor-pointer group active:scale-95"
+              title="Close Fullscreen (Esc)"
+              aria-label="Close Fullscreen Map"
+            >
+              <span className="text-xs font-mono font-bold tracking-wider uppercase hidden sm:inline text-gold-200">Close</span>
+              <X className="w-5 h-5 text-gold-300 group-hover:rotate-90 transition-transform" />
+            </button>
+          </div>
+
+          {/* Fullscreen Map View Canvas */}
+          <div className="relative w-full h-full flex-1">
+            {mapStyle === 'deepzoom' ? (
+              <InteractiveMap3D
+                markers={markers}
+                activeMarker={activeMarker}
+                onSelectAnimalBySlug={onSelectAnimalBySlug}
+                onOpenLiveCam={onOpenLiveCam}
+                onSelectMarker={focusOnAnimal}
+                embedded={true}
+                isFullscreen={true}
+              />
+            ) : mapStyle === '3d' ? (
+              <ThreeZooMap
+                markers={markers}
+                activeMarker={activeMarker}
+                onSelectMarker={focusOnAnimal}
+                selectedCategory={selectedCategory}
+                onOpenLiveCam={onOpenLiveCam}
+                isolateMarkerId={isolateMarkerId}
+                focusTrigger={focusTrigger}
+                onResetIsolate={() => setIsolateMarkerId(null)}
+                isFullscreen={true}
+              />
+            ) : (
+              <>
+                <div
+                  ref={fullscreenMapContainerRef}
+                  className="w-full h-full min-h-screen z-10 map-canvas-interactive zoo-map-container"
+                  style={{ background: '#0B2419' }}
+                />
+
+                {/* 2D Zoom Controls in Fullscreen */}
+                <div className="absolute bottom-6 right-6 z-20 flex items-center gap-2 bg-forest-950/90 backdrop-blur-md p-2 rounded-2xl border border-gold-500/30 shadow-2xl">
+                  <button
+                    onClick={handleZoomIn}
+                    className="p-2.5 rounded-xl bg-forest-900/80 hover:bg-forest-800 text-ivory-100 hover:text-gold-400 transition-colors shadow-sm"
+                    title="Zoom In"
+                  >
+                    <Plus className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={handleZoomOut}
+                    className="p-2.5 rounded-xl bg-forest-900/80 hover:bg-forest-800 text-ivory-100 hover:text-gold-400 transition-colors shadow-sm"
+                    title="Zoom Out"
+                  >
+                    <Minus className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={handleShowAllAnimals}
+                    className="p-2.5 rounded-xl bg-forest-900/80 hover:bg-forest-800 text-gold-400 transition-colors shadow-sm"
+                    title="Show All"
+                  >
+                    <Navigation className="w-5 h-5" />
+                  </button>
+                </div>
+              </>
+            )}
+
+            {/* Quick Animal Jump Strip at Bottom of Fullscreen */}
+            <div className="absolute bottom-6 left-6 right-28 z-20 pointer-events-none hidden md:block">
+              <div className="pointer-events-auto flex items-center gap-1.5 overflow-x-auto p-1.5 rounded-2xl bg-forest-950/90 backdrop-blur-md border border-gold-500/30 scrollbar-none max-w-fit shadow-2xl">
+                <span className="text-[10px] font-mono text-gold-400/80 uppercase px-2 font-bold shrink-0">
+                  Quick Jump:
+                </span>
+                {markers.slice(0, 12).map((m) => {
+                  const isCur = activeMarker?.id === m.id;
+                  return (
+                    <button
+                      key={m.id}
+                      onClick={() => focusOnAnimal(m)}
+                      className={`px-2.5 py-1 rounded-xl text-xs font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer ${
+                        isCur
+                          ? 'bg-gold-500 text-forest-950 font-bold shadow-sm'
+                          : 'bg-forest-900/70 hover:bg-forest-800 text-ivory-200 hover:text-gold-300'
+                      }`}
+                    >
+                      <span>{m.emoji || '🐾'}</span>
+                      <span>{m.animal_name || m.title}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Active Animal Live Stream Floating Overlay (if activeMarker selected in fullscreen) */}
+            {activeMarker && (
+              <div className="absolute top-20 right-6 z-30 w-80 max-w-[90vw] bg-forest-950/95 border border-gold-500/40 rounded-2xl p-3 shadow-2xl backdrop-blur-xl animate-fadeIn">
+                <div className="flex items-center justify-between mb-2 pb-1 border-b border-forest-800">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                    <span className="text-xs font-mono font-bold text-gold-300 truncate">
+                      {activeMarker.animal_name || activeMarker.title}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => setActiveMarker(null)}
+                    className="p-1 rounded hover:bg-forest-800 text-ivory-300 hover:text-white cursor-pointer"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+                {activeMarker.live_video_url ? (
+                  <div className="relative aspect-video rounded-xl overflow-hidden bg-black mb-2">
+                    <video
+                      src={activeMarker.live_video_url}
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded bg-red-600/90 text-[9px] font-mono font-bold text-white uppercase">
+                      LIVE FEED
+                    </div>
+                  </div>
+                ) : null}
+                <div className="flex items-center justify-between pt-1">
+                  <span className="text-[10px] font-mono text-emerald-400">
+                    {activeMarker.zone || 'Zone A'}
+                  </span>
+                  {onOpenLiveCam && (
+                    <button
+                      onClick={() => onOpenLiveCam(activeMarker)}
+                      className="px-2.5 py-1 rounded-lg bg-gold-500/20 hover:bg-gold-500 text-gold-300 hover:text-forest-950 font-mono text-[10px] font-bold uppercase transition-all flex items-center gap-1 cursor-pointer"
+                    >
+                      <Tv className="w-3 h-3" />
+                      <span>Full Cam</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>,
+        document.body
+      )}
 
     </section>
   );

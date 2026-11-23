@@ -336,7 +336,7 @@ export default function VirtualExperience() {
 
         {/* Tab 1: 360 Degree Panoramic Habitat Explorer */}
         {activeTab === '360' && (
-          <div className="animate-fadeIn">
+          <div id="virtual-tour-viewer" className="animate-fadeIn scroll-mt-28">
             <div className="relative rounded-3xl overflow-hidden border border-gold-500/30 shadow-2xl bg-black cursor-grab active:cursor-grabbing">
               
               <canvas
