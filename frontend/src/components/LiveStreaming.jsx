@@ -217,25 +217,29 @@ export default function LiveStreaming({
                   className="relative aspect-video w-full overflow-hidden bg-forest-950 cursor-pointer"
                   onClick={() => handleCardTap(camera)}
                 >
-                  {/* Base Thumbnail Poster Fallback */}
+                  {/* Respective Animal Image Front Cover */}
                   <img
-                    src={camera.thumbnail_url}
-                    alt={camera.title}
-                    className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
+                    src={camera.thumbnail_url || camera.photo_url}
+                    alt={camera.title || camera.animal_name}
+                    className={`w-full h-full object-cover object-center transition-all duration-700 ${
+                      isPreviewing ? 'scale-105' : 'scale-100 group-hover:scale-105'
+                    }`}
                   />
 
-                  {/* Real-Time Continuous Live Video Stream */}
+                  {/* Real-Time Continuous Live Video Stream (Plays on Hover / Preview) */}
                   <video
                     ref={(el) => (videoRefs.current[camera.id] = el)}
                     src={primaryStream}
-                    autoPlay
+                    poster={camera.thumbnail_url || camera.photo_url}
                     muted
                     loop
                     playsInline
                     disablePictureInPicture
                     controlsList="nodownload noplaybackrate nofullscreen noremoteplayback"
                     preload="metadata"
-                    className="absolute inset-0 w-full h-full object-cover object-center pointer-events-none transition-transform duration-700 group-hover:scale-105"
+                    className={`absolute inset-0 w-full h-full object-cover object-center pointer-events-none transition-opacity duration-500 ${
+                      isPreviewing ? 'opacity-100' : 'opacity-0'
+                    }`}
                   />
 
                   {/* Dark gradient overlay */}

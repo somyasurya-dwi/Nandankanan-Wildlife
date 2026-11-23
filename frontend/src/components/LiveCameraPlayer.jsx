@@ -1398,7 +1398,13 @@ export default function LiveCameraPlayer({
               <div className="min-w-0 truncate">
                 <div className="flex items-center gap-1.5 sm:gap-2">
                   <span className="shrink-0 flex items-center justify-center">
-                    {animal?.iconKey ? (
+                    {animal?.thumbnail_url || animal?.photo_url ? (
+                      <img 
+                        src={animal.thumbnail_url || animal.photo_url} 
+                        alt={animal.animal_name} 
+                        className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover border-2 border-[#C8A96B] shadow-md shrink-0" 
+                      />
+                    ) : animal?.iconKey ? (
                       <Realistic3DIcon iconKey={animal.iconKey} size={28} className="drop-shadow-md" />
                     ) : (
                       <span className="text-lg sm:text-xl">{animal?.emoji || '🐅'}</span>
@@ -1515,6 +1521,7 @@ export default function LiveCameraPlayer({
                   <video
                     ref={videoRefContinuous}
                     key={`${animal?.id || 'cam'}-continuous`}
+                    poster={animal?.thumbnail_url || animal?.photo_url || (isWhiteTiger ? '/images/white_tiger.jpg' : isPangolin ? '/images/pangolin.jpg' : isGharial ? '/images/gharial.jpg' : isCobra ? '/images/king_cobra.jpg' : '/images/royal_bengal_tiger.jpg')}
                     autoPlay
                     loop
                     muted={isMuted}
@@ -1622,6 +1629,13 @@ export default function LiveCameraPlayer({
                 {!isFullscreen && (
                   <div className="pointer-events-auto flex items-center flex-nowrap gap-1.5 sm:gap-2 min-w-0 flex-1 overflow-hidden">
                     <div className="px-2 sm:px-2.5 py-1 rounded-xl bg-black/75 backdrop-blur-md border border-[#C8A96B]/30 text-[10px] sm:text-[11px] font-mono text-[#F5F4EA] flex items-center gap-1.5 shadow-lg pointer-events-none shrink min-w-0">
+                      {(animal?.thumbnail_url || animal?.photo_url) && (
+                        <img 
+                          src={animal.thumbnail_url || animal.photo_url} 
+                          alt={animal.animal_name} 
+                          className="w-4 h-4 rounded-full object-cover border border-[#C8A96B]/60 shrink-0" 
+                        />
+                      )}
                       <span className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-red-500 animate-pulse shrink-0" />
                       <span className="text-[#C8A96B] font-bold truncate max-w-[85px] sm:max-w-[120px] md:max-w-[150px]">{animal?.animal_name}</span>
                       <span className="text-white/40 hidden md:inline">•</span>
