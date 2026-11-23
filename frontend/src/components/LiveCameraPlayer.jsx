@@ -1830,37 +1830,37 @@ export default function LiveCameraPlayer({
                   {/* Top-Right Zoom Dropdown Popover */}
                   {showZoomMenu && (
                     <div
-                      className="absolute top-full right-0 mt-2 w-64 sm:w-72 bg-[#0B2A1A] border border-[#C8A96B]/50 rounded-2xl shadow-2xl p-3.5 z-50 text-[#F5F4EA] animate-fadeIn pointer-events-auto shadow-black/80"
+                      className="absolute top-full right-0 mt-1.5 w-48 sm:w-52 bg-[#0B2A1A] border border-[#C8A96B]/50 rounded-xl shadow-2xl p-2 sm:p-2.5 z-50 text-[#F5F4EA] animate-fadeIn pointer-events-auto shadow-black/80"
                       onClick={(e) => e.stopPropagation()}
                     >
                       {/* Header */}
-                      <div className="flex items-center justify-between pb-2 mb-2.5 border-b border-white/10">
-                        <span className="text-[11px] font-mono uppercase tracking-widest text-[#C8A96B] flex items-center gap-1.5 font-bold">
-                          <ZoomIn className="w-3.5 h-3.5 text-[#C8A96B]" />
+                      <div className="flex items-center justify-between pb-1.5 mb-2 border-b border-white/10">
+                        <span className="text-[10px] sm:text-[10.5px] font-mono uppercase tracking-wider text-[#C8A96B] flex items-center gap-1 font-bold">
+                          <ZoomIn className="w-3 h-3 text-[#C8A96B]" />
                           <span>Digital Zoom</span>
                         </span>
                         {zoomLevel > 1 ? (
                           <button
                             type="button"
                             onClick={() => handleSelectZoom(1)}
-                            className="text-[10px] font-mono text-[#C8A96B] hover:text-white flex items-center gap-1 transition-colors cursor-pointer"
+                            className="text-[9.5px] font-mono text-[#C8A96B] hover:text-white flex items-center gap-1 transition-colors cursor-pointer"
                             title="Reset zoom to 1x"
                           >
-                            <RotateCcw className="w-3 h-3 text-[#C8A96B]" /> Reset
+                            <RotateCcw className="w-2.5 h-2.5 text-[#C8A96B]" /> Reset
                           </button>
                         ) : (
-                          <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-[#061D12] text-[#C8A96B] border border-[#26734D]/70">
+                          <span className="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded-full bg-[#061D12] text-[#C8A96B] border border-[#26734D]/70">
                             1X Normal
                           </span>
                         )}
                       </div>
 
-                      {/* Magnification Segmented Controls (Matching Text Size 3-pill grid in screenshot) */}
-                      <div className="mb-2.5">
-                        <label className="text-[11px] font-medium text-[#F5F4EA]/80 block mb-1.5">
+                      {/* Magnification Segmented Controls */}
+                      <div className="mb-1.5">
+                        <label className="text-[9.5px] sm:text-[10px] font-medium text-[#F5F4EA]/70 block mb-1">
                           Magnification Level
                         </label>
-                        <div className="grid grid-cols-3 gap-1.5 bg-[#061D12] p-1 rounded-xl border border-[#26734D]/50">
+                        <div className="grid grid-cols-3 gap-1 bg-[#061D12] p-0.5 rounded-lg border border-[#26734D]/50">
                           {ZOOM_OPTIONS.map((z) => {
                             const isSelected = zoomLevel === z.level;
                             return (
@@ -1868,7 +1868,7 @@ export default function LiveCameraPlayer({
                                 key={z.level}
                                 type="button"
                                 onClick={() => handleSelectZoom(z.level)}
-                                className={`py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                                className={`py-1 rounded-md text-[10px] sm:text-[10.5px] font-bold transition-all cursor-pointer ${
                                   isSelected
                                     ? 'bg-[#C8A96B] text-[#071D12] shadow-sm'
                                     : 'text-[#F5F4EA]/80 hover:bg-[#1B6537]/50 hover:text-white'
@@ -1882,12 +1882,12 @@ export default function LiveCameraPlayer({
                       </div>
 
                       {/* Field of View Row */}
-                      <div className="mb-2.5 flex items-center justify-between p-2.5 rounded-xl bg-[#061D12] border border-[#26734D]/50">
-                        <span className="text-xs font-medium text-[#F5F4EA] flex items-center gap-2">
-                          <Eye className="w-3.5 h-3.5 text-[#C8A96B]" />
+                      <div className="mb-1.5 flex items-center justify-between p-1.5 rounded-lg bg-[#061D12] border border-[#26734D]/50">
+                        <span className="text-[9.5px] sm:text-[10px] font-medium text-[#F5F4EA] flex items-center gap-1.5">
+                          <Eye className="w-3 h-3 text-[#C8A96B]" />
                           <span>Field of View</span>
                         </span>
-                        <span className="text-[11px] font-mono font-bold text-[#C8A96B]">
+                        <span className="text-[9px] sm:text-[9.5px] font-mono font-bold text-[#C8A96B]">
                           {zoomLevel === 1 ? '100% Panorama' : zoomLevel === 1.5 ? '67% Telephoto' : '50% Close-up'}
                         </span>
                       </div>
@@ -1896,16 +1896,16 @@ export default function LiveCameraPlayer({
                       <button
                         type="button"
                         onClick={() => handleSelectZoom(zoomLevel === 1 ? 2 : 1)}
-                        className="w-full py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-2 border transition-all bg-[#1B6537] text-white hover:text-[#C8A96B] hover:bg-[#217c44] border border-[#26734D]/70 shadow-sm cursor-pointer"
+                        className="w-full py-1.5 rounded-lg text-[10px] sm:text-[10.5px] font-bold flex items-center justify-center gap-1 border transition-all bg-[#1B6537] text-white hover:text-[#C8A96B] hover:bg-[#217c44] border border-[#26734D]/70 shadow-sm cursor-pointer"
                       >
                         {zoomLevel === 1 ? (
                           <>
-                            <ZoomIn className="w-3.5 h-3.5" />
+                            <ZoomIn className="w-3 h-3" />
                             <span>Quick Zoom In (2X)</span>
                           </>
                         ) : (
                           <>
-                            <RotateCcw className="w-3.5 h-3.5" />
+                            <RotateCcw className="w-3 h-3" />
                             <span>Reset to Panorama (1X)</span>
                           </>
                         )}
