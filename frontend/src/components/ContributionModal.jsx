@@ -359,7 +359,7 @@ export default function ContributionModal({
       }}
     >
       <div 
-        className="relative w-full max-w-md sm:max-w-lg rounded-2xl bg-gradient-to-b from-[#0B2A1A] to-[#071D12] border border-[#C8A96B]/50 shadow-2xl p-3 sm:p-3.5 text-[#F5F4EA] my-auto max-h-[96vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+        className="relative w-full max-w-[420px] rounded-2xl bg-gradient-to-b from-[#0B2A1A] to-[#071D12] border border-[#C8A96B]/50 shadow-2xl p-3 sm:p-3.5 text-[#F5F4EA] my-auto max-h-[96vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
         onClick={(e) => e.stopPropagation()}
       >
         
