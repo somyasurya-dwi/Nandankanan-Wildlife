@@ -796,10 +796,7 @@ export default function LiveCameraPlayer({
     return () => clearInterval(interval);
   }, [isSubscribed, animal, viewMode, selectedAngleId, videoRefs]);
 
-  const handleDismissSubscriptionModal = () => {
-    setShowSubscriptionModal(false);
-    setSelectedSubscriptionPlan(null);
-    // If user does not take subscription, grant another 5-second preview so they can watch 5s then alert repeats
+  const handlePreviewAgain = () => {
     if (!subscriptionManager.isSubscribed(animal)) {
       subscriptionManager.grantAdditionalPreview(5.0, animal);
       setRemainingSeconds(5.0);
@@ -809,6 +806,32 @@ export default function LiveCameraPlayer({
         activeVideo.play().then(() => setIsPlaying(true)).catch(() => {});
       }
     }
+  };
+
+  const handleDismissSubscriptionModal = () => {
+    setShowSubscriptionModal(false);
+    setSelectedSubscriptionPlan(null);
+    // Dismiss live player and redirect directly to Live Views section (#live-wildlife)
+    if (onClose) {
+      onClose();
+    }
+    window.location.hash = '#live-wildlife';
+    try {
+      window.dispatchEvent(new HashChangeEvent('hashchange'));
+    } catch (e) {}
+    setTimeout(() => {
+      const el = document.getElementById('live-cameras-grid') || document.getElementById('live-wildlife');
+      if (el) {
+        const header = document.querySelector('header');
+        const headerHeight = header ? header.offsetHeight : 95;
+        if (window.__lenis) {
+          window.__lenis.scrollTo(el, { offset: -headerHeight - 12, duration: 1.0, immediate: false });
+        } else {
+          const pos = el.getBoundingClientRect().top + window.scrollY;
+          window.scrollTo({ top: Math.max(0, pos - headerHeight - 12), behavior: 'smooth' });
+        }
+      }
+    }, 60);
   };
 
   const handleSubscriptionSuccess = (sub) => {
@@ -1506,7 +1529,7 @@ export default function LiveCameraPlayer({
                     </button>
 
                     <button
-                      onClick={handleDismissSubscriptionModal}
+                      onClick={handlePreviewAgain}
                       className="w-full px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-white/80 hover:text-white font-mono text-xs transition-colors cursor-pointer"
                     >
                       Preview Again (5s)

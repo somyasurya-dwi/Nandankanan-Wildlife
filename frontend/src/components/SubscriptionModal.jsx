@@ -192,18 +192,41 @@ export default function SubscriptionModal({
     }
   };
 
+  const handleReturnToLiveViews = () => {
+    if (onClose) {
+      onClose();
+    }
+    window.location.hash = '#live-wildlife';
+    try {
+      window.dispatchEvent(new HashChangeEvent('hashchange'));
+    } catch (e) {}
+    setTimeout(() => {
+      const el = document.getElementById('live-cameras-grid') || document.getElementById('live-wildlife');
+      if (el) {
+        const header = document.querySelector('header');
+        const headerHeight = header ? header.offsetHeight : 95;
+        if (window.__lenis) {
+          window.__lenis.scrollTo(el, { offset: -headerHeight - 12, duration: 1.0, immediate: false });
+        } else {
+          const pos = el.getBoundingClientRect().top + window.scrollY;
+          window.scrollTo({ top: Math.max(0, pos - headerHeight - 12), behavior: 'smooth' });
+        }
+      }
+    }, 60);
+  };
+
   const handleCancelDemoPayment = () => {
     setShowDemoGateway(false);
     setIsProcessing(false);
-    if (onClose) onClose();
+    handleReturnToLiveViews();
   };
 
   return (
     <div 
       className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md animate-fadeIn"
       onClick={(e) => {
-        if (e.target === e.currentTarget && onClose && !isProcessing) {
-          onClose();
+        if (e.target === e.currentTarget && !isProcessing) {
+          handleReturnToLiveViews();
         }
       }}
     >
@@ -220,9 +243,9 @@ export default function SubscriptionModal({
           {/* Subtle Top Gold Ambient Glow */}
           <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-80 h-48 bg-[#C8A96B]/20 rounded-full blur-3xl pointer-events-none" />
 
-          {/* Close Icon (Dismissal & Redirect to Home) */}
+          {/* Close Icon (Dismissal & Redirect to Live Views) */}
           <button
-            onClick={onClose}
+            onClick={handleReturnToLiveViews}
             disabled={isProcessing}
             className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 p-1 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-colors cursor-pointer z-10"
             title="Close & Return to Home Page"
@@ -370,7 +393,7 @@ export default function SubscriptionModal({
 
           {/* Maybe Later Dismissal Button */}
           <button
-            onClick={onClose}
+            onClick={handleReturnToLiveViews}
             disabled={isProcessing}
             className="w-full mt-1.5 py-1 px-2 rounded-lg text-[11px] sm:text-xs font-semibold text-[#F5F4EA]/70 hover:text-white hover:bg-white/10 transition-colors text-center cursor-pointer border border-transparent hover:border-white/10 flex items-center justify-center gap-1.5"
             title="Close & Return to Home Page"

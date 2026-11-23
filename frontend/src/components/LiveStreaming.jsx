@@ -56,6 +56,9 @@ export default function LiveStreaming({
         if (found) {
           setActiveModalCamera(found);
         }
+      } else {
+        // Any other route hash like #live-wildlife automatically dismisses the camera modal
+        setActiveModalCamera(null);
       }
     };
 
@@ -83,9 +86,23 @@ export default function LiveStreaming({
 
   const handleCloseModal = () => {
     setActiveModalCamera(null);
-    if (window.location.hash.startsWith('#live/')) {
-      window.history.replaceState(null, '', '#live-wildlife');
-    }
+    window.location.hash = '#live-wildlife';
+    try {
+      window.dispatchEvent(new HashChangeEvent('hashchange'));
+    } catch (e) {}
+    setTimeout(() => {
+      const el = document.getElementById('live-cameras-grid') || document.getElementById('live-wildlife');
+      if (el) {
+        const header = document.querySelector('header');
+        const headerHeight = header ? header.offsetHeight : 95;
+        if (window.__lenis) {
+          window.__lenis.scrollTo(el, { offset: -headerHeight - 12, duration: 1.0, immediate: false });
+        } else {
+          const pos = el.getBoundingClientRect().top + window.scrollY;
+          window.scrollTo({ top: Math.max(0, pos - headerHeight - 12), behavior: 'smooth' });
+        }
+      }
+    }, 60);
   };
 
   // Switch animal inside live camera player
