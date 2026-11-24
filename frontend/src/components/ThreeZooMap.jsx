@@ -138,14 +138,14 @@ export default function ThreeZooMap({
   const [cameraHeading, setCameraHeading] = useState(0); // Heading in degrees (0 = North)
   const [cameraPitch, setCameraPitch] = useState(55); // Pitch angle in degrees
   const [is3DMode, setIs3DMode] = useState(true);
-  const [isAutoRotate, setIsAutoRotate] = useState(true);
-  const isAutoRotateRef = useRef(true);
+  const [isAutoRotate, setIsAutoRotate] = useState(false);
+  const isAutoRotateRef = useRef(false);
 
   useEffect(() => {
     isAutoRotateRef.current = isAutoRotate;
     if (controlsRef.current) {
       controlsRef.current.autoRotate = isAutoRotate;
-      controlsRef.current.autoRotateSpeed = 2.5;
+      controlsRef.current.autoRotateSpeed = 2.0;
     }
   }, [isAutoRotate]);
 
@@ -254,13 +254,12 @@ export default function ThreeZooMap({
     });
   }, [get3DCoords, isolateMarkerId]);
 
-  // Start continuous 360° turntable circular orbit rotation (matching user reference video)
+  // Camera steady handler (auto-rotation disabled for flexible touch navigation)
   const startOrbitRotation = useCallback(() => {
-    setIsAutoRotate(true);
-    isAutoRotateRef.current = true;
+    setIsAutoRotate(false);
+    isAutoRotateRef.current = false;
     if (controlsRef.current) {
-      controlsRef.current.autoRotate = true;
-      controlsRef.current.autoRotateSpeed = 2.5;
+      controlsRef.current.autoRotate = false;
     }
   }, []);
 
@@ -271,23 +270,31 @@ export default function ThreeZooMap({
       isAutoRotateRef.current = next;
       if (controlsRef.current) {
         controlsRef.current.autoRotate = next;
-        controlsRef.current.autoRotateSpeed = 2.5;
+        controlsRef.current.autoRotateSpeed = 2.0;
       }
       return next;
     });
   }, []);
 
-  // Reset camera to golden presentation pose (Upright, front-facing, centered & level)
+  // Reset camera to golden presentation pose (Upright, front-facing, perfectly filling rectangle box)
   const resetToFrontView = useCallback((smooth = true) => {
     if (!controlsRef.current || !cameraRef.current) return;
     const controls = controlsRef.current;
     const camera = cameraRef.current;
 
+    const targetCamX = 0;
+    const targetCamY = 36;
+    const targetCamZ = 42;
+    const targetTarX = 0;
+    const targetTarY = -1.0;
+    const targetTarZ = 0;
+
     if (!smooth) {
-      camera.position.set(0, 48, 54);
-      controls.target.set(0, 0, 0);
+      camera.position.set(targetCamX, targetCamY, targetCamZ);
+      controls.target.set(targetTarX, targetTarY, targetTarZ);
+      controls.minDistance = 18;
+      controls.maxDistance = 75;
       controls.update();
-      startOrbitRotation();
       return;
     }
 
@@ -305,12 +312,12 @@ export default function ThreeZooMap({
     };
 
     gsap.to(animState, {
-      camX: 0,
-      camY: 48,
-      camZ: 54,
-      tarX: 0,
-      tarY: 0,
-      tarZ: 0,
+      camX: targetCamX,
+      camY: targetCamY,
+      camZ: targetCamZ,
+      tarX: targetTarX,
+      tarY: targetTarY,
+      tarZ: targetTarZ,
       duration: 0.8,
       ease: 'power2.out',
       onUpdate: () => {
@@ -319,22 +326,21 @@ export default function ThreeZooMap({
         camera.lookAt(controls.target);
       },
       onComplete: () => {
-        camera.position.set(0, 48, 54);
-        controls.target.set(0, 0, 0);
-        controls.minDistance = 16;
+        camera.position.set(targetCamX, targetCamY, targetCamZ);
+        controls.target.set(targetTarX, targetTarY, targetTarZ);
+        controls.minDistance = 18;
+        controls.maxDistance = 75;
         controls.enabled = true;
         controls.update();
-        startOrbitRotation();
       }
     });
-  }, [startOrbitRotation]);
+  }, []);
 
   // Center / Zoom Out to view the entire floating sanctuary diorama
   const handleOverview = useCallback(() => {
     if (onResetIsolate) onResetIsolate();
     resetToFrontView(true);
-    startOrbitRotation();
-  }, [onResetIsolate, resetToFrontView, startOrbitRotation]);
+  }, [onResetIsolate, resetToFrontView]);
 
   // Toggle between 3D oblique perspective and 2D overhead top-down view
   const toggle2D3D = useCallback(() => {
@@ -390,12 +396,11 @@ export default function ThreeZooMap({
       z: controls.target.z + r,
       duration: 0.6,
       ease: 'power2.out',
-      onUpdate: () => controls.update(),
-      onComplete: () => {
-        startOrbitRotation();
-      }
+      onUpdate: () => controls.update()
     });
-  }, [startOrbitRotation]);
+  }, []);
+
+  const alignNorth = resetNorth;
 
   // Tilt Up (closer to horizon)
   const handleTiltUp = useCallback(() => {
@@ -561,9 +566,9 @@ export default function ThreeZooMap({
     scene.fog = new THREE.Fog(0x071d14, 250, 600);
     sceneRef.current = scene;
 
-    // 2. Camera Setup: Golden Isometric Perspective (Frames whole floating diorama like image 1, showing rich 3D surface like image 2)
-    const camera = new THREE.PerspectiveCamera(46, curW / curH, 0.5, 700);
-    camera.position.set(0, 48, 54);
+    // 2. Camera Setup: Golden Isometric Perspective (Frames whole floating diorama prominently to fill the rectangle box)
+    const camera = new THREE.PerspectiveCamera(45, curW / curH, 0.5, 700);
+    camera.position.set(0, 36, 42);
     cameraRef.current = camera;
 
     // 3. WebGL Renderer
@@ -588,67 +593,113 @@ export default function ThreeZooMap({
     renderer.domElement.style.display = 'block';
     container.appendChild(renderer.domElement);
 
-    // 4. Orbit Controls with 360° Circular Orbit
+    // 4. Orbit Controls with Flexible Touchpad & Mouse Navigation
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.08;
-    controls.rotateSpeed = 1.35;
-    controls.screenSpacePanning = false;
     controls.enableZoom = false; // Disable wheel zoom so mouse wheel passes smoothly to page scroll
-    controls.minDistance = 16;
-    controls.maxDistance = 140;
-    controls.maxPolarAngle = Math.PI * 0.38; // Keeps camera ~22° above horizon, always displaying lush surface and never showing underside
-    controls.minPolarAngle = 0.18;
-    controls.target.set(0, 0, 0);
+    controls.rotateSpeed = 0.85; // Calibrated for responsive laptop touchpad click-and-drag
+    controls.enablePan = true;
+    controls.screenSpacePanning = true; // Essential for natural 1:1 screen-aligned panning
+    controls.panSpeed = 1.0;
+    controls.minDistance = 18;
+    controls.maxDistance = 75; // Maintains optimal presentation scale within the rectangle box
+    controls.maxPolarAngle = Math.PI * 0.42; // Keeps camera comfortably above horizon, never showing underside
+    controls.minPolarAngle = 0.12; // Allows nearly top-down perspective
+    controls.target.set(0, -1.0, 0);
 
     controls.minAzimuthAngle = -Infinity;
     controls.maxAzimuthAngle = Infinity;
 
-    controls.autoRotate = isAutoRotateRef.current;
-    controls.autoRotateSpeed = 2.5; // Smooth continuous 360° turntable orbit (matches video: ~24s per revolution)
+    // Zero auto-rotation: map stays completely steady unless user intentionally toggles
+    controls.autoRotate = false;
+    controls.autoRotateSpeed = 2.0;
 
-    controls.enableZoom = true;
-    controls.zoomSpeed = 1.0;
+    // Custom zoom & pan handling for seamless laptop touchpad gestures
+    controls.enableZoom = false;
 
     controls.touches = {
       ONE: THREE.TOUCH.ROTATE,
       TWO: THREE.TOUCH.DOLLY_PAN
     };
 
-    controlsRef.current = controls;
-
-    let idleTimer = null;
-    const handleCanvasInteractionStart = () => {
-      if (controlsRef.current) {
-        controlsRef.current.autoRotate = false;
-      }
-      if (idleTimer) clearTimeout(idleTimer);
+    controls.mouseButtons = {
+      LEFT: THREE.MOUSE.ROTATE,
+      MIDDLE: THREE.MOUSE.DOLLY,
+      RIGHT: THREE.MOUSE.PAN
     };
 
-    const handleCanvasInteractionEnd = () => {
-      if (idleTimer) clearTimeout(idleTimer);
-      idleTimer = setTimeout(() => {
-        if (controlsRef.current && isAutoRotateRef.current) {
-          controlsRef.current.autoRotate = true;
-          controlsRef.current.autoRotateSpeed = 2.5;
+    controlsRef.current = controls;
+
+    // High-Precision Flexible Touchpad & Wheel Engine
+    const onCanvasWheel = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const ctrl = controlsRef.current;
+      const cam = cameraRef.current;
+      if (!ctrl || !cam) return;
+
+      // 1. Pinch-to-zoom on laptop trackpad (Chrome/Edge/Firefox set ctrlKey: true on touchpad pinch)
+      // OR standard desktop physical mouse wheel (large discrete deltaY with deltaMode 1 or 0 and no deltaX)
+      const isTouchpadPinch = e.ctrlKey;
+      const isMouseWheel = e.deltaMode === 1 || (!e.ctrlKey && Math.abs(e.deltaX) === 0 && Math.abs(e.deltaY) >= 80);
+
+      if (isTouchpadPinch || isMouseWheel) {
+        // Silky progressive dolly zoom
+        const zoomSensitivity = isTouchpadPinch ? 0.007 : 0.0022;
+        const rawFactor = 1 + (e.deltaY * zoomSensitivity);
+        const factor = Math.min(Math.max(rawFactor, 0.82), 1.22);
+
+        const offset = new THREE.Vector3().subVectors(cam.position, ctrl.target);
+        offset.multiplyScalar(factor);
+
+        const dist = offset.length();
+        if (dist >= ctrl.minDistance && dist <= ctrl.maxDistance) {
+          cam.position.copy(ctrl.target).add(offset);
+          ctrl.update();
         }
-      }, 1500);
+        return;
+      }
+
+      // 2. Flexible 2-Finger Touchpad Pan:
+      // Gliding 2 fingers across laptop trackpad smoothly moves the sanctuary diorama in 3D!
+      const currentDist = cam.position.distanceTo(ctrl.target);
+      const panSensitivity = Math.max(0.025, (currentDist / 550) * 0.65);
+
+      // Camera right vector (screen-aligned horizontal axis)
+      const vRight = new THREE.Vector3();
+      vRight.crossVectors(cam.up, cam.getWorldDirection(new THREE.Vector3()).negate()).normalize();
+
+      // Ground-plane forward vector (screen-aligned vertical axis projected on XZ)
+      const vForward = new THREE.Vector3();
+      cam.getWorldDirection(vForward);
+      vForward.y = 0;
+      vForward.normalize();
+
+      const dx = (e.deltaX || 0) * panSensitivity;
+      const dz = (e.deltaY || 0) * panSensitivity;
+
+      const panOffset = new THREE.Vector3()
+        .addScaledVector(vRight, dx)
+        .addScaledVector(vForward, -dz);
+
+      ctrl.target.add(panOffset);
+      cam.position.add(panOffset);
+
+      // Soft clamp target within sanctuary bounds
+      ctrl.target.x = THREE.MathUtils.clamp(ctrl.target.x, -65, 65);
+      ctrl.target.z = THREE.MathUtils.clamp(ctrl.target.z, -45, 45);
+      ctrl.target.y = THREE.MathUtils.clamp(ctrl.target.y, -5, 15);
+
+      ctrl.update();
     };
 
     const domEl = renderer.domElement;
-    domEl.addEventListener('pointerdown', handleCanvasInteractionStart);
-    domEl.addEventListener('pointerup', handleCanvasInteractionEnd);
-    domEl.addEventListener('pointerleave', handleCanvasInteractionEnd);
-
-    const onCanvasWheel = (e) => {
-      e.preventDefault();
-      const factor = e.deltaY < 0 ? 0.88 : 1.14;
-      handleZoom(factor);
-    };
     domEl.addEventListener('wheel', onCanvasWheel, { passive: false });
 
     const onCanvasDblClick = () => {
-      handleZoom(0.72);
+      handleZoom(0.75);
     };
     domEl.addEventListener('dblclick', onCanvasDblClick);
 
@@ -1036,36 +1087,12 @@ export default function ThreeZooMap({
 
     animate();
 
-    // Listen for custom navigation event from navbar or hero buttons to start continuous orbit
-    const handleStartOrbit = () => {
-      const dx = camera.position.x - controls.target.x;
-      const dy = camera.position.y - controls.target.y;
-      const dz = camera.position.z - controls.target.z;
-      const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
-      const isOffCenter = controls.target.length() > 2.0;
-      const isZoomed = dist < 50 || dist > 85;
-
-      if (isOffCenter || isZoomed) {
-        resetToFrontView(true);
-      } else {
-        startOrbitRotation();
-      }
+    // Listen for custom navigation event from navbar or hero buttons to reset view cleanly
+    const handleResetView = () => {
+      resetToFrontView(true);
     };
-    window.addEventListener('start-zoo-map-orbit', handleStartOrbit);
-    window.addEventListener('reset-zoo-map-view', handleStartOrbit);
-
-    // Automatically start 360° turntable orbit whenever visitor scrolls or moves to the map section
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            handleStartOrbit();
-          }
-        });
-      },
-      { threshold: 0.15 }
-    );
-    if (container) observer.observe(container);
+    window.addEventListener('start-zoo-map-orbit', handleResetView);
+    window.addEventListener('reset-zoo-map-view', handleResetView);
 
     const resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
@@ -1083,20 +1110,15 @@ export default function ThreeZooMap({
     resizeObserver.observe(container);
 
     return () => {
-      window.removeEventListener('start-zoo-map-orbit', handleStartOrbit);
-      window.removeEventListener('reset-zoo-map-view', handleStartOrbit);
-      if (observer && container) observer.unobserve(container);
+      window.removeEventListener('start-zoo-map-orbit', handleResetView);
+      window.removeEventListener('reset-zoo-map-view', handleResetView);
       visibilityObserver.disconnect();
       controls.removeEventListener('change', onControlsChange);
       resizeObserver.disconnect();
-      if (idleTimer) clearTimeout(idleTimer);
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
       if (renderer.domElement) {
         renderer.domElement.removeEventListener('wheel', onCanvasWheel);
         renderer.domElement.removeEventListener('dblclick', onCanvasDblClick);
-        renderer.domElement.removeEventListener('pointerdown', handleCanvasInteractionStart);
-        renderer.domElement.removeEventListener('pointerup', handleCanvasInteractionEnd);
-        renderer.domElement.removeEventListener('pointerleave', handleCanvasInteractionEnd);
         if (container.contains(renderer.domElement)) {
           container.removeChild(renderer.domElement);
         }
@@ -1119,7 +1141,7 @@ export default function ThreeZooMap({
     : null;
 
   return (
-    <div className={`relative w-full ${isFullscreen ? 'h-full flex-1 min-h-screen' : isExpanded ? 'h-[620px] sm:h-[700px] md:h-[780px] lg:h-[840px] xl:h-[900px]' : 'h-[420px] sm:h-[480px] md:h-[540px] lg:h-[580px] xl:h-[600px] 2xl:h-[620px]'} bg-forest-950 overflow-hidden select-none transition-all duration-300`}>
+    <div className={`relative w-full ${isFullscreen ? 'h-full flex-1 min-h-screen' : 'h-[520px] sm:h-[580px] md:h-[640px] lg:h-[700px] xl:h-[740px]'} bg-forest-950 overflow-hidden select-none transition-all duration-300`}>
 
       {/* Three.js Canvas Container */}
       <div
@@ -1127,11 +1149,9 @@ export default function ThreeZooMap({
         onClick={() => {
           if (activeMarker || isolateMarkerId) {
             handleOverview();
-          } else if (!isAutoRotateRef.current) {
-            startOrbitRotation();
           }
         }}
-        className="w-full h-full cursor-grab active:cursor-grabbing"
+        className="w-full h-full cursor-grab active:cursor-grabbing touch-none"
       />
 
       {/* TOP SCI-FI / GOOGLE EARTH SPECIES IDENTIFICATION HUD BANNER */}
@@ -1189,7 +1209,7 @@ export default function ThreeZooMap({
             <span className="text-ivory-400/50 hidden sm:inline">•</span>
             <span className="text-emerald-400 hidden sm:inline">4K ARCHITECTURAL DIORAMA: ACTIVE</span>
             <span className="text-ivory-400/50 hidden sm:inline">•</span>
-            <span className="hidden sm:inline">360° Circular Orbit • Drag in Circle to Rotate</span>
+            <span className="hidden sm:inline">Touchpad: ✌️ 2-finger pan • 🤏 pinch zoom • Drag to rotate</span>
           </div>
 
           {/* ISOLATED REGION ONLY BADGE + SHOW ALL ANIMALS TOGGLE */}
@@ -1313,7 +1333,7 @@ export default function ThreeZooMap({
       </div>
 
       {/* GOOGLE EARTH 3D COMPASS ROSE (TOP RIGHT) */}
-      <div className={`absolute top-4 ${isFullscreen ? 'right-24 sm:right-28' : 'right-20 sm:right-24'} z-20 flex flex-col items-center gap-1.5 select-none pointer-events-auto`}>
+      <div className={`absolute top-4 ${isFullscreen ? 'right-24 sm:right-28' : 'right-4 sm:right-5'} z-20 flex flex-col items-center gap-1.5 select-none pointer-events-auto`}>
         <button
           onClick={resetNorth}
           className="relative w-11 h-11 rounded-full bg-forest-950/90 hover:bg-forest-900 border border-gold-500/40 p-1 shadow-2xl backdrop-blur-md transition-all duration-200 group flex items-center justify-center cursor-pointer"
@@ -1353,55 +1373,6 @@ export default function ThreeZooMap({
 
       {/* 360° CIRCULAR NAVIGATION & CONTROLS (BOTTOM RIGHT) */}
       <div className="absolute bottom-4 right-4 z-20 flex flex-col items-end gap-2 pointer-events-auto">
-
-        {/* Top Control Bar: Quick Zoom Model Size, 360° Continuous Orbit Toggle & 3D Perspective Switcher */}
-        <div className="flex items-center gap-1.5">
-          {/* Quick Zoom / Increase 3D Size Pill */}
-          <div className="flex items-center gap-1 bg-forest-950/92 backdrop-blur-md p-1 rounded-xl border border-gold-500/40 text-[11px] font-mono shadow-xl">
-            <button
-              onClick={() => handleZoom(0.75)}
-              className="px-2 py-0.5 rounded-lg bg-forest-900/90 hover:bg-gold-500/30 text-gold-300 font-bold hover:text-gold-100 transition-colors cursor-pointer flex items-center gap-1"
-              title="Increase 3D Map Model Size (Zoom In)"
-              aria-label="Increase 3D Map Model Size"
-            >
-              <ZoomIn className="w-3 h-3 text-gold-400" />
-              <span>INCREASE</span>
-            </button>
-            <button
-              onClick={() => handleZoom(1.3)}
-              className="px-1.5 py-0.5 rounded-lg bg-forest-900/90 hover:bg-forest-800 text-ivory-300 font-bold hover:text-ivory-100 transition-colors cursor-pointer"
-              title="Decrease 3D Map Model Size (Zoom Out)"
-              aria-label="Decrease 3D Map Model Size"
-            >
-              <ZoomOut className="w-3 h-3" />
-            </button>
-          </div>
-
-          {/* 360° Continuous Auto-Orbit Button */}
-          <button
-            onClick={toggleAutoRotate}
-            className={`px-3 py-1.5 rounded-xl border text-xs font-mono font-bold uppercase tracking-wider shadow-2xl backdrop-blur-md transition-all flex items-center gap-1.5 cursor-pointer ${
-              isAutoRotate
-                ? 'bg-emerald-500 text-black border-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.5)]'
-                : 'bg-forest-950/92 hover:bg-forest-900 border-gold-500/40 text-gold-300'
-            }`}
-            title={isAutoRotate ? "Pause 360° Auto-Orbit" : "Start 360° Circular Orbit"}
-          >
-            <RotateCcw className={`w-3.5 h-3.5 ${isAutoRotate ? 'animate-spin' : ''}`} style={{ animationDuration: '3.0s' }} />
-            <span>{isAutoRotate ? '360° (ON)' : '360° ORBIT'}</span>
-            {isAutoRotate && <span className="w-1.5 h-1.5 rounded-full bg-black animate-ping" />}
-          </button>
-
-          {/* 3D Google Earth Perspective Switcher */}
-          <button
-            onClick={toggle2D3D}
-            className="px-3 py-1.5 rounded-xl bg-forest-950/92 hover:bg-forest-900 border border-gold-500/40 text-gold-300 hover:text-gold-200 text-xs font-mono font-bold uppercase tracking-wider shadow-2xl backdrop-blur-md transition-all flex items-center gap-1.5 group cursor-pointer"
-            title={is3DMode ? "3D View Active (Click for Overhead Angle)" : "Overhead View (Click for 3D Angle)"}
-          >
-            <Layers className="w-3.5 h-3.5 text-gold-400 group-hover:rotate-12 transition-transform" />
-            <span>3D VIEW</span>
-          </button>
-        </div>
 
         {/* Circular Direction Navigation Gizmo Stack */}
         <div className="flex items-center gap-1.5 bg-forest-950/92 backdrop-blur-xl p-1.5 rounded-2xl border border-gold-500/30 shadow-2xl">
@@ -1445,16 +1416,6 @@ export default function ThreeZooMap({
             <RotateCw className="w-4 h-4" />
           </button>
 
-          {/* Fast 360° Circular Panoramic Sweep (2.0s) */}
-          <button
-            onClick={() => handle360Spin(1)}
-            className="p-2 rounded-xl bg-forest-900/80 hover:bg-forest-800 text-emerald-400 hover:text-emerald-300 transition-colors shadow-sm cursor-pointer"
-            title="Perform Fast 360° Panoramic Circular Spin"
-            aria-label="360 Spin"
-          >
-            <Orbit className="w-4 h-4" />
-          </button>
-
           {/* Zoom In (+) */}
           <button
             onClick={() => handleZoom(0.75)}
@@ -1485,6 +1446,16 @@ export default function ThreeZooMap({
             <Navigation className="w-4 h-4" />
           </button>
         </div>
+      </div>
+
+      {/* Laptop Touchpad Gesture Guide Pill (Bottom Left) */}
+      <div className="absolute bottom-4 left-4 z-20 hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-forest-950/92 border border-gold-500/30 text-[11px] font-mono text-ivory-200 shadow-xl backdrop-blur-md pointer-events-none select-none">
+        <span className="text-gold-400 font-bold">Touchpad:</span>
+        <span>✌️ 2 fingers to Pan</span>
+        <span className="text-gold-500/40">•</span>
+        <span>🤏 Pinch to Zoom</span>
+        <span className="text-gold-500/40">•</span>
+        <span>🖱️ Drag to Rotate</span>
       </div>
 
     </div>

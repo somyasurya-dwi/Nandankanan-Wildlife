@@ -284,7 +284,7 @@ export default function Navbar({
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('close-animal-modal'));
       if (link.key === 'zooMap' || link.sectionId === 'interactive-map' || link.scrollTarget === 'zoo-map-viewport') {
-        window.dispatchEvent(new CustomEvent('start-zoo-map-orbit'));
+        window.dispatchEvent(new CustomEvent('reset-zoo-map-view'));
       }
     }
 

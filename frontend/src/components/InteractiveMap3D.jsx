@@ -45,9 +45,12 @@ export default function InteractiveMap3D({
   embedded = false,
   isFullscreen: externalIsFullscreen = false,
   isExpanded = false,
-  onCloseFullscreen
+  onCloseFullscreen,
+  onBackTo3D,
+  onClose
 }) {
   const osdContainerRef  = useRef(null);
+  const viewportRef      = useRef(null);
   const viewerRef        = useRef(null);
   const overlaysRef      = useRef([]);
   const auraOverlayRef   = useRef(null);
@@ -58,6 +61,58 @@ export default function InteractiveMap3D({
   const [internalIsFullscreen, setInternalIsFullscreen] = useState(false);
   const isFullscreen = externalIsFullscreen || internalIsFullscreen;
   const [navigationTip, setNavigationTip] = useState(null);
+
+  // Unified Back Handler: exits browser fullscreen and switches back to 3D map
+  const handleBack = useCallback((e) => {
+    if (e) {
+      if (typeof e.preventDefault === 'function') e.preventDefault();
+      if (typeof e.stopPropagation === 'function') e.stopPropagation();
+    }
+    if (document.fullscreenElement) {
+      if (document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      }
+    }
+    if (onBackTo3D) {
+      onBackTo3D();
+    } else if (onClose) {
+      onClose();
+    } else if (onCloseFullscreen) {
+      onCloseFullscreen();
+    }
+  }, [onBackTo3D, onClose, onCloseFullscreen]);
+
+  // Escape key & Browser Fullscreen synchronization
+  useEffect(() => {
+    const onFsChange = () => {
+      const isFs = Boolean(document.fullscreenElement);
+      setInternalIsFullscreen(isFs);
+      if (viewerRef.current?.viewport) {
+        setTimeout(() => {
+          viewerRef.current?.viewport?.applyConstraints();
+        }, 150);
+      }
+    };
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        if (document.fullscreenElement) {
+          document.exitFullscreen().catch(() => {});
+        } else {
+          handleBack();
+        }
+      }
+    };
+    document.addEventListener('fullscreenchange', onFsChange);
+    document.addEventListener('webkitfullscreenchange', onFsChange);
+    window.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('fullscreenchange', onFsChange);
+      document.removeEventListener('webkitfullscreenchange', onFsChange);
+      window.removeEventListener('keydown', onKeyDown);
+    };
+  }, [handleBack]);
 
   // Recalibrate viewport constraints and frame map smoothly on fullscreen / expand change
   useEffect(() => {
@@ -127,6 +182,25 @@ export default function InteractiveMap3D({
     viewer.addHandler('full-screen', (e) => {
       setInternalIsFullscreen(e.fullScreen);
     });
+
+    // Intercept OpenSeadragon's fullscreen to make viewportRef the target
+    viewer.setFullScreen = function(fs) {
+      const targetEl = viewportRef.current || osdContainerRef.current;
+      if (!targetEl) return;
+      if (fs) {
+        if (targetEl.requestFullscreen) {
+          targetEl.requestFullscreen().catch(() => {});
+        } else if (targetEl.webkitRequestFullscreen) {
+          targetEl.webkitRequestFullscreen();
+        }
+      } else {
+        if (document.fullscreenElement) {
+          document.exitFullscreen().catch(() => {});
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        }
+      }
+    };
 
     // Intentional Ctrl+Wheel zoom handler so standard scroll moves the webpage naturally
     const osdEl = osdContainerRef.current;
@@ -326,9 +400,21 @@ export default function InteractiveMap3D({
       onCloseFullscreen();
       return;
     }
-    const viewer = viewerRef.current;
-    if (!viewer) return;
-    viewer.setFullScreen(!viewer.isFullScreen());
+    const targetEl = viewportRef.current || osdContainerRef.current;
+    if (!targetEl) return;
+    if (!document.fullscreenElement) {
+      if (targetEl.requestFullscreen) {
+        targetEl.requestFullscreen().catch(() => {});
+      } else if (targetEl.webkitRequestFullscreen) {
+        targetEl.webkitRequestFullscreen();
+      }
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      }
+    }
   };
 
   return (
@@ -377,11 +463,13 @@ export default function InteractiveMap3D({
         )}
 
         {/* ── Main Map Viewport ── */}
-        <div className={`osd-viewport-container relative overflow-hidden bg-black ${
+        <div 
+          ref={viewportRef}
+          className={`osd-viewport-container relative overflow-hidden bg-black ${
           isFullscreen
             ? 'w-full h-full flex-1 rounded-none border-0 shadow-none is-fullscreen'
             : embedded
-              ? `${isExpanded ? 'h-[620px] sm:h-[700px] md:h-[780px] lg:h-[840px] xl:h-[900px]' : 'h-[420px] sm:h-[480px] md:h-[540px] lg:h-[580px] xl:h-[600px] 2xl:h-[620px]'} rounded-3xl border border-[#C8A96B]/30 shadow-2xl transition-all duration-300`
+              ? 'h-[520px] sm:h-[580px] md:h-[640px] lg:h-[700px] xl:h-[740px] rounded-3xl border border-[#C8A96B]/30 shadow-2xl transition-all duration-300'
               : 'rounded-3xl border border-[#C8A96B]/30 shadow-2xl'
         }`}>
           {/* OpenSeadragon Mount */}
@@ -389,7 +477,7 @@ export default function InteractiveMap3D({
 
           {/* ── Top-Left HUD: Resolution & Status ── */}
           <div className={`absolute ${isFullscreen ? 'top-16 left-4' : 'top-4 left-4'} z-20 flex flex-col gap-2 pointer-events-none`}>
-            <div className="glass-panel px-3.5 py-2 rounded-xl flex items-center gap-3">
+            <div className="glass-panel px-3.5 py-2 rounded-2xl flex items-center gap-3 bg-forest-950/90 backdrop-blur-xl border border-[#C8A96B]/30 shadow-2xl">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
               <div className="flex flex-col">
                 <span className="text-[#F5F4EA] font-extrabold text-xs tracking-wider uppercase">Nandankanan 3D Map</span>
@@ -402,15 +490,16 @@ export default function InteractiveMap3D({
               </div>
             </div>
 
-            <div className="bg-black/60 backdrop-blur-sm rounded-lg px-2.5 py-1 text-[10px] text-[#a4c2ad] flex items-center gap-1.5 w-fit">
+            <div className="bg-forest-950/80 backdrop-blur-md rounded-xl px-2.5 py-1 text-[10px] text-[#a4c2ad] border border-forest-800 flex items-center gap-1.5 w-fit">
               <span>🖱️</span>
-              <span>Drag to navigate · Ctrl + Scroll / ± to Zoom · Click enclosure</span>
+              <span>Drag to navigate · Ctrl + Scroll to Zoom · Click enclosure</span>
             </div>
           </div>
 
-          {/* ── Top-Right Quick Safari Jump Buttons ── */}
-          <div className={`absolute ${isFullscreen ? 'top-16 right-4 sm:top-4 sm:right-28' : (embedded ? 'top-4 right-16' : 'top-4 right-4')} z-20 flex items-center gap-2`}>
-            <div className="glass-panel p-1.5 rounded-xl hidden md:flex items-center gap-1.5">
+          {/* ── Top-Right Controls: Safaris Jump Strip + Back Cross (✕) Button ── */}
+          <div className={`absolute ${isFullscreen ? 'top-16 right-4 sm:top-4 sm:right-4' : 'top-4 right-4'} z-40 flex items-center gap-2.5`}>
+            {/* Safari Shortcuts */}
+            <div className="glass-panel p-1.5 rounded-2xl hidden md:flex items-center gap-1.5 bg-forest-950/92 backdrop-blur-xl border border-[#C8A96B]/30 shadow-2xl">
               <span className="text-[10px] text-[#C8A96B] font-bold uppercase tracking-wider px-2">Safaris:</span>
               {[
                 { name: 'Tiger Safari', slug: 'tiger-safari', emoji: '🐅' },
@@ -424,7 +513,7 @@ export default function InteractiveMap3D({
                   <button
                     key={s.slug}
                     onClick={() => target && handleSelectEnclosure(target)}
-                    className="px-2.5 py-1 rounded-lg text-xs font-semibold text-[#d3e8db] hover:bg-[#C8A96B] hover:text-[#071D12] transition-all flex items-center gap-1"
+                    className="px-2.5 py-1 rounded-xl text-xs font-semibold text-[#d3e8db] hover:bg-[#C8A96B] hover:text-[#071D12] transition-all flex items-center gap-1 cursor-pointer"
                   >
                     <span>{s.emoji}</span>
                     <span>{s.name.replace(' Safari', '')}</span>
@@ -432,6 +521,21 @@ export default function InteractiveMap3D({
                 );
               })}
             </div>
+
+            {/* Clean Back Cross Button */}
+            <button
+              onClick={handleBack}
+              className="px-3.5 py-2 rounded-2xl bg-forest-950/95 hover:bg-forest-900 border-2 border-[#C8A96B] hover:border-gold-300 text-gold-300 hover:text-white shadow-2xl backdrop-blur-xl transition-all flex items-center gap-2 cursor-pointer hover:scale-105 active:scale-95 group font-mono font-bold text-xs shrink-0"
+              title="Back to 3D Map (Esc)"
+              aria-label="Back to 3D Map"
+            >
+              <span className="w-5 h-5 rounded-full bg-red-500/25 text-red-400 group-hover:bg-red-500 group-hover:text-white flex items-center justify-center font-black text-xs transition-colors border border-red-500/50">
+                ✕
+              </span>
+              <span className="tracking-wider uppercase font-black">
+                BACK
+              </span>
+            </button>
           </div>
 
           {/* ── Floating Zoom & Reset Glass Controls (Bottom-Left) ── */}

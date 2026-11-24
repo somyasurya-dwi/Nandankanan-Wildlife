@@ -97,6 +97,7 @@ export default function InteractiveMap({
   const ILLUSTRATED_BOUNDS = [[0, 0], [571, 1024]];
 
   const categories = [
+    { key: 'all', label: (t && t('map.categories.all')) || '✓ All 12 Species' },
     { key: 'safari_zone', label: (t && t('map.categories.safari_zone')) || '🐅 Safari Zones (5)' },
     { key: 'animal_habitat', label: (t && t('map.categories.animal_habitat')) || '🐾 Enclosures & Habitats (7)' }
   ];
@@ -482,7 +483,7 @@ export default function InteractiveMap({
             </p>
           </div>
 
-          {/* Map Controls: 3D Google Earth / 2D Illustrated / Satellite Mode Switcher */}
+          {/* Map Controls: 3D Google Earth / Satellite Mode Switcher */}
           <div className="flex flex-wrap items-center gap-2">
             <div className="flex items-center gap-1.5 p-1.5 rounded-2xl bg-forest-950/95 border border-[#C8A96B]/40 backdrop-blur-md shadow-2xl">
               <button
@@ -491,13 +492,13 @@ export default function InteractiveMap({
                   setActiveMarker(null);
                   setIsolateMarkerId(null);
                   if (typeof window !== 'undefined') {
-                    window.dispatchEvent(new CustomEvent('start-zoo-map-orbit'));
+                    window.dispatchEvent(new CustomEvent('reset-zoo-map-view'));
                   }
                 }}
-                className={`px-3.5 py-2 rounded-xl text-xs font-extrabold tracking-wider flex items-center gap-1.5 transition-all ${
+                className={`px-3.5 py-2 rounded-xl text-xs font-black tracking-wider flex items-center gap-1.5 transition-all cursor-pointer ${
                   mapStyle === '3d'
-                    ? 'bg-[#C8A96B] text-[#071810] shadow-lg shadow-[#C8A96B]/30 ring-2 ring-[#C8A96B]'
-                    : 'text-[#FAF9F5] hover:text-[#C8A96B] hover:bg-forest-900/70'
+                    ? 'bg-gold-400 text-forest-950 font-black shadow-lg shadow-gold-500/30 ring-2 ring-gold-300'
+                    : 'text-[#FAF9F5] hover:text-gold-300 hover:bg-forest-900/70 font-bold'
                 }`}
                 title="Interactive 3D Google Earth Terrain Perspective"
               >
@@ -507,10 +508,10 @@ export default function InteractiveMap({
 
               <button
                 onClick={() => setMapStyle('deepzoom')}
-                className={`px-3.5 py-2 rounded-xl text-xs font-extrabold tracking-wider flex items-center gap-1.5 transition-all ${
+                className={`px-3.5 py-2 rounded-xl text-xs font-black tracking-wider flex items-center gap-1.5 transition-all cursor-pointer ${
                   mapStyle === 'deepzoom'
-                    ? 'bg-[#C8A96B] text-[#071810] shadow-md ring-2 ring-[#C8A96B]'
-                    : 'text-[#FAF9F5] hover:text-[#C8A96B] hover:bg-forest-900/70'
+                    ? 'bg-gold-400 text-forest-950 font-black shadow-lg shadow-gold-500/30 ring-2 ring-gold-300'
+                    : 'text-[#FAF9F5] hover:text-gold-300 hover:bg-forest-900/70 font-bold'
                 }`}
                 title="4K Deep-Zoom DZI Interactive Pyramidal Map"
               >
@@ -519,24 +520,11 @@ export default function InteractiveMap({
               </button>
 
               <button
-                onClick={() => setMapStyle('illustrated')}
-                className={`px-3.5 py-2 rounded-xl text-xs font-extrabold tracking-wider flex items-center gap-1.5 transition-all ${
-                  mapStyle === 'illustrated'
-                    ? 'bg-[#C8A96B] text-[#071810] shadow-md ring-2 ring-[#C8A96B]'
-                    : 'text-[#FAF9F5] hover:text-[#C8A96B] hover:bg-forest-900/70'
-                }`}
-                title="Official 2D Illustrated Sanctuary Guide Map"
-              >
-                <span>2D View</span>
-                <span className="text-sm">🗺️</span>
-              </button>
-
-              <button
                 onClick={() => setMapStyle('satellite')}
-                className={`px-3.5 py-2 rounded-xl text-xs font-extrabold tracking-wider flex items-center gap-1.5 transition-all ${
+                className={`px-3.5 py-2 rounded-xl text-xs font-black tracking-wider flex items-center gap-1.5 transition-all cursor-pointer ${
                   mapStyle === 'satellite'
-                    ? 'bg-[#C8A96B] text-[#071810] shadow-md ring-2 ring-[#C8A96B]'
-                    : 'text-[#FAF9F5] hover:text-[#C8A96B] hover:bg-forest-900/70'
+                    ? 'bg-gold-400 text-forest-950 font-black shadow-lg shadow-gold-500/30 ring-2 ring-gold-300'
+                    : 'text-[#FAF9F5] hover:text-gold-300 hover:bg-forest-900/70 font-bold'
                 }`}
                 title="Topographic Satellite World Imagery"
               >
@@ -549,26 +537,29 @@ export default function InteractiveMap({
 
         {/* Category Filter Pills */}
         <div className="flex items-center gap-2 overflow-x-auto pb-2 mb-2 scrollbar-none">
-          {categories.map((cat) => (
-            <button
-              key={cat.key}
-              onClick={() => {
-                if (cat.key === 'all') {
-                  setSelectedCategory('all');
-                } else {
-                  setSelectedCategory((prev) => (prev === cat.key ? 'all' : cat.key));
-                }
-                setIsolateMarkerId(null);
-              }}
-              className={`px-4 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider whitespace-nowrap transition-all ${
-                (cat.key === 'all' && selectedCategory === 'all') || selectedCategory === cat.key
-                  ? 'bg-gold-500 text-forest-950 font-bold shadow-md shadow-gold-500/20'
-                  : 'bg-forest-950/80 text-ivory-200 hover:bg-forest-800 border border-forest-700/60'
-              }`}
-            >
-              {cat.label}
-            </button>
-          ))}
+          {categories.map((cat) => {
+            const isActive = (cat.key === 'all' && (!selectedCategory || selectedCategory === 'all')) || selectedCategory === cat.key;
+            return (
+              <button
+                key={cat.key}
+                onClick={() => {
+                  if (cat.key === 'all') {
+                    setSelectedCategory('all');
+                  } else {
+                    setSelectedCategory((prev) => (prev === cat.key ? 'all' : cat.key));
+                  }
+                  setIsolateMarkerId(null);
+                }}
+                className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider whitespace-nowrap transition-all cursor-pointer ${
+                  isActive
+                    ? 'bg-gold-400 text-forest-950 font-black shadow-lg shadow-gold-500/30 ring-2 ring-gold-300 scale-102'
+                    : 'bg-forest-950/90 text-ivory-100 hover:bg-forest-900 border border-forest-700/70 hover:border-gold-500/50 hover:text-white font-bold'
+                }`}
+              >
+                {cat.label}
+              </button>
+            );
+          })}
         </div>
 
         {/* Quick Animal Jump Strip (All 12 Live Sanctuary Animals with Scroll Arrows) */}
@@ -591,8 +582,8 @@ export default function InteractiveMap({
             onScroll={checkAnimalScroll}
             className={`flex items-center gap-2 overflow-x-auto pb-1.5 scrollbar-none scroll-smooth w-full ${canScrollLeft ? 'pl-9' : 'pl-0'}`}
           >
-            <span className="text-[11px] font-bold text-gold-400 uppercase tracking-widest shrink-0 flex items-center gap-1 mr-1">
-              <Compass className="w-3.5 h-3.5" />
+            <span className="px-3 py-1.5 rounded-xl bg-forest-900/90 border border-gold-500/40 text-gold-300 font-extrabold text-xs tracking-wider uppercase shrink-0 flex items-center gap-1.5 shadow-sm">
+              <Compass className="w-3.5 h-3.5 text-gold-400 shrink-0" />
               <span>Select Animal to View Live:</span>
             </span>
             {markers.map((m) => {
@@ -601,15 +592,16 @@ export default function InteractiveMap({
                 <button
                   key={m.id || m.animal_slug}
                   onClick={() => focusOnAnimal(m)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs whitespace-nowrap transition-all shrink-0 cursor-pointer ${isCurrent
-                      ? 'bg-gold-500 text-forest-950 font-bold shadow-lg shadow-gold-500/30 ring-2 ring-gold-400 scale-105'
-                      : 'bg-forest-950/70 border border-forest-800 hover:border-gold-500/40 text-ivory-200 hover:text-white'
-                    }`}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs whitespace-nowrap transition-all shrink-0 cursor-pointer ${
+                    isCurrent
+                      ? 'bg-gold-400 text-forest-950 font-black shadow-lg shadow-gold-500/40 ring-2 ring-gold-300 scale-105'
+                      : 'bg-[#0B2A1A] border border-forest-700/80 hover:border-gold-500/60 text-[#FAF9F5] font-semibold hover:text-white hover:bg-forest-900'
+                  }`}
                   title={`Click to view ${m.animal_name || m.title} live video`}
                 >
                   <span>{m.emoji || '🐾'}</span>
-                  <span>{m.animal_name || m.title}</span>
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse ml-0.5" />
+                  <span className={isCurrent ? 'font-black text-black' : 'font-semibold text-ivory-100'}>{m.animal_name || m.title}</span>
+                  <span className={`w-1.5 h-1.5 rounded-full ml-0.5 ${isCurrent ? 'bg-forest-950' : 'bg-emerald-400 animate-pulse'}`} />
                 </button>
               );
             })}
@@ -637,9 +629,6 @@ export default function InteractiveMap({
                 setActiveMarker(null);
                 setIsolateMarkerId(null);
               }
-              if (mapStyle === '3d' && typeof window !== 'undefined') {
-                window.dispatchEvent(new CustomEvent('start-zoo-map-orbit'));
-              }
             }}
             className="w-full relative rounded-3xl overflow-hidden zoo-map-frame bg-forest-950 transition-all scroll-mt-28"
           >
@@ -654,6 +643,8 @@ export default function InteractiveMap({
                 embedded={true}
                 isFullscreen={false}
                 isExpanded={isMapExpanded}
+                onBackTo3D={() => setMapStyle('3d')}
+                onClose={() => setMapStyle('3d')}
               />
             ) : mapStyle === '3d' ? (
               <ThreeZooMap
@@ -672,7 +663,7 @@ export default function InteractiveMap({
               <>
                 <div
                   ref={mapContainerRef}
-                  className={`w-full ${isMapExpanded ? 'h-[620px] sm:h-[700px] md:h-[780px] lg:h-[840px] xl:h-[880px]' : 'h-[420px] sm:h-[480px] md:h-[540px] lg:h-[580px] xl:h-[600px] 2xl:h-[620px]'} z-10 map-canvas-interactive zoo-map-container transition-all duration-300`}
+                  className="w-full h-[520px] sm:h-[580px] md:h-[640px] lg:h-[700px] xl:h-[740px] z-10 map-canvas-interactive zoo-map-container transition-all duration-300"
                   style={{ background: '#0B2419' }}
                 />
 
@@ -711,37 +702,6 @@ export default function InteractiveMap({
                 </div>
               </>
             )}
-
-            {/* Top Right Box Size Controls: Increase/Default Size Toggle + Fullscreen */}
-            <div 
-              className="absolute top-4 right-4 z-30 flex items-center gap-2"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsMapExpanded(!isMapExpanded);
-                }}
-                className="px-3 py-2 rounded-2xl bg-forest-950/95 hover:bg-forest-900 border border-gold-500/40 text-gold-300 hover:text-gold-100 transition-all shadow-xl backdrop-blur-md cursor-pointer hover:scale-105 active:scale-95 flex items-center gap-1.5 text-xs font-mono font-bold"
-                title={isMapExpanded ? "Restore Exact Default Size" : "Increase Map Box Size"}
-                aria-label="Toggle Increased Size"
-              >
-                {isMapExpanded ? <Minimize2 className="w-3.5 h-3.5 text-gold-400" /> : <Maximize2 className="w-3.5 h-3.5 text-gold-400" />}
-                <span>{isMapExpanded ? "DEFAULT SIZE" : "INCREASE SIZE"}</span>
-              </button>
-
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsFullscreenMap(true);
-                }}
-                className="p-2.5 rounded-2xl bg-forest-950/95 hover:bg-forest-900 border border-gold-500/40 text-gold-300 hover:text-gold-200 transition-all shadow-xl backdrop-blur-md cursor-pointer hover:scale-105 active:scale-95"
-                title="Fullscreen Monitor View"
-                aria-label="Fullscreen Map"
-              >
-                <Maximize2 className="w-4 h-4" />
-              </button>
-            </div>
           </div>
 
           {/* Active Animal Live Video Stream Card & "SPECIES IDENTIFIED" Dossier (Wide Full-Width 2-Column Responsive Layout) */}
@@ -1034,6 +994,14 @@ export default function InteractiveMap({
                 embedded={true}
                 isFullscreen={true}
                 onCloseFullscreen={() => setIsFullscreenMap(false)}
+                onBackTo3D={() => {
+                  setIsFullscreenMap(false);
+                  setMapStyle('3d');
+                }}
+                onClose={() => {
+                  setIsFullscreenMap(false);
+                  setMapStyle('3d');
+                }}
               />
             ) : mapStyle === '3d' ? (
               <ThreeZooMap
