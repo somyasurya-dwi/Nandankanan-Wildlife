@@ -12,6 +12,7 @@ import {
 import { useLanguage } from '../context/LanguageContext';
 import LiveCameraPlayer from './LiveCameraPlayer';
 import Realistic3DIcon from './reactions/Realistic3DIcon';
+import { subscriptionManager } from '../utils/subscriptionManager';
 
 export default function LiveStreaming({ 
   cameras, 
