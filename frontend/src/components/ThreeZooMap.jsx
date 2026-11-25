@@ -435,6 +435,7 @@ export default function ThreeZooMap({
     controls.enableDamping = true;
     controls.dampingFactor = 0.06;
     controls.screenSpacePanning = false;
+    controls.enableZoom = false; // Disable wheel zoom so mouse wheel passes smoothly to page scroll
     controls.minDistance = 30; // Clamped to optimal distance so map texture stays razor-sharp
     controls.maxDistance = 130;
     controls.maxPolarAngle = Math.PI * 0.44; // Don't allow camera to dip below terrain
@@ -665,14 +666,23 @@ export default function ThreeZooMap({
       beaconGroup.visible = false;
     }
 
-    // 11. Animation Loop & Throttled Screen Projection for HTML Badges
+    // 11. Animation Loop & Intelligent Event-Driven Screen Projection for HTML Badges
     let clock = new THREE.Clock();
+    let needsUiUpdate = true;
+    let isMapVisible = true;
     let lastUiUpdate = 0;
 
-    const updateProjection = (now) => {
-      // Throttle React state updates to ~20 FPS (every 50ms) to ensure smooth 60 FPS Three.js rendering
-      if (now - lastUiUpdate < 50) return;
+    // Only update camera heading and projection when controls change or when animating
+    const onControlsChange = () => {
+      needsUiUpdate = true;
+    };
+    controls.addEventListener('change', onControlsChange);
+
+    const updateProjection = (force = false) => {
+      const now = performance.now();
+      if (!force && now - lastUiUpdate < 60) return;
       lastUiUpdate = now;
+      needsUiUpdate = false;
 
       // Calculate camera heading and pitch for Compass & 3D Gizmo
       const camPos = camera.position;
@@ -683,13 +693,13 @@ export default function ThreeZooMap({
 
       // Heading (azimuth): angle around Y axis
       const headingRad = Math.atan2(dx, dz);
-      const headingDeg = (headingRad * 180 / Math.PI + 360) % 360;
-      setCameraHeading(headingDeg);
+      const headingDeg = Math.round(((headingRad * 180 / Math.PI + 360) % 360) * 10) / 10;
+      setCameraHeading((prev) => (Math.abs(prev - headingDeg) > 0.5 ? headingDeg : prev));
 
       // Pitch: angle from horizon
       const groundDist = Math.hypot(dx, dz);
-      const pitchDeg = Math.atan2(dy, groundDist) * 180 / Math.PI;
-      setCameraPitch(pitchDeg);
+      const pitchDeg = Math.round((Math.atan2(dy, groundDist) * 180 / Math.PI) * 10) / 10;
+      setCameraPitch((prev) => (Math.abs(prev - pitchDeg) > 0.5 ? pitchDeg : prev));
 
       // Project each animal marker's 3D position to 2D screen coordinates
       const w = curW;
@@ -723,8 +733,26 @@ export default function ThreeZooMap({
       setPinPositions(projected);
     };
 
+    // Initial projection
+    updateProjection(true);
+
+    // Pause Three.js rendering completely when map is outside viewport to eliminate GPU/CPU lag
+    const visibilityObserver = new IntersectionObserver(
+      (entries) => {
+        isMapVisible = entries[0]?.isIntersecting ?? true;
+        if (isMapVisible) {
+          needsUiUpdate = true;
+        }
+      },
+      { threshold: 0.05 }
+    );
+    visibilityObserver.observe(container);
+
     const animate = () => {
       animFrameRef.current = requestAnimationFrame(animate);
+
+      // Skip render when map is not on screen (frees 100% GPU for smooth page scrolling)
+      if (!isMapVisible) return;
 
       const elapsedTime = clock.getElapsedTime();
       controls.update();
@@ -744,7 +772,9 @@ export default function ThreeZooMap({
         waterMat.opacity = 0.72 + Math.sin(elapsedTime * 1.5) * 0.06;
       }
 
-      updateProjection(performance.now());
+      if (needsUiUpdate) {
+        updateProjection();
+      }
 
       renderer.render(scene, camera);
     };
@@ -761,12 +791,15 @@ export default function ThreeZooMap({
           camera.aspect = newW / newH;
           camera.updateProjectionMatrix();
           renderer.setSize(newW, newH);
+          needsUiUpdate = true;
         }
       }
     });
     resizeObserver.observe(container);
 
     return () => {
+      visibilityObserver.disconnect();
+      controls.removeEventListener('change', onControlsChange);
       resizeObserver.disconnect();
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
       if (renderer.domElement && container.contains(renderer.domElement)) {

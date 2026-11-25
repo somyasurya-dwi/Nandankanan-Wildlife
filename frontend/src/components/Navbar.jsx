@@ -140,7 +140,6 @@ export default function Navbar({
       if (newSectionId && newSectionId !== activeSectionRef.current) {
         activeSectionRef.current = newSectionId;
         setActiveSection(newSectionId);
-        if (onSectionChange) onSectionChange(newSectionId);
       }
     };
 
@@ -200,13 +199,17 @@ export default function Navbar({
       }
     };
 
-    // Handle scroll events with rAF for instant feedback without layout thrashing
+    // Throttled scroll handling to eliminate layout thrashing
     let scrollTicking = false;
+    let lastEvalTime = 0;
     const handleScroll = () => {
       const scrolled = window.scrollY > 20;
       setIsScrolled((prev) => (prev === scrolled ? prev : scrolled));
-      if (!scrollTicking) {
+
+      const now = performance.now();
+      if (now - lastEvalTime > 80 && !scrollTicking) {
         scrollTicking = true;
+        lastEvalTime = now;
         window.requestAnimationFrame(() => {
           evaluateActiveSection();
           scrollTicking = false;
@@ -217,30 +220,12 @@ export default function Navbar({
     window.addEventListener('scroll', handleScroll, { passive: true });
     window.addEventListener('resize', handleScroll, { passive: true });
 
-    // Also connect directly with Lenis smooth scroll updates
-    let cleanupLenis = null;
-    const setupLenis = () => {
-      if (typeof window !== 'undefined' && window.__lenis) {
-        const onLenisScroll = () => {
-          handleScroll();
-        };
-        window.__lenis.on('scroll', onLenisScroll);
-        cleanupLenis = () => {
-          if (window.__lenis) window.__lenis.off('scroll', onLenisScroll);
-        };
-      }
-    };
-    setupLenis();
-    const lenisTimer = setTimeout(setupLenis, 600);
-
     // Initial evaluation on mount
     evaluateActiveSection();
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('resize', handleScroll);
-      if (cleanupLenis) cleanupLenis();
-      clearTimeout(lenisTimer);
     };
   }, [onSectionChange]);
 
@@ -439,7 +424,7 @@ export default function Navbar({
     { key: 'species', name: t('nav.species'), href: '#explore-animals', sectionId: 'explore-animals', scrollTarget: 'species-grid' },
     { key: 'stories', name: t('nav.stories'), href: '#conservation-stories', sectionId: 'conservation-stories', scrollTarget: 'stories-grid' },
     { key: 'notices', name: t('nav.newsNotice'), href: '#notices', sectionId: 'notices', scrollTarget: 'notices-bulletin-box' },
-    { key: 'adopt', name: t('nav.adopt'), href: '#sponsorship-portal', sectionId: 'sponsorship-portal', scrollTarget: 'sponsorship-flow' },
+    { key: 'adopt', name: t('nav.adopt'), href: '#sponsorship-portal', sectionId: 'sponsorship-portal', scrollTarget: 'sponsorship-portal' },
     { key: 'wallet', name: t('nav.wallet'), href: '#wallet', onClick: () => setWalletModalOpen(true) },
   ];
 

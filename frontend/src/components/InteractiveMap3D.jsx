@@ -69,7 +69,7 @@ export default function InteractiveMap3D({
         clickToZoom: false,
         dblClickToZoom: true,
         pinchToZoom: true,
-        scrollToZoom: true,
+        scrollToZoom: false,
       },
       gestureSettingsTouch: {
         pinchToZoom: true,

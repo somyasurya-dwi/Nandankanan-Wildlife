@@ -136,18 +136,18 @@ export default function ParallaxSectionBreak({
           </p>
         )}
 
-        {/* Floating Metrics Pill Bar */}
+        {/* Floating Metrics Stat Boxes */}
         {metrics && metrics.length > 0 && (
-          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 mb-8">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 sm:gap-5 max-w-4xl mx-auto mb-8 sm:mb-10 w-full">
             {metrics.map((m, idx) => (
               <div 
                 key={idx}
-                className="px-4 py-2.5 rounded-2xl bg-[#071D12]/80 border border-[#C8A96B]/30 backdrop-blur-md shadow-lg flex items-center gap-3 transition-transform hover:-translate-y-1"
+                className="px-4 sm:px-6 py-4.5 sm:py-6 rounded-2xl sm:rounded-3xl bg-[#071D12]/85 hover:bg-[#0B2A1A]/95 border border-[#C8A96B]/40 hover:border-[#C8A96B]/80 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.6)] flex flex-col items-center justify-center transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_15px_35px_rgba(200,169,107,0.25)] group"
               >
-                <span className="text-[#C8A96B] font-display font-black text-base sm:text-xl">
+                <span className="text-[#C8A96B] font-display font-black text-2xl sm:text-3xl lg:text-4xl tracking-tight leading-tight group-hover:scale-105 transition-transform">
                   {m.value}
                 </span>
-                <span className="text-gray-300 font-sans text-xs tracking-wide">
+                <span className="text-[#F5F4EA]/90 font-sans font-semibold text-xs sm:text-sm tracking-wider uppercase text-center mt-2 leading-snug">
                   {m.label}
                 </span>
               </div>

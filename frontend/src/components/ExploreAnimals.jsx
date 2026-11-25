@@ -659,38 +659,28 @@ export default function ExploreAnimals({ animals = [], onSponsorAnimal }) {
               data-lenis-prevent-wheel="true"
               data-lenis-prevent-touch="true"
             >
-              {/* Large Photograph Banner */}
-              <div className="relative h-64 sm:h-80 md:h-96 w-full bg-[#071D12] overflow-hidden shrink-0">
-                <img
-                  src={activeAnimalModal.photo_url}
-                  alt={activeAnimalModal.name}
-                  className="w-full h-full object-cover object-center"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0B2A1A] via-[#0B2A1A]/40 to-transparent" />
-
-                {/* Floating Bio Summary over Image */}
-                <div className="absolute bottom-6 left-6 right-6 text-[#F5F4EA]">
-                  <div className="flex flex-wrap items-center gap-2 mb-2">
-                    <span className="px-3 py-1 rounded-md bg-[#123D2B]/90 text-xs font-bold uppercase tracking-wider text-[#C8A96B] border border-[#C8A96B]/40">
-                      {activeAnimalModal.category}
+              {/* Species Title & Classification Header (Photo removed from detail modal) */}
+              <div className="p-6 sm:p-8 bg-gradient-to-b from-[#071D12] to-[#0B2A1A] border-b border-[#26734D]/40 shrink-0">
+                <div className="flex flex-wrap items-center gap-2 mb-3">
+                  <span className="px-3 py-1 rounded-md bg-[#123D2B] text-xs font-bold uppercase tracking-wider text-[#C8A96B] border border-[#C8A96B]/40">
+                    {activeAnimalModal.category}
+                  </span>
+                  {activeAnimalModal.group && (
+                    <span className="px-3 py-1 rounded-md bg-[#071D12] text-xs font-semibold uppercase tracking-wider text-[#F5F4EA]/90 border border-[#26734D]">
+                      Group: {activeAnimalModal.group}
                     </span>
-                    {activeAnimalModal.group && (
-                      <span className="px-3 py-1 rounded-md bg-[#071D12]/90 text-xs font-semibold uppercase tracking-wider text-[#F5F4EA]/90 border border-[#26734D]">
-                        Group: {activeAnimalModal.group}
-                      </span>
-                    )}
-                    <span className={`px-3 py-1 rounded-md text-xs font-bold uppercase tracking-wider border ${getStatusColor(activeAnimalModal.conservation_status)}`}>
-                      IUCN: {activeAnimalModal.conservation_status}
-                    </span>
-                  </div>
-
-                  <h3 className="font-display font-extrabold text-3xl sm:text-4xl text-[#F5F4EA]">
-                    {(getAnimalName && getAnimalName(activeAnimalModal)) || activeAnimalModal.name}
-                  </h3>
-                  <p className="font-editorial italic text-[#C8A96B] text-base sm:text-lg mt-0.5">
-                    {activeAnimalModal.scientific_name}
-                  </p>
+                  )}
+                  <span className={`px-3 py-1 rounded-md text-xs font-bold uppercase tracking-wider border ${getStatusColor(activeAnimalModal.conservation_status)}`}>
+                    IUCN: {activeAnimalModal.conservation_status}
+                  </span>
                 </div>
+
+                <h3 className="font-display font-extrabold text-3xl sm:text-4xl text-[#F5F4EA]">
+                  {(getAnimalName && getAnimalName(activeAnimalModal)) || activeAnimalModal.name}
+                </h3>
+                <p className="font-editorial italic text-[#C8A96B] text-base sm:text-lg mt-1">
+                  {activeAnimalModal.scientific_name}
+                </p>
               </div>
 
               {/* Modal Body */}

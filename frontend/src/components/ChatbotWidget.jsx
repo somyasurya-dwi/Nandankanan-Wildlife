@@ -158,6 +158,7 @@ export default function ChatbotWidget({
   const [input, setInput] = useState('');
   const [navBottom, setNavBottom] = useState(72);
   const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
   const langMenuRef = useRef(null);
 
   // Measure the bottom edge of the navbar so the chatbot touches the line under Explore Now
@@ -438,8 +439,8 @@ export default function ChatbotWidget({
   };
 
   useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    if (isOpen && messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
     }
   }, [messages, isOpen]);
 
@@ -592,7 +593,7 @@ export default function ChatbotWidget({
           </div>
 
           {/* Messages Feed */}
-          <div className="flex-1 min-h-0 p-4 overflow-y-auto space-y-3.5 text-xs leading-relaxed">
+          <div ref={messagesContainerRef} className="flex-1 min-h-0 p-4 overflow-y-auto space-y-3.5 text-xs leading-relaxed">
             {messages.map((m) => (
               <div
                 key={m.id}
