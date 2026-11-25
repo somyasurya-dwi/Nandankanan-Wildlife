@@ -48,6 +48,7 @@ MANIFEST
 db.sqlite3
 backend/db.sqlite3
 backend/media/
+backend/.otp_cache.json
 local_settings.py
 
 # Django Database Migrations (strictly local only - NEVER commit/push to remote)
