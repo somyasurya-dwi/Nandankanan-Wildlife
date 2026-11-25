@@ -11,26 +11,26 @@ import './InteractiveMap3D.css';
    - Glassmorphism Forest-Green UI with responsive controls & drawer
 ───────────────────────────────────────────────────────────── */
 
-// Coordinate mapping from 1024×571 illustrated space to normalized DZI (width=1.0, aspect=0.5)
-const MAP_ASPECT = 2048 / 4096; // 0.5
+// Coordinate mapping from 1024×512 illustrated space to normalized DZI (width=1.0, aspect=0.5)
+const MAP_ASPECT = 0.5; // 2048 / 4096
 
 function mapToNormalized(map_x, map_y) {
   const norm_x = map_x / 1024.0;
-  const norm_y = ((571.0 - map_y) / 571.0) * MAP_ASPECT;
+  const norm_y = ((512.0 - map_y) / 512.0) * MAP_ASPECT;
   return { x: norm_x, y: norm_y };
 }
 
 // 12 Live View Animals
 const PRIMARY_SAFARIS = [
   'Royal Bengal Tiger',
-  'White Bengal Tiger',
   'Asiatic Lion',
   'Elephant',
-  'Bear',
   'Deer',
-  'Gharial Crocodile',
+  'Bear',
+  'Peacock',
+  'White Bengal Tiger',
   'Indian Pangolin',
-  'Birds',
+  'Gharial Crocodile',
   'King Cobra',
   'Indian Flapshell Turtle',
   'Asian Openbill'
@@ -43,7 +43,9 @@ export default function InteractiveMap3D({
   onOpenLiveCam, 
   onSelectMarker,
   embedded = false,
-  isFullscreen: externalIsFullscreen = false
+  isFullscreen: externalIsFullscreen = false,
+  isExpanded = false,
+  onCloseFullscreen
 }) {
   const osdContainerRef  = useRef(null);
   const viewerRef        = useRef(null);
@@ -56,6 +58,21 @@ export default function InteractiveMap3D({
   const [internalIsFullscreen, setInternalIsFullscreen] = useState(false);
   const isFullscreen = externalIsFullscreen || internalIsFullscreen;
   const [navigationTip, setNavigationTip] = useState(null);
+
+  // Recalibrate viewport constraints and frame map smoothly on fullscreen / expand change
+  useEffect(() => {
+    const viewer = viewerRef.current;
+    if (!viewer || !viewer.viewport) return;
+    const timer = setTimeout(() => {
+      if (viewer && viewer.viewport) {
+        viewer.viewport.applyConstraints();
+        if (isFullscreen) {
+          viewer.viewport.goHome(false);
+        }
+      }
+    }, 150);
+    return () => clearTimeout(timer);
+  }, [isFullscreen, isExpanded]);
 
   /* ─────────────────────────── INITIALIZE OPENSEADRAGON ─────────────────────────── */
   useEffect(() => {
@@ -305,14 +322,18 @@ export default function InteractiveMap3D({
   };
 
   const handleToggleFullscreen = () => {
+    if (externalIsFullscreen && onCloseFullscreen) {
+      onCloseFullscreen();
+      return;
+    }
     const viewer = viewerRef.current;
     if (!viewer) return;
     viewer.setFullScreen(!viewer.isFullScreen());
   };
 
   return (
-    <section id={embedded ? undefined : "interactive-map"} className={embedded ? "w-full" : "nandankanan-map-wrapper py-20 bg-[#041009] text-[#F5F4EA] relative overflow-hidden"}>
-      <div className={embedded ? "w-full" : "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10"}>
+    <section id={embedded ? undefined : "interactive-map"} className={embedded ? (isFullscreen ? "w-full h-full flex-1 flex flex-col min-h-full" : "w-full") : "nandankanan-map-wrapper py-20 bg-[#041009] text-[#F5F4EA] relative overflow-hidden"}>
+      <div className={embedded ? (isFullscreen ? "w-full h-full flex-1 flex flex-col min-h-full" : "w-full") : "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10"}>
         {/* ── Section Header (Standalone Only) ── */}
         {!embedded && (
           <div className="text-center max-w-3xl mx-auto mb-10">
@@ -356,12 +377,18 @@ export default function InteractiveMap3D({
         )}
 
         {/* ── Main Map Viewport ── */}
-        <div className={`osd-viewport-container relative rounded-3xl overflow-hidden border border-[#C8A96B]/30 shadow-2xl bg-black ${isFullscreen ? 'h-full flex-1 min-h-screen' : (embedded ? 'h-[280px] sm:h-[330px] lg:h-[370px]' : '')}`}>
+        <div className={`osd-viewport-container relative overflow-hidden bg-black ${
+          isFullscreen
+            ? 'w-full h-full flex-1 rounded-none border-0 shadow-none is-fullscreen'
+            : embedded
+              ? `${isExpanded ? 'h-[620px] sm:h-[700px] md:h-[780px] lg:h-[840px] xl:h-[900px]' : 'h-[420px] sm:h-[480px] md:h-[540px] lg:h-[580px] xl:h-[600px] 2xl:h-[620px]'} rounded-3xl border border-[#C8A96B]/30 shadow-2xl transition-all duration-300`
+              : 'rounded-3xl border border-[#C8A96B]/30 shadow-2xl'
+        }`}>
           {/* OpenSeadragon Mount */}
           <div ref={osdContainerRef} className="w-full h-full" tabIndex={0} />
 
           {/* ── Top-Left HUD: Resolution & Status ── */}
-          <div className="absolute top-4 left-4 z-20 flex flex-col gap-2 pointer-events-none">
+          <div className={`absolute ${isFullscreen ? 'top-16 left-4' : 'top-4 left-4'} z-20 flex flex-col gap-2 pointer-events-none`}>
             <div className="glass-panel px-3.5 py-2 rounded-xl flex items-center gap-3">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
               <div className="flex flex-col">
@@ -382,7 +409,7 @@ export default function InteractiveMap3D({
           </div>
 
           {/* ── Top-Right Quick Safari Jump Buttons ── */}
-          <div className={`absolute top-4 ${embedded ? 'right-16' : 'right-4'} z-20 flex items-center gap-2`}>
+          <div className={`absolute ${isFullscreen ? 'top-16 right-4 sm:top-4 sm:right-28' : (embedded ? 'top-4 right-16' : 'top-4 right-4')} z-20 flex items-center gap-2`}>
             <div className="glass-panel p-1.5 rounded-xl hidden md:flex items-center gap-1.5">
               <span className="text-[10px] text-[#C8A96B] font-bold uppercase tracking-wider px-2">Safaris:</span>
               {[
@@ -485,11 +512,7 @@ export default function InteractiveMap3D({
 
                 {/* Status Pill */}
                 <div className="absolute bottom-3 left-4 flex items-center gap-2 z-10">
-                  <span className="text-[11px] font-black px-3 py-1 rounded-full uppercase tracking-wider bg-red-600 text-white flex items-center gap-1.5 shadow-md">
-                    <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
-                    LIVE
-                  </span>
-                  <span className="text-[11px] font-black px-3 py-1 rounded-full uppercase tracking-wider bg-[#C8A96B] text-[#071D12]">
+                  <span className="text-[11px] font-black px-3 py-1 rounded-full uppercase tracking-wider bg-[#C8A96B] text-[#071D12] shadow-md">
                     {activeMarker.emoji} {activeMarker.badge_text || activeMarker.category}
                   </span>
                 </div>
@@ -510,36 +533,6 @@ export default function InteractiveMap3D({
                     Live Camera Connected
                   </span>
                 </div>
-
-                {activeMarker.description && (
-                  <p className="text-[#a4c2ad] text-xs leading-relaxed">
-                    {activeMarker.description}
-                  </p>
-                )}
-
-                {/* Territory description */}
-                {activeMarker.surrounding_place && (
-                  <div className="bg-[#071D12]/80 border border-[#C8A96B]/20 rounded-xl p-3">
-                    <span className="text-[#C8A96B] text-[10px] font-bold uppercase tracking-wider block mb-1">
-                      📍 Enclosure Environment
-                    </span>
-                    <p className="text-xs text-[#d8e8dc] leading-relaxed">
-                      {activeMarker.surrounding_place}
-                    </p>
-                  </div>
-                )}
-
-                {/* Nearby landmarks */}
-                {activeMarker.nearby_landmarks && (
-                  <div className="bg-[#071D12]/80 border border-emerald-500/20 rounded-xl p-3">
-                    <span className="text-emerald-400 text-[10px] font-bold uppercase tracking-wider block mb-1">
-                      🏛️ Nearby Sights
-                    </span>
-                    <p className="text-xs text-[#d8e8dc] leading-relaxed">
-                      {activeMarker.nearby_landmarks}
-                    </p>
-                  </div>
-                )}
 
                 {/* Navigation Tip Notice */}
                 {navigationTip && (
@@ -574,10 +567,11 @@ export default function InteractiveMap3D({
                   {onOpenLiveCam && (
                     <button
                       onClick={() => onOpenLiveCam(activeMarker)}
-                      className="w-full py-2.5 rounded-xl text-xs font-bold tracking-wide uppercase transition-all bg-red-600/90 hover:bg-red-500 text-white flex items-center justify-center gap-1.5 shadow-lg"
+                      className="w-full py-2.5 rounded-xl text-xs font-black tracking-wide uppercase transition-all bg-gradient-to-r from-[#ef4444] via-[#f97316] to-[#f59e0b] hover:from-[#dc2626] hover:to-[#ea580c] text-white flex items-center justify-center gap-2 shadow-lg shadow-red-500/30 cursor-pointer"
+                      title="Watch Fullscreen Live Stream"
                     >
-                      <span className="w-2 h-2 rounded-full bg-white animate-ping" />
-                      <span>Watch Live Stream</span>
+                      <span>📺</span>
+                      <span>Watch Fullscreen Live Stream</span>
                     </button>
                   )}
                 </div>

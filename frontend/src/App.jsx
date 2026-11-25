@@ -10,7 +10,6 @@ import CinematicVideoHero from './components/CinematicVideoHero';
 import LiveStreaming from './components/LiveStreaming';
 import InteractiveMap from './components/InteractiveMap';
 import ExploreAnimals from './components/ExploreAnimals';
-import VirtualExperience from './components/VirtualExperience';
 import ConservationStories from './components/ConservationStories';
 import NewsNoticeSection from './components/NewsNoticeSection';
 import SponsorshipPortal from './components/SponsorshipPortal';
@@ -138,19 +137,19 @@ export default function App() {
     setCurrentUser(null);
   };
 
-  // Initialize Lenis Smooth Scroll with Auto-RAF & Synchronize with GSAP ScrollTrigger
+  // Initialize Lenis Smooth Scroll with GSAP Ticker Synchronization
   useEffect(() => {
     if (currentPage !== 'sanctuary') return;
 
     const lenis = new Lenis({
-      duration: 1.25,
-      easing: (t) => 1 - Math.pow(1 - t, 4),
+      duration: 0.8,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       orientation: 'vertical',
       gestureOrientation: 'vertical',
       smoothWheel: true,
-      wheelMultiplier: 0.95,
-      touchMultiplier: 1.2,
-      autoRaf: true,
+      wheelMultiplier: 1.0,
+      touchMultiplier: 1.0,
+      autoRaf: false, // Driven precisely by GSAP ticker to eliminate frame fighting & auto-drift
     });
 
     lenisRef.current = lenis;
@@ -165,14 +164,22 @@ export default function App() {
       }
     });
 
+    // Synchronize Lenis with GSAP's RAF Ticker
+    const updateTicker = (time) => {
+      lenis.raf(time * 1000);
+    };
+    gsap.ticker.add(updateTicker);
+    gsap.ticker.lagSmoothing(0);
+
     // Settle loading screen
     const timer = setTimeout(() => {
       setIsLoaded(true);
       ScrollTrigger.refresh();
-    }, 600);
+    }, 500);
 
     return () => {
       clearTimeout(timer);
+      gsap.ticker.remove(updateTicker);
       lenisRef.current = null;
       if (typeof window !== 'undefined') window.__lenis = null;
       lenis.destroy();
@@ -201,7 +208,7 @@ export default function App() {
     if (lenisRef.current) {
       lenisRef.current.scrollTo(el, {
         offset: -headerHeight - 12,
-        duration: 1.2,
+        duration: 0.85,
         immediate: false
       });
     } else {
@@ -342,16 +349,15 @@ export default function App() {
         <ParallaxSectionBreak
           id="parallax-lake-kanjia"
           bgImage="/images/kanjia_lake.jpg"
-          badge="🌿 LAKE KANJIA WETLAND BIO-CORRIDOR • RAMSAR SENSITIVE"
           odiaText="କାଞ୍ଜିଆ ହ୍ରଦ ଓ ସବୁଜ ବନାନୀର ମିଳନସ୍ଥଳ"
           titlePart1="Where Pristine Wetlands Meet"
           titlePart2="Ancient Chandaka Forests"
           description="Spanning 75 hectares of tranquil fresh water, Lake Kanjia forms the beating ecological heart of Nandankanan, providing sanctuary to rare resident and migratory water birds, marsh crocodiles, and lush aquatic flora."
           metrics={[
-            { value: '437 ha', label: 'Protected Reserve' },
-            { value: '75 ha', label: 'Wetland Sanctuary' },
-            { value: '156+', label: 'Protected Species' },
-            { value: '64+', label: 'Avifauna Species' }
+            { icon: '🌲', value: '437 ha', label: 'Protected Reserve' },
+            { icon: '💧', value: '75 ha', label: 'Wetland Sanctuary' },
+            { icon: '🐾', value: '156+', label: 'Protected Species' },
+            { icon: '🦚', value: '64+', label: 'Avifauna Species' }
           ]}
           ctaText="Explore Illustrated Zoo Map"
           ctaHref="#zoo-map-viewport"
@@ -371,23 +377,19 @@ export default function App() {
           onSponsorAnimal={handleSponsorAnimal}
         />
 
-        {/* 7. 360° Virtual Wildlife Experience & Bio-Acoustic Soundboard */}
-        <VirtualExperience />
-
         {/* Parallax Breakthrough 2: Chandaka Sal Forest Canopy Heritage */}
         <ParallaxSectionBreak
           id="parallax-sal-canopy"
           bgImage="/images/sanctuary_forest.jpg"
-          badge="🐾 GLOBAL BREEDING & RESCUE LEADER • ESTD. 1960"
           odiaText="ବନ୍ୟପ୍ରାଣୀ ସଂରକ୍ଷଣର ଗୌରବମୟ ଇତିହାସ"
           titlePart1="A Living Heritage of"
-          titlePart2="Compassion & Conservation"
+          titlePart2="Compassion & Wildlife Conservation"
           description="The world's premier captive breeding sanctuary for Royal Bengal Tigers, White Tigers, and the endangered Indian Pangolin. Thoughtfully integrated within the native forest canopy to pioneer species rehabilitation."
           metrics={[
-            { value: '1960', label: 'Estd. Heritage' },
-            { value: '3.5M+', label: 'Annual Visitors' },
-            { value: '100%', label: 'Zero-Plastic Reserve' },
-            { value: '24/7', label: 'Veterinary Hospital' }
+            { icon: '🏛️', value: '1960', label: 'Estd. Heritage' },
+            { icon: '👥', value: '3.5M+', label: 'Annual Visitors' },
+            { icon: '🌿', value: '100%', label: 'Zero-Plastic Reserve' },
+            { icon: '🩺', value: '24/7', label: 'Veterinary Hospital' }
           ]}
           ctaText="Become an Animal Guardian"
           ctaHref="#sponsorship-flow"

@@ -81,9 +81,23 @@ export default function LiveStreaming({
 
   const handleCloseModal = () => {
     setActiveModalCamera(null);
-    if (window.location.hash.startsWith('#live/')) {
-      window.history.replaceState(null, '', '#live-wildlife');
-    }
+    window.location.hash = '#live-wildlife';
+    try {
+      window.dispatchEvent(new HashChangeEvent('hashchange'));
+    } catch (e) {}
+    setTimeout(() => {
+      const el = document.getElementById('live-cameras-grid') || document.getElementById('live-wildlife');
+      if (el) {
+        const header = document.querySelector('header');
+        const headerHeight = header ? header.offsetHeight : 95;
+        if (window.__lenis) {
+          window.__lenis.scrollTo(el, { offset: -headerHeight - 12, duration: 1.0, immediate: false });
+        } else {
+          const pos = el.getBoundingClientRect().top + window.scrollY;
+          window.scrollTo({ top: Math.max(0, pos - headerHeight - 12), behavior: 'smooth' });
+        }
+      }
+    }, 60);
   };
 
   // Switch animal inside live camera player
@@ -237,8 +251,12 @@ export default function LiveStreaming({
 
                     {/* Individual Animal Subscription Status Badge */}
                     {subscriptionManager.isSubscribed(camera) && (
-                      <span className="px-1.5 py-0.2 rounded-md bg-[#C8A96B]/25 border border-[#C8A96B]/50 text-[#C8A96B] font-mono text-[8.5px] font-bold backdrop-blur-md">
-                        VIP UNLIMITED
+                      <span 
+                        className="px-2 py-0.5 rounded-md bg-black/90 border border-[#C8A96B] text-[#F5F4EA] font-mono text-[8.5px] font-extrabold backdrop-blur-md uppercase tracking-wider shadow-md"
+                        title={`VIP Unlimited Access — ${subscriptionManager.getSubscriptionPlanLabel(camera) || '3 Months Plan'}`}
+                      >
+                        <span className="text-[#C8A96B] mr-1">✦</span>
+                        {(subscriptionManager.getSubscriptionPlanLabel(camera) || '3 Months Plan').toUpperCase()}
                       </span>
                     )}
                   </div>
@@ -246,7 +264,7 @@ export default function LiveStreaming({
                   {/* Viewer Count */}
                   <div className="absolute top-2 right-2 flex items-center gap-1 px-2 py-0.5 rounded-md bg-forest-950/80 backdrop-blur-md text-[9.5px] font-medium text-ivory-200 border border-forest-700/50 z-10 pointer-events-none">
                     <Eye className="w-3 h-3 text-gold-400" />
-                    <span>{camera.viewer_count?.toLocaleString()} watching</span>
+                    <span>{camera.viewer_count?.toLocaleString()}</span>
                   </div>
 
                   {/* Quick Play Overlay Button */}

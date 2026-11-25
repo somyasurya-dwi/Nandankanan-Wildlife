@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import confetti from 'canvas-confetti';
 import { 
   HeartHandshake, 
@@ -138,7 +138,7 @@ export default function SponsorshipPortal({
   };
 
   return (
-    <section id="sponsorship-portal" className="pt-10 sm:pt-12 lg:pt-14 pb-12 sm:pb-16 lg:pb-20 bg-forest-900 text-ivory-50 relative overflow-hidden">
+    <section id="sponsorship-portal" className="pt-16 sm:pt-20 lg:pt-24 pb-12 sm:pb-16 lg:pb-20 bg-forest-900 text-ivory-50 relative overflow-hidden scroll-mt-32">
       
       {/* Top Subtle Golden Forest Horizon Separator */}
       <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[#C8A96B]/25 to-transparent pointer-events-none" />
@@ -267,127 +267,66 @@ export default function SponsorshipPortal({
           </div>
         ) : (
           /* Sponsorship Configuration & Checkout Flow */
-          <div id="sponsorship-flow" className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start scroll-mt-28">
+          <div id="sponsorship-flow" className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch scroll-mt-32">
             
-            {/* Left 7 Columns: Animal Selection & Tier Options */}
-            <div className="lg:col-span-7 space-y-8">
+            {/* Left 7 Columns: Step 1 Animal Selection */}
+            <div className="lg:col-span-7 flex flex-col">
               
               {/* Step 1: Animal Picker */}
-              <div className="p-6 rounded-3xl bg-forest-950/80 border border-gold-500/20 backdrop-blur-md">
-                <div className="flex items-center gap-2 text-gold-400 text-xs font-bold uppercase tracking-wider mb-3">
-                  <span className="w-5 h-5 rounded-full bg-gold-500 text-forest-950 flex items-center justify-center text-[11px] font-bold">1</span>
-                  <span>Select Wildlife Species to Sponsor</span>
-                </div>
-
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  {animals.filter(a => a.sponsorship_available).map((animal) => {
-                    const isSelected = selectedAnimal.id === animal.id;
-                    return (
-                      <button
-                        key={animal.id}
-                        type="button"
-                        onClick={() => setSelectedAnimalId(animal.id)}
-                        className={`p-2.5 rounded-2xl border text-left transition-all flex flex-col items-center text-center gap-2 ${
-                          isSelected
-                            ? 'bg-forest-800 border-gold-400 shadow-lg shadow-gold-500/10 -translate-y-0.5'
-                            : 'bg-forest-900/60 border-forest-800 hover:border-gold-500/40'
-                        }`}
-                      >
-                        <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0">
-                          <img src={animal.photo_url} alt={animal.name} className="w-full h-full object-cover" />
-                        </div>
-                        <div>
-                          <h5 className="font-display font-bold text-xs text-ivory-50 line-clamp-1">{animal.name}</h5>
-                          <span className="text-[10px] text-gold-400 font-mono">₹{animal.monthly_sponsorship_cost?.toLocaleString()}/mo</span>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Step 2: Choose Sponsorship Tier */}
-              <div className="p-6 rounded-3xl bg-forest-950/80 border border-gold-500/20 backdrop-blur-md">
-                <div className="flex items-center gap-2 text-gold-400 text-xs font-bold uppercase tracking-wider mb-4">
-                  <span className="w-5 h-5 rounded-full bg-gold-500 text-forest-950 flex items-center justify-center text-[11px] font-bold">2</span>
-                  <span>Select Guardianship Tier</span>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {Object.entries(tiers).map(([key, tier]) => {
-                    const isSelected = selectedTier === key;
-                    return (
-                      <div
-                        key={key}
-                        onClick={() => setSelectedTier(key)}
-                        className={`p-5 rounded-2xl border cursor-pointer transition-all flex flex-col justify-between ${
-                          isSelected
-                            ? 'bg-forest-800 border-gold-400 shadow-xl shadow-gold-500/20 -translate-y-1'
-                            : 'bg-forest-900/60 border-forest-800 hover:border-gold-500/30'
-                        }`}
-                      >
-                        <div>
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="text-[9px] uppercase tracking-wider font-bold px-2 py-0.5 rounded bg-gold-500/20 text-gold-300 border border-gold-500/30">
-                              {tier.badge}
-                            </span>
-                            {isSelected && <CheckCircle2 className="w-4 h-4 text-gold-400" />}
-                          </div>
-
-                          <h5 className="font-display font-bold text-base text-ivory-50">{tier.name}</h5>
-                          <div className="mt-1 font-mono text-lg font-bold text-gold-400">
-                            ₹{tier.monthlyRate.toLocaleString()}<span className="text-xs text-ivory-300 font-normal">/mo</span>
-                          </div>
-
-                          <ul className="mt-4 space-y-2 text-[11px] text-ivory-200/90">
-                            {tier.benefits.map((b, idx) => (
-                              <li key={idx} className="flex items-start gap-1.5">
-                                <span className="text-gold-400 shrink-0 text-xs leading-none mt-0.5">➢</span>
-                                <span>{b}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Step 3: Duration Selector */}
-              <div className="p-6 rounded-3xl bg-forest-950/80 border border-gold-500/20 backdrop-blur-md flex items-center justify-between">
-                <div>
-                  <span className="text-xs font-bold uppercase tracking-wider text-gold-400 block mb-1">
-                    Guardianship Term
+              <div 
+                className="p-6 rounded-3xl bg-forest-950/80 border border-gold-500/20 backdrop-blur-md flex flex-col flex-1 min-h-[580px] lg:min-h-0"
+              >
+                <div className="flex items-center justify-between pb-3 mb-3 border-b border-gold-500/20 shrink-0">
+                  <div className="flex items-center gap-2 text-gold-400 text-xs font-bold uppercase tracking-wider">
+                    <span className="w-5 h-5 rounded-full bg-gold-500 text-forest-950 flex items-center justify-center text-[11px] font-bold">1</span>
+                    <span>Select Wildlife Species to Sponsor</span>
+                  </div>
+                  <span className="text-[10px] text-ivory-300/60 font-mono hidden sm:inline">
+                    {animals.filter(a => a.sponsorship_available).length} Species
                   </span>
-                  <span className="text-xs text-ivory-300">Choose commitment duration</span>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  {[1, 6, 12].map((m) => (
-                    <button
-                      key={m}
-                      type="button"
-                      onClick={() => setDuration(m)}
-                      className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-                        duration === m
-                          ? 'bg-gold-500 text-forest-950 shadow-md'
-                          : 'bg-forest-900 text-ivory-200 border border-forest-700 hover:bg-forest-800'
-                      }`}
-                    >
-                      {m} {m === 1 ? 'Month' : 'Months'}
-                    </button>
-                  ))}
+                <div 
+                  className="flex-1 min-h-0 overflow-y-auto pr-2 pt-1 adopt-animal-scrollbar"
+                  data-lenis-prevent="true"
+                  data-lenis-prevent-wheel="true"
+                  data-lenis-prevent-touch="true"
+                >
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pr-1 pt-1 pb-2">
+                    {animals.filter(a => a.sponsorship_available).map((animal) => {
+                      const isSelected = selectedAnimal.id === animal.id;
+                      return (
+                        <button
+                          key={animal.id}
+                          type="button"
+                          onClick={() => setSelectedAnimalId(animal.id)}
+                          className={`p-2.5 rounded-2xl border text-left transition-all flex flex-col items-center text-center gap-2 ${
+                            isSelected
+                              ? 'bg-forest-800 border-gold-400 shadow-lg shadow-gold-500/10 -translate-y-0.5'
+                              : 'bg-forest-900/60 border-forest-800 hover:border-gold-500/40'
+                          }`}
+                        >
+                          <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0">
+                            <img src={animal.photo_url} alt={animal.name} className="w-full h-full object-cover" />
+                          </div>
+                          <div>
+                            <h5 className="font-display font-bold text-xs text-ivory-50 line-clamp-1">{animal.name}</h5>
+                            <span className="text-[10px] text-gold-400 font-mono">₹{animal.monthly_sponsorship_cost?.toLocaleString()}/mo</span>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
 
             </div>
 
             {/* Right 5 Columns: Sponsor Details & Checkout */}
-            <div className="lg:col-span-5">
+            <div className="lg:col-span-5 flex flex-col">
               <form
                 onSubmit={handleCreateSponsorship}
-                className="p-6 sm:p-8 rounded-3xl bg-forest-950 border border-gold-500/30 shadow-2xl backdrop-blur-xl flex flex-col justify-between"
+                className="p-6 sm:p-8 rounded-3xl bg-forest-950 border border-gold-500/30 shadow-2xl backdrop-blur-xl flex flex-col justify-between flex-1"
               >
                 <div>
                   <div className="flex items-center gap-2 text-gold-400 text-xs font-bold uppercase tracking-wider mb-6">
@@ -502,6 +441,85 @@ export default function SponsorshipPortal({
                 </div>
 
               </form>
+            </div>
+
+            {/* Step 2: Choose Sponsorship Tier & Duration (Full 12-Column Width) */}
+            <div className="lg:col-span-12">
+              <div className="p-6 sm:p-8 rounded-3xl bg-forest-950/80 border border-gold-500/20 backdrop-blur-md">
+                <div className="flex items-center gap-2 text-gold-400 text-xs font-bold uppercase tracking-wider mb-5">
+                  <span className="w-5 h-5 rounded-full bg-gold-500 text-forest-950 flex items-center justify-center text-[11px] font-bold">2</span>
+                  <span>Select Guardianship Tier</span>
+                </div>
+
+                {/* 3 Tier Options Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {Object.entries(tiers).map(([key, tier]) => {
+                    const isSelected = selectedTier === key;
+                    return (
+                      <div
+                        key={key}
+                        onClick={() => setSelectedTier(key)}
+                        className={`p-6 rounded-2xl border cursor-pointer transition-all flex flex-col justify-between ${
+                          isSelected
+                            ? 'bg-forest-800 border-gold-400 shadow-xl shadow-gold-500/20 -translate-y-1'
+                            : 'bg-forest-900/60 border-forest-800 hover:border-gold-500/30'
+                        }`}
+                      >
+                        <div>
+                          <div className="flex items-center justify-between mb-3">
+                            <span className="text-[10px] uppercase tracking-wider font-bold px-2.5 py-1 rounded bg-gold-500/20 text-gold-300 border border-gold-500/30">
+                              {tier.badge}
+                            </span>
+                            {isSelected && <CheckCircle2 className="w-4 h-4 text-gold-400" />}
+                          </div>
+
+                          <h5 className="font-display font-bold text-lg text-ivory-50">{tier.name}</h5>
+                          <div className="mt-1 font-mono text-xl font-bold text-gold-400">
+                            ₹{tier.monthlyRate.toLocaleString()}<span className="text-xs text-ivory-300 font-normal">/mo</span>
+                          </div>
+
+                          <ul className="mt-4 space-y-2.5 text-xs text-ivory-200/90">
+                            {tier.benefits.map((b, idx) => (
+                              <li key={idx} className="flex items-start gap-2">
+                                <span className="text-gold-400 shrink-0 text-xs leading-none mt-0.5">➢</span>
+                                <span>{b}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Guardianship Term Selector (Integrated at the bottom of the 3 tier options) */}
+                <div className="mt-8 pt-6 border-t border-gold-500/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div>
+                    <span className="text-xs font-bold uppercase tracking-wider text-gold-400 block mb-1">
+                      Guardianship Term
+                    </span>
+                    <span className="text-xs text-ivory-300">Choose commitment duration</span>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    {[1, 6, 12].map((m) => (
+                      <button
+                        key={m}
+                        type="button"
+                        onClick={() => setDuration(m)}
+                        className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                          duration === m
+                            ? 'bg-gold-500 text-forest-950 shadow-md scale-105'
+                            : 'bg-forest-900 text-ivory-200 border border-forest-700 hover:bg-forest-800'
+                        }`}
+                      >
+                        {m} {m === 1 ? 'Month' : 'Months'}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+              </div>
             </div>
 
           </div>

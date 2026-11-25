@@ -175,20 +175,30 @@ class WalletManager {
   // =========================================================================
 
   getWallet() {
+    let currentBalance = 1250;
+    try {
+      const ecoRaw = localStorage.getItem('nkz_eco_balance');
+      if (ecoRaw !== null) currentBalance = Number(ecoRaw);
+    } catch {}
+
     try {
       const raw = localStorage.getItem(STORAGE_KEYS.WALLET);
       if (raw) {
-        return JSON.parse(raw);
+        const parsed = JSON.parse(raw);
+        if (!isNaN(currentBalance)) {
+          parsed.balance = currentBalance;
+        }
+        return parsed;
       }
     } catch {}
 
-    // Initial default wallet with ₹150 starting balance so visitors can test contributions immediately!
+    // Initial default wallet synchronized with Eco-Wallet balance
     const defaultWallet = {
       wallet_id: 'wal_init_' + this.sessionId.substring(0, 10),
       session_id: this.sessionId,
       user_name: 'Wildlife Enthusiast',
       user_email: 'visitor@nandankanan.org',
-      balance: 150,
+      balance: currentBalance,
       currency: 'INR'
     };
     try {
@@ -472,6 +482,26 @@ class WalletManager {
     this._notifyListeners();
     this._notifyDonationCelebration(contributionRecord);
 
+    // Sync with Eco-Orders for Order Ledger in Eco-Wallet
+    if (parsedAmount > 0) {
+      try {
+        const savedOrders = localStorage.getItem('nkz_eco_orders');
+        const orders = savedOrders ? JSON.parse(savedOrders) : [];
+        const newOrder = {
+          id: 'NK-ORD-' + Math.floor(10000 + Math.random() * 90000),
+          title: `${animal.animal_name || animal.name || 'Wildlife'} Sanctuary Care & Nutrition Voluntary Contribution`,
+          category: 'donation',
+          date: 'Just now',
+          paymentMethod: paymentMethod === 'wallet' ? 'Deducted from Eco-Wallet' : 'UPI / Card / NetBanking',
+          amount: -parsedAmount,
+          status: 'VERIFIED',
+          invoiceId: 'INV-' + Math.floor(10000 + Math.random() * 90000)
+        };
+        localStorage.setItem('nkz_eco_orders', JSON.stringify([newOrder, ...orders]));
+        window.dispatchEvent(new Event('nkz_eco_orders_updated'));
+      } catch (e) {}
+    }
+
     return {
       success: true,
       contribution: contributionRecord,
@@ -555,6 +585,8 @@ class WalletManager {
   _saveWallet(wallet) {
     try {
       localStorage.setItem(STORAGE_KEYS.WALLET, JSON.stringify(wallet));
+      localStorage.setItem('nkz_eco_balance', String(wallet.balance));
+      window.dispatchEvent(new Event('nkz_eco_balance_updated'));
     } catch {}
   }
 

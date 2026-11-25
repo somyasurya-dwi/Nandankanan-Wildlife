@@ -40,6 +40,8 @@ import {
   ZoomIn,
   ZoomOut,
   RefreshCw,
+  RotateCcw,
+  Signal,
   Loader2,
   Flame
 } from 'lucide-react';
@@ -166,7 +168,7 @@ export default function LiveCameraPlayer({
   const isElephant = animal?.slug === 'asian-elephant' || animal?.id === 3 || animal?.animal_name?.toLowerCase().includes('elephant');
   const isDeer = animal?.slug === 'spotted-deer' || animal?.id === 4;
   const isBear = animal?.slug === 'sloth-bear' || animal?.id === 5 || animal?.animal_name?.toLowerCase().includes('bear');
-  const isBird = animal?.slug === 'birds' || animal?.id === 6 || animal?.animal_name?.toLowerCase().includes('bird');
+  const isBird = animal?.slug === 'birds' || animal?.slug === 'peacock' || animal?.id === 6 || animal?.animal_name?.toLowerCase().includes('bird') || animal?.animal_name?.toLowerCase().includes('peacock');
   const isPangolin = animal?.slug === 'indian-pangolin' || animal?.id === 8 || animal?.animal_name?.toLowerCase().includes('pangolin');
   const isGharial = animal?.slug === 'gharial' || animal?.id === 9 || animal?.animal_name?.toLowerCase().includes('gharial') || animal?.animal_name?.toLowerCase().includes('crocodile');
   const isCobra = animal?.slug === 'king-cobra' || animal?.id === 10 || animal?.animal_name?.toLowerCase().includes('cobra');
@@ -313,11 +315,15 @@ export default function LiveCameraPlayer({
 
   // Individual Animal 5-Second Free Preview & Subscription System
   const [isSubscribed, setIsSubscribed] = useState(() => subscriptionManager.isSubscribed(animal));
+  const [activePlanLabel, setActivePlanLabel] = useState(() => {
+    return subscriptionManager.getSubscriptionPlanLabel(animal) || '3 Months Plan';
+  });
   const [remainingSeconds, setRemainingSeconds] = useState(() => {
     if (subscriptionManager.isSubscribed(animal)) return Infinity;
     return subscriptionManager.getRemainingPreviewSeconds(animal);
   });
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
+  const [selectedSubscriptionPlan, setSelectedSubscriptionPlan] = useState(null);
   const [isLocked, setIsLocked] = useState(false);
 
   // Auto-Tracking Mode (Automatic Camera Switching according to actual tiger location)
@@ -596,7 +602,7 @@ export default function LiveCameraPlayer({
   // Initialize continuous multi-camera physical location tracker
   const tracker = useMemo(() => {
     return new MultiCameraTracker({
-      animalName: animal?.animal_name || (isElephant ? "Elephant" : isBird ? "Birds" : isBear ? "Bear" : isDeer ? "Deer" : isLion ? "Asiatic Lion" : "Royal Bengal Tiger"),
+      animalName: animal?.animal_name || (isElephant ? "Elephant" : isBird ? "Peacock" : isBear ? "Bear" : isDeer ? "Deer" : isLion ? "Asiatic Lion" : "Royal Bengal Tiger"),
       individualId: animal?.resident_id || (isElephant ? "NKZ-E-01" : isBird ? "NKZ-B-12" : isBear ? "NKZ-B-05" : isDeer ? "NKZ-D-08" : isLion ? "NKZ-L-02" : "NKZ-T-04"),
       callsign: animal?.callsign || (isElephant ? "Basanti" : isBird ? "Mayur" : isBear ? "Baloo" : isDeer ? "Chitra" : isLion ? "Suraj" : "Kanha"),
       species: animal?.scientific_name || (isElephant ? "Elephas maximus" : isBird ? "Pavo cristatus" : isBear ? "Melursus ursinus" : isDeer ? "Axis axis" : isLion ? "Panthera leo persica" : "Panthera tigris tigris"),
@@ -740,6 +746,7 @@ export default function LiveCameraPlayer({
   useEffect(() => {
     const sub = subscriptionManager.isSubscribed(animal);
     setIsSubscribed(sub);
+    setActivePlanLabel(subscriptionManager.getSubscriptionPlanLabel(animal) || '3 Months Plan');
     if (sub) {
       setRemainingSeconds(Infinity);
       setIsLocked(false);
@@ -756,6 +763,7 @@ export default function LiveCameraPlayer({
     const unsubscribe = subscriptionManager.subscribe(() => {
       const sub = subscriptionManager.isSubscribed(animal);
       setIsSubscribed(sub);
+      setActivePlanLabel(subscriptionManager.getSubscriptionPlanLabel(animal) || '3 Months Plan');
       if (sub) {
         setRemainingSeconds(Infinity);
         setIsLocked(false);
@@ -790,9 +798,7 @@ export default function LiveCameraPlayer({
     return () => clearInterval(interval);
   }, [isSubscribed, animal, viewMode, selectedAngleId, videoRefs]);
 
-  const handleDismissSubscriptionModal = () => {
-    setShowSubscriptionModal(false);
-    // If user does not take subscription, grant another 5-second preview so they can watch 5s then alert repeats
+  const handlePreviewAgain = () => {
     if (!subscriptionManager.isSubscribed(animal)) {
       subscriptionManager.grantAdditionalPreview(5.0, animal);
       setRemainingSeconds(5.0);
@@ -804,8 +810,36 @@ export default function LiveCameraPlayer({
     }
   };
 
+  const handleDismissSubscriptionModal = () => {
+    setShowSubscriptionModal(false);
+    setSelectedSubscriptionPlan(null);
+    // Dismiss live player and redirect directly to Live Views section (#live-wildlife)
+    if (onClose) {
+      onClose();
+    }
+    window.location.hash = '#live-wildlife';
+    try {
+      window.dispatchEvent(new HashChangeEvent('hashchange'));
+    } catch (e) {}
+    setTimeout(() => {
+      const el = document.getElementById('live-cameras-grid') || document.getElementById('live-wildlife');
+      if (el) {
+        const header = document.querySelector('header');
+        const headerHeight = header ? header.offsetHeight : 95;
+        if (window.__lenis) {
+          window.__lenis.scrollTo(el, { offset: -headerHeight - 12, duration: 1.0, immediate: false });
+        } else {
+          const pos = el.getBoundingClientRect().top + window.scrollY;
+          window.scrollTo({ top: Math.max(0, pos - headerHeight - 12), behavior: 'smooth' });
+        }
+      }
+    }, 60);
+  };
+
   const handleSubscriptionSuccess = (sub) => {
     setIsSubscribed(true);
+    const label = (sub && sub.plan_title) || subscriptionManager.getSubscriptionPlanLabel(animal) || '3 Months Plan';
+    setActivePlanLabel(label);
     setRemainingSeconds(Infinity);
     setIsLocked(false);
     setShowSubscriptionModal(false);
@@ -1389,7 +1423,13 @@ export default function LiveCameraPlayer({
               <div className="min-w-0 truncate">
                 <div className="flex items-center gap-1.5 sm:gap-2">
                   <span className="shrink-0 flex items-center justify-center">
-                    {animal?.iconKey ? (
+                    {animal?.thumbnail_url || animal?.photo_url ? (
+                      <img 
+                        src={animal.thumbnail_url || animal.photo_url} 
+                        alt={animal.animal_name} 
+                        className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover border-2 border-[#C8A96B] shadow-md shrink-0" 
+                      />
+                    ) : animal?.iconKey ? (
                       <Realistic3DIcon iconKey={animal.iconKey} size={28} className="drop-shadow-md" />
                     ) : (
                       <span className="text-lg sm:text-xl">{animal?.emoji || '🐅'}</span>
@@ -1437,7 +1477,7 @@ export default function LiveCameraPlayer({
         {/* =========================================================================
             MAIN DASHBOARD BODY (Full Width Panoramic Video Surveillance View)
             ========================================================================= */}
-        <main className="w-full max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 xl:px-10 py-1.5 sm:py-2 flex-1 flex flex-col justify-center items-center" >
+        <main className="w-full max-w-7xl mx-auto px-4 sm:px-8 md:px-12 lg:px-16 xl:px-20 2xl:px-24 py-1.5 sm:py-2 flex-1 flex flex-col justify-center items-center" >
 
           {/* Main Top Section: Full Width High-Definition Live Camera Viewport & Controls */}
           <div className="w-full flex-1 flex flex-col justify-center items-center" >
@@ -1448,12 +1488,11 @@ export default function LiveCameraPlayer({
             <div
               ref={videoPlayerContainerRef}
               style={!isFullscreen ? {
-                aspectRatio: '16 / 9',
-                maxWidth: 'calc((100vh - 125px) * 16 / 9)'
+                height: 'min(calc(100vh - 125px), 820px)'
               } : undefined}
               className={`relative bg-black w-full mx-auto overflow-hidden group select-none transition-all duration-300 ${isFullscreen
                 ? 'fixed inset-0 z-50 h-screen w-screen rounded-none max-h-none border-none'
-                : 'max-h-[calc(100vh-125px)] rounded-2xl shadow-2xl border border-white/10'
+                : 'aspect-video md:aspect-auto max-h-[calc(100vh-125px)] min-h-[360px] rounded-2xl shadow-2xl border border-white/10'
                 }`}
             >
 
@@ -1492,7 +1531,7 @@ export default function LiveCameraPlayer({
                     </button>
 
                     <button
-                      onClick={handleDismissSubscriptionModal}
+                      onClick={handlePreviewAgain}
                       className="w-full px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-white/80 hover:text-white font-mono text-xs transition-colors cursor-pointer"
                     >
                       Preview Again (5s)
@@ -1507,6 +1546,7 @@ export default function LiveCameraPlayer({
                   <video
                     ref={videoRefContinuous}
                     key={`${animal?.id || 'cam'}-continuous`}
+                    poster={animal?.thumbnail_url || animal?.photo_url || (isWhiteTiger ? '/images/white_tiger.jpg?v=20261124' : isPangolin ? '/images/pangolin.jpg' : isGharial ? '/images/gharial.jpg' : isCobra ? '/images/king_cobra.jpg' : '/images/royal_bengal_tiger.jpg')}
                     autoPlay
                     loop
                     muted={isMuted}
@@ -1574,6 +1614,16 @@ export default function LiveCameraPlayer({
                     <div className="w-4 h-4 rounded-full bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center shrink-0">
                       <Radar className="w-2.5 h-2.5 text-emerald-400 animate-spin" />
                     </div>
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2">
+                      <span className="font-bold text-[#C8A96B] flex items-center gap-1.5">
+                        {animal?.iconKey ? (
+                          <Realistic3DIcon iconKey={animal.iconKey} size={18} className="shrink-0 inline-block align-middle" />
+                        ) : (
+                          <span>{animal?.emoji || '🐾'}</span>
+                        )}
+                        <span>{animal?.animal_name || 'Animal'}</span>
+                      </span>
+                    </div>
                     <span className="text-white font-medium flex items-center gap-1.5 whitespace-nowrap">
                       <span>Handover: <strong className="text-amber-300 font-bold">Cam {cameraMovementNotification.fromCam}</strong></span>
                       <ArrowRight className="w-3 h-3 text-[#C8A96B] shrink-0" />
@@ -1582,6 +1632,7 @@ export default function LiveCameraPlayer({
                     {cameraMovementNotification.toAngle && (
                       <span className="hidden sm:inline text-[#A7D7A9] text-[10.5px]">
                         ({cameraMovementNotification.toAngle})
+
                       </span>
                     )}
                     <button
@@ -1603,6 +1654,13 @@ export default function LiveCameraPlayer({
                 {!isFullscreen && (
                   <div className="pointer-events-auto flex items-center flex-nowrap gap-1.5 sm:gap-2 min-w-0 flex-1 overflow-hidden">
                     <div className="px-2 sm:px-2.5 py-1 rounded-xl bg-black/75 backdrop-blur-md border border-[#C8A96B]/30 text-[10px] sm:text-[11px] font-mono text-[#F5F4EA] flex items-center gap-1.5 shadow-lg pointer-events-none shrink min-w-0">
+                      {(animal?.thumbnail_url || animal?.photo_url) && (
+                        <img 
+                          src={animal.thumbnail_url || animal.photo_url} 
+                          alt={animal.animal_name} 
+                          className="w-4 h-4 rounded-full object-cover border border-[#C8A96B]/60 shrink-0" 
+                        />
+                      )}
                       <span className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-red-500 animate-pulse shrink-0" />
                       <span className="text-[#C8A96B] font-bold truncate max-w-[85px] sm:max-w-[120px] md:max-w-[150px]">{animal?.animal_name}</span>
                       <span className="text-white/40 hidden md:inline">•</span>
@@ -1612,21 +1670,25 @@ export default function LiveCameraPlayer({
                     </div>
 
                     {/* Live Stream Status Badge */}
-                    <div className="px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-[9px] sm:text-[10px] font-mono text-emerald-300 font-bold flex items-center gap-1 shadow-lg backdrop-blur-md pointer-events-none uppercase tracking-wider shrink-0">
+                    <div className="px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-xl bg-black/80 border border-emerald-500/50 text-[9px] sm:text-[10px] font-mono text-emerald-400 font-bold flex items-center gap-1 shadow-lg backdrop-blur-md pointer-events-none uppercase tracking-wider shrink-0">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
                       <span>LIVE</span>
                     </div>
 
-                    {/* 5-Second Free Preview Countdown / VIP Unlimited Badge */}
+                    {/* 5-Second Free Preview Countdown / Subscription Plan Badge (e.g. 3 Months Plan, 1 Month Plan, 6 Months Plan) */}
                     {!isSubscribed ? (
-                      <div className="px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-xl bg-amber-500/20 border border-amber-500/40 text-[9px] sm:text-[10px] font-mono text-amber-300 font-bold flex items-center gap-1 shadow-lg backdrop-blur-md pointer-events-none shrink-0 whitespace-nowrap">
+                      <div className="px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-xl bg-black/85 border border-amber-500/60 text-[9px] sm:text-[10px] font-mono text-amber-300 font-bold flex items-center gap-1 shadow-lg backdrop-blur-md pointer-events-none shrink-0 whitespace-nowrap">
                         <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse shrink-0" />
                         <span>{Math.max(0, Math.ceil(remainingSeconds))}s<span className="hidden sm:inline"> Preview</span></span>
                       </div>
                     ) : (
-                      <div className="px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-xl bg-[#C8A96B]/20 border border-[#C8A96B]/40 text-[9px] sm:text-[10px] font-mono text-[#C8A96B] font-bold flex items-center gap-1 shadow-lg backdrop-blur-md pointer-events-none shrink-0 whitespace-nowrap">
-                        <Sparkles className="w-3 h-3 text-[#C8A96B] shrink-0" />
-                        <span>VIP<span className="hidden sm:inline"> Unlimited</span></span>
+                      <div 
+                        className="px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-xl bg-black/90 border border-[#C8A96B] text-[10px] sm:text-[11px] font-mono text-[#F5F4EA] font-extrabold flex items-center gap-1.5 shadow-xl backdrop-blur-md pointer-events-none shrink-0 whitespace-nowrap"
+                        title={`VIP Unlimited Access — ${activePlanLabel}`}
+                        aria-label={`VIP ${activePlanLabel}`}
+                      >
+                        <Sparkles className="w-3.5 h-3.5 text-[#C8A96B] shrink-0 fill-[#C8A96B]/30" />
+                        <span className="text-[#F5F4EA] font-extrabold">{activePlanLabel}</span>
                       </div>
                     )}
                   </div>
@@ -1636,10 +1698,12 @@ export default function LiveCameraPlayer({
                 <div className="pointer-events-auto flex items-center gap-1.5 sm:gap-2 shrink-0 ml-auto">
                 {/* Live Viewers Watching Badge */}
                 {!isFullscreen && (
-                  <div className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl bg-black/75 hover:bg-black/90 backdrop-blur-md border border-[#C8A96B]/40 text-[10px] sm:text-xs text-[#A7D7A9] font-mono shrink-0 shadow-lg select-none">
+                  <div 
+                    className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl bg-black/75 hover:bg-black/90 backdrop-blur-md border border-[#C8A96B]/40 text-[10px] sm:text-xs font-mono shrink-0 shadow-lg select-none"
+                    title={`Live Viewers: ${animal?.viewer_count?.toLocaleString() || '1,420'}`}
+                  >
                     <Eye className="w-3.5 h-3.5 text-[#C8A96B] shrink-0" />
                     <span className="font-bold text-[#F5F4EA]">{animal?.viewer_count?.toLocaleString() || '1,420'}</span>
-                    <span className="hidden md:inline text-[#A7D7A9]">watching</span>
                   </div>
                 )}
 
@@ -1653,20 +1717,20 @@ export default function LiveCameraPlayer({
                     }}
                     className={`px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl text-[10px] sm:text-xs font-semibold backdrop-blur-md transition-all border flex items-center gap-1.5 cursor-pointer shrink-0 shadow-lg select-none ${showTopQualityMenu
                       ? 'bg-[#C8A96B] text-[#071D12] border-[#C8A96B] font-bold shadow-md shadow-[#C8A96B]/25'
-                      : 'bg-black/75 hover:bg-black/90 text-[#F5F4EA] border-[#C8A96B]/40 hover:border-[#C8A96B]'
+                      : 'bg-[#092215]/85 hover:bg-[#123D2B] text-[#F5F4EA] border-[#26734D]/60 hover:border-[#C8A96B]/60'
                       }`}
                     title={`Video Stream Quality: ${displayResolution} (Click to change)`}
                     aria-label="Change Video Stream Quality"
                   >
                     <SlidersHorizontal className={`w-3.5 h-3.5 ${showTopQualityMenu ? 'text-[#071D12]' : 'text-[#C8A96B]'} shrink-0`} />
                     {!isFullscreen && (
-                      <span className="hidden xs:inline font-mono font-bold text-emerald-300">
+                      <span className={`hidden xs:inline font-mono font-bold ${showTopQualityMenu ? 'text-[#071D12]' : 'text-[#F5F4EA]'}`}>
                         {streamQuality === 'auto' ? 'Auto' : streamQuality.toUpperCase()}
                       </span>
                     )}
-                    <span className={`px-1 py-0.2 rounded text-[9px] font-mono font-bold ${showTopQualityMenu
-                      ? 'bg-black/20 text-[#071D12]'
-                      : 'bg-black/40 text-amber-300 border border-amber-400/30'
+                    <span className={`px-1.5 py-0.2 rounded text-[9px] font-mono font-bold ${showTopQualityMenu
+                      ? 'bg-[#071D12] text-[#C8A96B]'
+                      : 'bg-[#061D12] text-[#C8A96B] border border-[#26734D]/60'
                       }`}>
                       {streamQuality === '480p' || streamQuality === '360p' ? 'SD' : 'HD'}
                     </span>
@@ -1675,20 +1739,38 @@ export default function LiveCameraPlayer({
                   {/* Top-Right Quality Dropdown Popover */}
                   {showTopQualityMenu && (
                     <div
-                      className="absolute top-full right-0 mt-1.5 w-48 sm:w-52 bg-[#06180E]/95 backdrop-blur-xl border border-[#C8A96B]/50 rounded-xl shadow-2xl p-1.5 z-50 text-xs font-mono animate-fadeIn pointer-events-auto max-h-[50vh] overflow-y-auto scrollbar-thin"
+                      className="absolute top-full right-0 mt-1.5 w-48 sm:w-52 bg-[#0B2A1A] border border-[#C8A96B]/50 rounded-xl shadow-2xl p-2 sm:p-2.5 z-50 text-[#F5F4EA] animate-fadeIn pointer-events-auto max-h-[50vh] overflow-y-auto scrollbar-thin shadow-black/80"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      <div className="flex items-center justify-between px-2 py-1 text-[9.5px] text-white/60 uppercase tracking-wider border-b border-white/10 mb-1 font-bold">
-                        <span className="flex items-center gap-1.5 text-[#C8A96B]">
+                      {/* Header */}
+                      <div className="flex items-center justify-between pb-1.5 mb-2 border-b border-white/10">
+                        <span className="text-[10px] sm:text-[10.5px] font-mono uppercase tracking-wider text-[#C8A96B] flex items-center gap-1 font-bold">
                           <SlidersHorizontal className="w-3 h-3 text-[#C8A96B]" />
-                          Video Stream Quality
+                          <span>Stream Quality</span>
                         </span>
-                        <span className="text-emerald-400 font-mono">
-                          {streamQuality.toUpperCase()}
-                        </span>
+                        {streamQuality !== 'auto' ? (
+                          <button
+                            type="button"
+                            onClick={() => handleSelectQuality('auto')}
+                            className="text-[9.5px] font-mono text-[#C8A96B] hover:text-white flex items-center gap-1 transition-colors cursor-pointer"
+                            title="Reset to Auto quality"
+                          >
+                            <RotateCcw className="w-2.5 h-2.5 text-[#C8A96B]" /> Reset
+                          </button>
+                        ) : (
+                          <span className="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded-full bg-[#061D12] text-[#C8A96B] border border-[#26734D]/70">
+                            Adaptive
+                          </span>
+                        )}
                       </div>
 
-                      <div className="space-y-0.5">
+                      {/* Stream Quality Options Header Label */}
+                      <label className="text-[10px] font-medium text-[#F5F4EA]/70 block mb-1">
+                        Resolution & Bitrate
+                      </label>
+
+                      {/* Quality Options List styled with the accessibility color combination */}
+                      <div className="space-y-0.5 bg-[#061D12] p-1 rounded-lg border border-[#26734D]/50">
                         {QUALITY_OPTIONS.map((q) => {
                           const isSelected = streamQuality === q.id;
                           return (
@@ -1696,18 +1778,21 @@ export default function LiveCameraPlayer({
                               key={q.id}
                               type="button"
                               onClick={() => handleSelectQuality(q.id)}
-                              className={`w-full text-left px-2.5 py-1.5 rounded-lg flex items-center justify-between transition-all cursor-pointer ${isSelected
-                                ? 'bg-gradient-to-r from-[#C8A96B] to-[#DFCA98] text-[#071D12] font-bold shadow-sm'
-                                : 'text-white/80 hover:bg-white/10 hover:text-white'
-                                }`}
+                              className={`w-full px-2 py-1 rounded-md flex items-center justify-between transition-all cursor-pointer ${
+                                isSelected
+                                  ? 'bg-[#C8A96B] text-[#071D12] font-bold shadow-sm'
+                                  : 'text-[#F5F4EA]/80 hover:bg-[#1B6537]/50 hover:text-white'
+                              }`}
                             >
-                              <span className={`text-[10px] px-2 py-0.5 rounded font-bold font-mono ${isSelected
-                                ? 'bg-black/20 text-[#071D12]'
-                                : 'bg-white/10 text-emerald-400'
-                                }`}>
+                              <span className={`text-[10.5px] sm:text-[11px] font-bold tracking-wide ${isSelected ? 'text-[#071D12]' : 'text-[#F5F4EA]'}`}>
                                 {q.badge}
                               </span>
-                              {isSelected && <CheckCircle2 className="w-3.5 h-3.5 text-[#071D12] shrink-0" />}
+                              <div className="flex items-center gap-1">
+                                <span className={`text-[9px] font-mono ${isSelected ? 'text-[#071D12]/85 font-semibold' : 'text-[#C8A96B]'}`}>
+                                  {q.fps} • {q.bitrate}
+                                </span>
+                                {isSelected && <CheckCircle2 className="w-3 h-3 text-[#071D12] shrink-0" />}
+                              </div>
                             </button>
                           );
                         })}
@@ -1725,7 +1810,7 @@ export default function LiveCameraPlayer({
                     }}
                     className={`px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl text-[10px] sm:text-xs font-semibold backdrop-blur-md transition-all border flex items-center gap-1.5 cursor-pointer shrink-0 shadow-lg select-none ${showZoomMenu || zoomLevel > 1
                       ? 'bg-[#C8A96B] text-[#071D12] border-[#C8A96B] font-bold shadow-md shadow-[#C8A96B]/25'
-                      : 'bg-black/75 hover:bg-black/90 text-[#F5F4EA] border-[#C8A96B]/40 hover:border-[#C8A96B]'
+                      : 'bg-[#092215]/85 hover:bg-[#123D2B] text-[#F5F4EA] border-[#26734D]/60 hover:border-[#C8A96B]/60'
                       }`}
                     title={`Digital Zoom: ${zoomLevel}x (Click to change zoom level)`}
                     aria-label="Change Video Zoom Level"
@@ -1736,7 +1821,7 @@ export default function LiveCameraPlayer({
                       <ZoomIn className={`w-3.5 h-3.5 ${showZoomMenu || zoomLevel > 1 ? 'text-[#071D12]' : 'text-[#C8A96B]'}`} />
                     )}
                     {!isFullscreen && (
-                      <span className="font-mono font-bold text-emerald-300">
+                      <span className={`font-mono font-bold ${showZoomMenu || zoomLevel > 1 ? 'text-[#071D12]' : 'text-[#F5F4EA]'}`}>
                         {zoomLevel}x
                       </span>
                     )}
@@ -1745,43 +1830,86 @@ export default function LiveCameraPlayer({
                   {/* Top-Right Zoom Dropdown Popover */}
                   {showZoomMenu && (
                     <div
-                      className="absolute top-full right-0 mt-1.5 w-48 sm:w-52 bg-[#06180E]/95 backdrop-blur-xl border border-[#C8A96B]/50 rounded-xl shadow-2xl p-1.5 z-50 text-xs font-mono animate-fadeIn pointer-events-auto max-h-[50vh] overflow-y-auto scrollbar-thin"
+                      className="absolute top-full right-0 mt-1.5 w-48 sm:w-52 bg-[#0B2A1A] border border-[#C8A96B]/50 rounded-xl shadow-2xl p-2 sm:p-2.5 z-50 text-[#F5F4EA] animate-fadeIn pointer-events-auto shadow-black/80"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      <div className="flex items-center justify-between px-2 py-1 text-[9.5px] text-white/60 uppercase tracking-wider border-b border-white/10 mb-1 font-bold">
-                        <span className="flex items-center gap-1.5 text-[#C8A96B]">
+                      {/* Header */}
+                      <div className="flex items-center justify-between pb-1.5 mb-2 border-b border-white/10">
+                        <span className="text-[10px] sm:text-[10.5px] font-mono uppercase tracking-wider text-[#C8A96B] flex items-center gap-1 font-bold">
                           <ZoomIn className="w-3 h-3 text-[#C8A96B]" />
-                          Optical & Digital Zoom
+                          <span>Digital Zoom</span>
                         </span>
-                        <span className="text-emerald-400 font-mono">
-                          {zoomLevel}X
+                        {zoomLevel > 1 ? (
+                          <button
+                            type="button"
+                            onClick={() => handleSelectZoom(1)}
+                            className="text-[9.5px] font-mono text-[#C8A96B] hover:text-white flex items-center gap-1 transition-colors cursor-pointer"
+                            title="Reset zoom to 1x"
+                          >
+                            <RotateCcw className="w-2.5 h-2.5 text-[#C8A96B]" /> Reset
+                          </button>
+                        ) : (
+                          <span className="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded-full bg-[#061D12] text-[#C8A96B] border border-[#26734D]/70">
+                            1X Normal
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Magnification Segmented Controls */}
+                      <div className="mb-1.5">
+                        <label className="text-[9.5px] sm:text-[10px] font-medium text-[#F5F4EA]/70 block mb-1">
+                          Magnification Level
+                        </label>
+                        <div className="grid grid-cols-3 gap-1 bg-[#061D12] p-0.5 rounded-lg border border-[#26734D]/50">
+                          {ZOOM_OPTIONS.map((z) => {
+                            const isSelected = zoomLevel === z.level;
+                            return (
+                              <button
+                                key={z.level}
+                                type="button"
+                                onClick={() => handleSelectZoom(z.level)}
+                                className={`py-1 rounded-md text-[10px] sm:text-[10.5px] font-bold transition-all cursor-pointer ${
+                                  isSelected
+                                    ? 'bg-[#C8A96B] text-[#071D12] shadow-sm'
+                                    : 'text-[#F5F4EA]/80 hover:bg-[#1B6537]/50 hover:text-white'
+                                }`}
+                              >
+                                {z.badge}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Field of View Row */}
+                      <div className="mb-1.5 flex items-center justify-between p-1.5 rounded-lg bg-[#061D12] border border-[#26734D]/50">
+                        <span className="text-[9.5px] sm:text-[10px] font-medium text-[#F5F4EA] flex items-center gap-1.5">
+                          <Eye className="w-3 h-3 text-[#C8A96B]" />
+                          <span>Field of View</span>
+                        </span>
+                        <span className="text-[9px] sm:text-[9.5px] font-mono font-bold text-[#C8A96B]">
+                          {zoomLevel === 1 ? '100% Panorama' : zoomLevel === 1.5 ? '67% Telephoto' : '50% Close-up'}
                         </span>
                       </div>
 
-                      <div className="space-y-0.5">
-                        {ZOOM_OPTIONS.map((z) => {
-                          const isSelected = zoomLevel === z.level;
-                          return (
-                            <button
-                              key={z.level}
-                              type="button"
-                              onClick={() => handleSelectZoom(z.level)}
-                              className={`w-full text-left px-2.5 py-1.5 rounded-lg flex items-center justify-between transition-all cursor-pointer ${isSelected
-                                ? 'bg-gradient-to-r from-[#C8A96B] to-[#DFCA98] text-[#071D12] font-bold shadow-sm'
-                                : 'text-[#F5F4EA]/90 hover:bg-white/10'
-                                }`}
-                            >
-                              <span className={`text-[10px] px-2 py-0.5 rounded font-bold font-mono ${isSelected
-                                ? 'bg-black/20 text-[#071D12]'
-                                : 'bg-white/10 text-emerald-400'
-                                }`}>
-                                {z.badge}
-                              </span>
-                              {isSelected && <CheckCircle2 className="w-3.5 h-3.5 text-[#071D12] shrink-0" />}
-                            </button>
-                          );
-                        })}
-                      </div>
+                      {/* Bottom Action Button */}
+                      <button
+                        type="button"
+                        onClick={() => handleSelectZoom(zoomLevel === 1 ? 2 : 1)}
+                        className="w-full py-1.5 rounded-lg text-[10px] sm:text-[10.5px] font-bold flex items-center justify-center gap-1 border transition-all bg-[#1B6537] text-white hover:text-[#C8A96B] hover:bg-[#217c44] border border-[#26734D]/70 shadow-sm cursor-pointer"
+                      >
+                        {zoomLevel === 1 ? (
+                          <>
+                            <ZoomIn className="w-3 h-3" />
+                            <span>Quick Zoom In (2X)</span>
+                          </>
+                        ) : (
+                          <>
+                            <RotateCcw className="w-3 h-3" />
+                            <span>Reset to Panorama (1X)</span>
+                          </>
+                        )}
+                      </button>
                     </div>
                   )}
                 </div>
@@ -1790,32 +1918,32 @@ export default function LiveCameraPlayer({
 
             {/* On-Screen Video Zoom Notification Toast */}
             {zoomNotification && (
-              <div className={`absolute ${cameraMovementNotification ? 'top-22 sm:top-24' : 'top-13 sm:top-14'} inset-x-0 mx-auto w-fit z-30 px-3.5 py-1.5 rounded-full bg-black/85 backdrop-blur-md border border-[#C8A96B]/60 text-[#F5F4EA] shadow-2xl flex items-center gap-2 text-xs font-mono animate-fadeIn pointer-events-none`}>
+              <div className={`absolute ${cameraMovementNotification ? 'top-22 sm:top-24' : 'top-13 sm:top-14'} inset-x-0 mx-auto w-fit z-30 px-3.5 py-1.5 rounded-full bg-[#0B2A1A]/95 backdrop-blur-md border border-[#26734D]/80 text-[#F5F4EA] shadow-2xl flex items-center gap-2 text-xs font-mono animate-fadeIn pointer-events-none`}>
                 <ZoomIn className="w-3.5 h-3.5 text-[#C8A96B] animate-pulse" />
-                <span className="text-white/80">Digital Zoom:</span>
-                <span className="text-emerald-400 font-bold">{zoomNotification}</span>
+                <span className="text-[#F5F4EA]/80">Digital Zoom:</span>
+                <span className="text-[#C8A96B] font-bold">{zoomNotification}</span>
               </div>
             )}
 
             {/* On-Screen Video Quality Notification Toast */}
             {qualityNotification && (
-              <div className={`absolute ${cameraMovementNotification ? 'top-22 sm:top-24' : 'top-13 sm:top-14'} inset-x-0 mx-auto w-fit z-30 px-3.5 py-1.5 rounded-full bg-black/85 backdrop-blur-md border border-[#C8A96B]/60 text-[#F5F4EA] shadow-2xl flex items-center gap-2 text-xs font-mono animate-fadeIn pointer-events-none`}>
+              <div className={`absolute ${cameraMovementNotification ? 'top-22 sm:top-24' : 'top-13 sm:top-14'} inset-x-0 mx-auto w-fit z-30 px-3.5 py-1.5 rounded-full bg-[#0B2A1A]/95 backdrop-blur-md border border-[#26734D]/80 text-[#F5F4EA] shadow-2xl flex items-center gap-2 text-xs font-mono animate-fadeIn pointer-events-none`}>
                 <SlidersHorizontal className="w-3.5 h-3.5 text-[#C8A96B] animate-spin" />
-                <span className="text-white/80">Stream Quality:</span>
-                <span className="text-emerald-400 font-bold">{qualityNotification}</span>
+                <span className="text-[#F5F4EA]/80">Stream Quality:</span>
+                <span className="text-[#C8A96B] font-bold">{qualityNotification}</span>
               </div>
             )}
 
             {/* Audio Volume / Mute Toast Notification */}
             {audioNotification && (
-              <div className={`absolute ${cameraMovementNotification ? 'top-22 sm:top-24' : 'top-13 sm:top-14'} inset-x-0 mx-auto w-fit z-30 px-3.5 py-1.5 rounded-full bg-black/85 backdrop-blur-md border border-[#C8A96B]/60 text-[#F5F4EA] shadow-2xl flex items-center gap-2 text-xs font-mono animate-fadeIn pointer-events-none`}>
+              <div className={`absolute ${cameraMovementNotification ? 'top-22 sm:top-24' : 'top-13 sm:top-14'} inset-x-0 mx-auto w-fit z-30 px-3.5 py-1.5 rounded-full bg-[#06180E]/90 backdrop-blur-md border border-[#C8A96B]/60 text-[#F5F4EA] shadow-2xl flex items-center gap-2 text-xs font-mono animate-fadeIn pointer-events-none`}>
                 {isMuted || volume === 0 ? (
                   <VolumeX className="w-3.5 h-3.5 text-rose-400" />
                 ) : (
                   <Volume2 className="w-3.5 h-3.5 text-[#C8A96B] animate-pulse" />
                 )}
-                <span className="text-white/80">Audio:</span>
-                <span className="text-emerald-400 font-bold">{audioNotification}</span>
+                <span className="text-[#F5F4EA]/80">Audio:</span>
+                <span className="text-[#C8A96B] font-bold">{audioNotification}</span>
               </div>
             )}
 
@@ -2078,7 +2206,7 @@ export default function LiveCameraPlayer({
         </main>
 
         {/* =========================================================================
-            6. SANCTUARY FOOTER
+            5. SANCTUARY FOOTER
             ========================================================================= */}
         <footer className="w-full bg-[#06180E] border-t border-[#14532D]/80 shadow-2xl py-1.5 sm:py-2 px-3 sm:px-6 lg:px-8 xl:px-10 shrink-0 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-[#A7D7A9] font-mono">
           <div className="flex items-center gap-2">
@@ -2482,6 +2610,7 @@ export default function LiveCameraPlayer({
           onSuccess={handleSubscriptionSuccess}
           animal={animal}
           animalName={animal?.animal_name}
+          initialPlan={selectedSubscriptionPlan}
         />
 
       </div>

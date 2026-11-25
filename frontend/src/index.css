@@ -53,6 +53,62 @@ html {
   background: #C8A96B;
 }
 
+/* Eliminate native scrollbar up/down arrow buttons across all browsers so nothing pokes out of boxes */
+::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* Modal and card smooth contained scrollbar */
+.modal-scroll-container {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(200, 169, 107, 0.45) transparent;
+}
+.modal-scroll-container::-webkit-scrollbar {
+  width: 6px;
+}
+.modal-scroll-container::-webkit-scrollbar-track {
+  background: transparent;
+  margin-top: 18px;
+  margin-bottom: 18px;
+}
+.modal-scroll-container::-webkit-scrollbar-thumb {
+  background: rgba(200, 169, 107, 0.45);
+  border-radius: 9999px;
+  border: none;
+}
+.modal-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(200, 169, 107, 0.85);
+}
+.modal-scroll-container::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* Adopt Animal Picker Scrollbar */
+.adopt-animal-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #C8A96B rgba(11, 36, 25, 0.8);
+}
+.adopt-animal-scrollbar::-webkit-scrollbar {
+  width: 6px !important;
+  height: 0px !important;
+}
+.adopt-animal-scrollbar::-webkit-scrollbar-track {
+  background: rgba(11, 36, 25, 0.6) !important;
+  border-radius: 9999px;
+}
+.adopt-animal-scrollbar::-webkit-scrollbar-thumb {
+  background: #C8A96B !important;
+  border-radius: 9999px;
+  border: 1px solid rgba(11, 36, 25, 0.5);
+}
+.adopt-animal-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #DFB876 !important;
+}
+
 /* Universal Scrollbar Hide Utilities */
 .scrollbar-none::-webkit-scrollbar,
 .no-scrollbar::-webkit-scrollbar {

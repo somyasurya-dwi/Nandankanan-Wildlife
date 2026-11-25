@@ -29,19 +29,22 @@ const LOCALIZED_CONTENT = {
     badge: "AI Guide",
     status: "Sanctuary AI Intelligence Active",
     welcome: "Namaskar! I am your Nandankanan Sanctuary AI Assistant. How may I assist your visit, safari booking, or wildlife inquiry today?",
-    placeholder: "Ask AI about any animal, safaris, timings...",
+    placeholder: "Ask AI about any animal, live streams, safaris...",
     langLabel: "Language:",
     prompts: [
-      { label: '📹 Tiger Live Cam', q: 'Show me the tiger live cam' },
-      { label: '🦁 Lion Live Cam', q: 'Show me the lion live cam' },
+      { label: '📹 All 12 Animal Live Streams', q: 'Show me the live stream of the individual animal' },
+      { label: '🐅 Royal Bengal Tiger Live Cam', q: 'Show me the tiger live cam' },
+      { label: '🦁 Asiatic Lion Live Cam', q: 'Show me the lion live cam' },
       { label: '🐘 Elephant Live Cam', q: 'Show me the elephant live cam' },
-      { label: '🐅 White Tiger Live Cam', q: 'Show me the white tiger live cam' },
       { label: '🦌 Deer Live Cam', q: 'Show me the deer live cam' },
       { label: '🐻 Bear Live Cam', q: 'Show me the bear live cam' },
-      { label: '🦚 Birds & Aviary Live Cam', q: 'Show me the birds live cam' },
-      { label: '🛡️ Pangolin Live Cam', q: 'Show me the pangolin live cam' },
-      { label: '🐊 Gharial Live Cam', q: 'Show me the gharial live cam' },
+      { label: '🦚 Peacock Live Cam', q: 'Show me the peacock live cam' },
+      { label: '⚪ White Bengal Tiger Live Cam', q: 'Show me the white tiger live cam' },
+      { label: '🛡️ Indian Pangolin Live Cam', q: 'Show me the pangolin live cam' },
+      { label: '🐊 Gharial Crocodile Live Cam', q: 'Show me the gharial live cam' },
       { label: '🐍 King Cobra Live Cam', q: 'Show me the king cobra live cam' },
+      { label: '🐢 Flapshell Turtle Live Cam', q: 'Show me the turtle live cam' },
+      { label: '🪶 Asian Openbill Live Cam', q: 'Show me the openbill live cam' },
       { label: '🐾 Every Animal Guide', q: 'Tell me every animal detail in Nandankanan Zoological Park' },
       { label: '🐅 White Tiger Heritage', q: 'Tell me the history of White Tigers in Nandankanan' },
       { label: '🦁 Asiatic Lion Safari', q: 'Tell me about Asiatic Lion and Lion Safari' },
@@ -61,16 +64,22 @@ const LOCALIZED_CONTENT = {
     badge: "AI ସହାୟକ",
     status: "ଅଭୟାରଣ୍ୟ ସହାୟକ ସକ୍ରିୟ • ଓଡ଼ିଆ",
     welcome: "ନମସ୍କାର! ମୁଁ ନନ୍ଦନକାନନ ଅଭୟାରଣ୍ୟ AI ସହାୟକ। ଆଜି ଆପଣଙ୍କ ପରିଦର୍ଶନ, ସଫାରୀ ବୁକିଂ କିମ୍ବା ବନ୍ୟପ୍ରାଣୀ ସମ୍ପର୍କରେ କି ସାହାଯ୍ୟ କରିପାରିବି?",
-    placeholder: "ସମସ୍ତ ପ୍ରାଣୀ, ସମୟ, ସଫାରୀ ସମ୍ପର୍କରେ ପଚାରନ୍ତୁ...",
+    placeholder: "ସମସ୍ତ ପ୍ରାଣୀ, ଲାଇଭ୍ ଷ୍ଟ୍ରିମ୍, ସଫାରୀ ସମ୍ପର୍କରେ ପଚାରନ୍ତୁ...",
     langLabel: "ଭାଷା:",
     prompts: [
-      { label: '📹 ବାଘ ଲାଇଭ୍ କ୍ୟାମେରା', q: 'ମୋତେ ବାଘ ଲାଇଭ୍ କ୍ୟାମେରା ଦେଖାନ୍ତୁ' },
+      { label: '📹 ସମସ୍ତ ୧୨ଟି ଲାଇଭ୍ ଷ୍ଟ୍ରିମ୍', q: 'ମୋତେ ପ୍ରତ୍ୟେକ ପ୍ରାଣୀଙ୍କ ଲାଇଭ୍ ଷ୍ଟ୍ରିମ୍ ଦେଖାନ୍ତୁ' },
+      { label: '🐅 ବାଘ ଲାଇଭ୍ କ୍ୟାମେରା', q: 'ମୋତେ ବାଘ ଲାଇଭ୍ କ୍ୟାମେରା ଦେଖାନ୍ତୁ' },
       { label: '🦁 ସିଂହ ଲାଇଭ୍ କ୍ୟାମେରା', q: 'ମୋତେ ସିଂହ ଲାଇଭ୍ କ୍ୟାମେରା ଦେଖାନ୍ତୁ' },
       { label: '🐘 ହାତୀ ଲାଇଭ୍ କ୍ୟାମେରା', q: 'ମୋତେ ହାତୀ ଲାଇଭ୍ କ୍ୟାମେରା ଦେଖାନ୍ତୁ' },
-      { label: '🐅 ଧଳା ବାଘ ଲାଇଭ୍ କ୍ୟାମେରା', q: 'ମୋତେ ଧଳା ବାଘ ଲାଇଭ୍ କ୍ୟାମେରା ଦେଖାନ୍ତୁ' },
       { label: '🦌 ହରିଣ ଲାଇଭ୍ କ୍ୟାମେରା', q: 'ମୋତେ ହରିଣ ଲାଇଭ୍ କ୍ୟାମେରା ଦେଖାନ୍ତୁ' },
       { label: '🐻 ଭାଲୁ ଲାଇଭ୍ କ୍ୟାମେରା', q: 'ମୋତେ ଭାଲୁ ଲାଇଭ୍ କ୍ୟାମେରା ଦେଖାନ୍ତୁ' },
-      { label: '🦚 ପକ୍ଷୀ ଲାଇଭ୍ କ୍ୟାମେରା', q: 'ମୋତେ ପକ୍ଷୀ ଲାଇଭ୍ କ୍ୟାମେରା ଦେଖାନ୍ତୁ' },
+      { label: '🦚 ମୟୂର ଲାଇଭ୍ କ୍ୟାମେରା', q: 'ମୋତେ ମୟୂର ଲାଇଭ୍ କ୍ୟାମେରା ଦେଖାନ୍ତୁ' },
+      { label: '⚪ ଧଳା ବାଘ ଲାଇଭ୍ କ୍ୟାମେରା', q: 'ମୋତେ ଧଳା ବାଘ ଲାଇଭ୍ କ୍ୟାମେରା ଦେଖାନ୍ତୁ' },
+      { label: '🛡️ ବଜ୍ରକାପ୍ତା ଲାଇଭ୍ କ୍ୟାମେରା', q: 'ମୋତେ ବଜ୍ରକାପ୍ତା ଲାଇଭ୍ କ୍ୟାମେରା ଦେଖାନ୍ତୁ' },
+      { label: '🐊 ଘଡ଼ିଆଳ ଲାଇଭ୍ କ୍ୟାମେରା', q: 'ମୋତେ ଘଡ଼ିଆଳ ଲାଇଭ୍ କ୍ୟାମେରା ଦେଖାନ୍ତୁ' },
+      { label: '🐍 କିଙ୍ଗ କୋବ୍ରା ଲାଇଭ୍ କ୍ୟାମେରା', q: 'ମୋତେ କିଙ୍ଗ କୋବ୍ରା ଲାଇଭ୍ କ୍ୟାମେରା ଦେଖାନ୍ତୁ' },
+      { label: '🐢 କଇଁଛ ଲାଇଭ୍ କ୍ୟାମେରା', q: 'ମୋତେ କଇଁଛ ଲାଇଭ୍ କ୍ୟାମେରା ଦେଖାନ୍ତୁ' },
+      { label: '🪶 ଓପନବିଲ୍ ଲାଇଭ୍ କ୍ୟାମେରା', q: 'ମୋତେ ଓପନବିଲ୍ ଲାଇଭ୍ କ୍ୟାମେରା ଦେଖାନ୍ତୁ' },
       { label: '🐾 ସମସ୍ତ ପ୍ରାଣୀ ଗାଇଡ୍', q: 'ନନ୍ଦନକାନନର ସମସ୍ତ ପ୍ରାଣୀଙ୍କ ବିବରଣୀ କୁହନ୍ତୁ' },
       { label: '🐅 ଧଳା ବାଘ ଇତିହାସ', q: 'ଧଳା ବାଘଙ୍କ ଇତିହାସ କୁହନ୍ତୁ' },
       { label: '🦁 ସିଂହ ସଫାରୀ', q: 'ଏସିଆଟିକ ସିଂହ ଓ ସିଂହ ସଫାରୀ ବିଷୟରେ କୁହନ୍ତୁ' },
@@ -90,16 +99,22 @@ const LOCALIZED_CONTENT = {
     badge: "AI সহকারী",
     status: "অভয়ারণ্য সহায়ক সক্রিয় • বাংলা",
     welcome: "নমস্কার! আমি আপনার নন্দনকানন অভয়ারণ্য AI সহকারী। আজকের ভ্রমণ, সাফারি বুকিং বা বন্যপ্রাণী অনুসন্ধানে কীভাবে সাহায্য করতে পারি?",
-    placeholder: "সকল প্রাণী, সময়সূচী বা সাফারি সম্পর্কে জিজ্ঞাসা করুন...",
+    placeholder: "সকল প্রাণী, লাইভ স্ট্রিম, সময়সূচী বা সাফারি...",
     langLabel: "ভাষা:",
     prompts: [
-      { label: '📹 বাঘের লাইভ ক্যামেরা', q: 'আমাকে বাঘের লাইভ ক্যামেরা দেখান' },
+      { label: '📹 সকল ১২টি প্রাণীর লাইভ স্ট্রিম', q: 'আমাকে প্রতিটি প্রাণীর লাইভ স্ট্রিম দেখান' },
+      { label: '🐅 বাঘের লাইভ ক্যামেরা', q: 'আমাকে বাঘের লাইভ ক্যামেরা দেখান' },
       { label: '🦁 সিংহ লাইভ ক্যামেরা', q: 'আমাকে সিংহের লাইভ ক্যামেরা দেখান' },
       { label: '🐘 হাতি লাইভ ক্যামেরা', q: 'আমাকে হাতির লাইভ ক্যামেরা দেখান' },
-      { label: '🐅 সাদা বাঘ লাইভ ক্যামেরা', q: 'আমাকে সাদা বাঘের লাইভ ক্যামেরা দেখান' },
       { label: '🦌 হরিণ লাইভ ক্যামেরা', q: 'আমাকে হরিণের লাইভ ক্যামেরা দেখান' },
       { label: '🐻 ভাল্লুক লাইভ ক্যামেরা', q: 'আমাকে ভাল্লুকের লাইভ ক্যামেরা দেখান' },
-      { label: '🦚 পাখি লাইভ ক্যামেরা', q: 'আমাকে পাখির লাইভ ক্যামেরা দেখান' },
+      { label: '🦚 ময়ূর লাইভ ক্যামেরা', q: 'আমাকে ময়ূরের লাইভ ক্যামেরা দেখান' },
+      { label: '⚪ সাদা বাঘ লাইভ ক্যামেরা', q: 'আমাকে সাদা বাঘের লাইভ ক্যামেরা দেখান' },
+      { label: '🛡️ প্যাঙ্গোলিন লাইভ ক্যামেরা', q: 'আমাকে প্যাঙ্গোলিনের লাইভ ক্যামেরা দেখান' },
+      { label: '🐊 ঘড়িয়াল লাইভ ক্যামেরা', q: 'আমাকে ঘড়িয়ালের লাইভ ক্যামেরা দেখান' },
+      { label: '🐍 কিং কোবরা লাইভ ক্যামেরা', q: 'আমাকে কিং কোবরার লাইভ ক্যামেরা দেখান' },
+      { label: '🐢 কাছিম লাইভ ক্যামেরা', q: 'আমাকে কাছিমের লাইভ ক্যামেরা দেখান' },
+      { label: '🪶 শামুকখোল লাইভ ক্যামেরা', q: 'আমাকে শামুকখোলের লাইভ ক্যামেরা দেখান' },
       { label: '🐾 সকল প্রাণী সহায়িকা', q: 'নন্দনকাননের সকল প্রাণীর পূর্ণাঙ্গ বিবরণ দিন' },
       { label: '🐅 সাদা বাঘের ইতিহাস', q: 'সাদা বাঘের ইতিহাস সম্পর্কে বলুন' },
       { label: '🦁 সিংহ সাফারি', q: 'এশিয়াটিক সিংহ ও সাফারি সম্পর্কে বলুন' },
@@ -119,16 +134,22 @@ const LOCALIZED_CONTENT = {
     badge: "AI सहायक",
     status: "अभयारण्य सहायक सक्रिय • हिन्दी",
     welcome: "नमस्कार! मैं आपका नंदनकानन अभयारण्य AI सहायक हूँ। आज आपकी यात्रा, सफारी बुकिंग या वन्यजीव संबंधी पूछताछ में किस प्रकार सहायता कर सकता हूँ?",
-    placeholder: "सभी जानवर, समय, सफारी या वन्यजीवों के बारे में पूछें...",
+    placeholder: "सभी जानवर, लाइव स्ट्रीम, समय, सफारी पूछें...",
     langLabel: "भाषा:",
     prompts: [
-      { label: '📹 बाघ का लाइव कैमरा', q: 'मुझे बाघ का लाइव कैमरा दिखाएं' },
+      { label: '📹 सभी 12 जानवरों की लाइव स्ट्रीम', q: 'मुझे प्रत्येक जानवर की लाइव स्ट्रीम दिखाएं' },
+      { label: '🐅 बाघ का लाइव कैमरा', q: 'मुझे बाघ का लाइव कैमरा दिखाएं' },
       { label: '🦁 शेर का लाइव कैमरा', q: 'मुझे शेर का लाइव कैमरा दिखाएं' },
       { label: '🐘 हाथी का लाइव कैमरा', q: 'मुझे हाथी का लाइव कैमरा दिखाएं' },
-      { label: '🐅 सफेद बाघ लाइव कैमरा', q: 'मुझे सफेद बाघ का लाइव कैमरा दिखाएं' },
       { label: '🦌 हिरण लाइव कैमरा', q: 'मुझे हिरण का लाइव कैमरा दिखाएं' },
       { label: '🐻 भालू लाइव कैमरा', q: 'मुझे भालू का लाइव कैमरा दिखाएं' },
-      { label: '🦚 पक्षी लाइव कैमरा', q: 'मुझे पक्षी का लाइव कैमरा दिखाएं' },
+      { label: '🦚 मोर लाइव कैमरा', q: 'मुझे मोर का लाइव कैमरा दिखाएं' },
+      { label: '⚪ सफेद बाघ लाइव कैमरा', q: 'मुझे सफेद बाघ का लाइव कैमरा दिखाएं' },
+      { label: '🛡️ पैंगोलिन लाइव कैमरा', q: 'मुझे पैंगोलिन का लाइव कैमरा दिखाएं' },
+      { label: '🐊 घड़ियाल लाइव कैमरा', q: 'मुझे घड़ियाल का लाइव कैमरा दिखाएं' },
+      { label: '🐍 किंग कोबरा लाइव कैमरा', q: 'मुझे किंग कोबरा का लाइव कैमरा दिखाएं' },
+      { label: '🐢 कछुआ लाइव कैमरा', q: 'मुझे कछुए का लाइव कैमरा दिखाएं' },
+      { label: '🪶 ओपनबिल लाइव कैमरा', q: 'मुझे ओपनबिल का लाइव कैमरा दिखाएं' },
       { label: '🐾 संपूर्ण वन्यजीव गाइड', q: 'नंदनकानन प्राणी उद्यान के सभी जानवरों का विवरण बताएं' },
       { label: '🐅 सफेद बाघ का इतिहास', q: 'सफेद बाघ का इतिहास बताएं' },
       { label: '🦁 एशियाई शेर सफारी', q: 'एशियाई शेर और लॉयन सफारी के बारे में बताएं' },
@@ -158,6 +179,7 @@ export default function ChatbotWidget({
   const [input, setInput] = useState('');
   const [navBottom, setNavBottom] = useState(72);
   const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
   const langMenuRef = useRef(null);
 
   // Measure the bottom edge of the navbar so the chatbot touches the line under Explore Now
@@ -393,8 +415,8 @@ export default function ChatbotWidget({
     // Immediately close/hide the chatbot window so it does not overlap the live cam screen
     setIsOpen(false);
 
-    const camId = actionBtn.cameraId || 1;
-    const targetCam = actionBtn.cameraObj || INITIAL_CAMERAS.find(c => c.id === camId) || INITIAL_CAMERAS[0];
+    const camId = actionBtn.cameraId || (actionBtn.cameraObj && actionBtn.cameraObj.id) || 1;
+    const targetCam = INITIAL_CAMERAS.find(c => c.id === camId) || actionBtn.cameraObj || INITIAL_CAMERAS[0];
 
     if (onOpenLiveCam) {
       onOpenLiveCam(targetCam);
@@ -432,21 +454,33 @@ export default function ChatbotWidget({
         id: Date.now() + 1,
         sender: 'bot',
         text: isObj ? botReply.text : botReply,
-        actionButton: isObj ? botReply.actionButton : null
+        actionButton: isObj ? botReply.actionButton : null,
+        actionButtons: isObj ? botReply.actionButtons : null
       }]);
     }, 350);
   };
 
   useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    if (isOpen && messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
     }
   }, [messages, isOpen]);
 
   const currentLangObj = SUPPORTED_LANGUAGES.find(l => l.id === chatLang) || SUPPORTED_LANGUAGES[0];
 
-  // Completely invisible on the screen while the live camera screen is showing
-  if (isLiveModalOpen) {
+  // Global modal state tracking (e.g. WalletModal, NewsNoticeModal, AuthModal)
+  const [isExternalModalOpen, setIsExternalModalOpen] = useState(false);
+
+  useEffect(() => {
+    const handleModalEvent = (e) => {
+      setIsExternalModalOpen(Boolean(e.detail?.open));
+    };
+    window.addEventListener('nkz_modal_state_change', handleModalEvent);
+    return () => window.removeEventListener('nkz_modal_state_change', handleModalEvent);
+  }, []);
+
+  // Completely invisible on the screen while any full modal is showing (prevents overlap with Done button)
+  if (isLiveModalOpen || isExternalModalOpen) {
     return null;
   }
 
@@ -592,7 +626,7 @@ export default function ChatbotWidget({
           </div>
 
           {/* Messages Feed */}
-          <div className="flex-1 min-h-0 p-4 overflow-y-auto space-y-3.5 text-xs leading-relaxed">
+          <div ref={messagesContainerRef} className="flex-1 min-h-0 p-4 overflow-y-auto space-y-3.5 text-xs leading-relaxed">
             {messages.map((m) => (
               <div
                 key={m.id}
@@ -673,8 +707,87 @@ export default function ChatbotWidget({
                     </div>
                   )}
 
+                  {/* Multiple Individual Animal Live Stream Buttons (All 12 Sanctuary Animals) */}
+                  {m.actionButtons && Array.isArray(m.actionButtons) && m.actionButtons.length > 0 && (
+                    <div className="mt-3 pt-2.5 border-t border-[#2E7D32]/40 space-y-2">
+                      <div className="flex items-center justify-between text-[10px] font-mono text-[#A7D7A9] font-bold">
+                        <span className="flex items-center gap-1.5">
+                          <Radio className="w-3.5 h-3.5 text-red-400 animate-pulse" />
+                          <span>ALL 12 INDIVIDUAL ANIMAL LIVE STREAMS:</span>
+                        </span>
+                        <span className="text-[8.5px] px-1.5 py-0.5 rounded bg-red-950/80 text-red-300 border border-red-500/40">
+                          12 CAMS LIVE
+                        </span>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-1.5 max-h-60 overflow-y-auto pr-1">
+                        {m.actionButtons.map((btn, idx) => (
+                          <button
+                            key={btn.cameraId || idx}
+                            type="button"
+                            onClick={() => handleLiveCamAction(btn)}
+                            className="p-2 rounded-xl bg-[#071D12] hover:bg-[#123D2B] border border-[#2E7D32]/60 hover:border-red-500/80 text-left transition-all group flex flex-col justify-between shadow-sm hover:shadow-[0_0_12px_rgba(239,68,68,0.25)] hover:scale-[1.02] cursor-pointer"
+                          >
+                            <div className="flex items-center gap-1.5 mb-1 min-w-0">
+                              <span className="text-sm shrink-0">{btn.cameraObj?.emoji || '📹'}</span>
+                              <span className="font-bold text-[10.5px] text-white group-hover:text-amber-200 truncate leading-tight">
+                                {btn.cameraObj?.animal_name || btn.label}
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between text-[8px] font-mono text-[#A7D7A9]/80 border-t border-white/5 pt-1">
+                              <span className="truncate">{btn.subLabel || `Cam #${btn.cameraId}`}</span>
+                              <span className="text-red-400 font-bold shrink-0 flex items-center gap-0.5">
+                                <span className="w-1 h-1 rounded-full bg-red-400 animate-ping inline-block" />
+                                LIVE
+                              </span>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Single Individual Animal Live Stream Action with Rich Preview Card */}
                   {m.actionButton && m.actionButton.type === 'live_cam' && (
-                    <div className="mt-3 pt-2.5 border-t border-[#2E7D32]/40">
+                    <div className="mt-3 pt-2.5 border-t border-[#2E7D32]/40 space-y-2">
+                      {/* Animal Live Camera Mini Preview Card */}
+                      {m.actionButton.cameraObj && (
+                        <div className="p-2.5 rounded-xl bg-[#071D12]/95 border border-red-500/40 flex items-center gap-3 shadow-inner">
+                          <div className="relative w-14 h-14 rounded-lg overflow-hidden border border-red-500/60 shrink-0 bg-black">
+                            <img 
+                              src={m.actionButton.cameraObj.thumbnail_url || '/images/sanctuary_forest.jpg'} 
+                              alt={m.actionButton.cameraObj.animal_name || 'Live Stream'}
+                              className="w-full h-full object-cover" 
+                            />
+                            <span className="absolute top-1 left-1 px-1 py-0.2 rounded bg-red-600 text-white font-black text-[7.5px] uppercase tracking-wider flex items-center gap-0.5 shadow">
+                              <span className="w-1 h-1 rounded-full bg-white animate-ping" />
+                              LIVE
+                            </span>
+                            <span className="absolute bottom-0.5 right-0.5 text-xs">
+                              {m.actionButton.cameraObj.emoji || '📹'}
+                            </span>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between gap-1">
+                              <h4 className="font-bold text-[11px] text-[#FAF9F5] truncate">
+                                {m.actionButton.cameraObj.animal_name}
+                              </h4>
+                              <span className="text-[8.5px] px-1.5 py-0.5 rounded bg-red-950/60 text-red-300 font-mono border border-red-500/30 whitespace-nowrap flex items-center gap-1">
+                                <span>👁</span>
+                                {m.actionButton.cameraObj.viewer_count ? `${m.actionButton.cameraObj.viewer_count.toLocaleString()} watching` : 'LIVE'}
+                              </span>
+                            </div>
+                            <p className="text-[10px] text-[#A7D7A9] font-mono truncate mt-0.5">
+                              📍 {m.actionButton.cameraObj.habitat_name || m.actionButton.cameraObj.camera_location || 'Sanctuary Zone'}
+                            </p>
+                            <p className="text-[9px] text-[#C8A96B] font-mono truncate">
+                              📹 {m.actionButton.cameraObj.title || 'Official Surveillance Feed'}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Glowing Live Stream Action Button */}
                       <button
                         type="button"
                         onClick={() => handleLiveCamAction(m.actionButton)}
@@ -691,7 +804,7 @@ export default function ChatbotWidget({
                           </span>
                         </span>
                         <span className="px-1.5 py-0.5 rounded bg-black/30 text-[9px] text-amber-200 font-mono flex items-center gap-0.5 group-hover:translate-x-0.5 transition-transform">
-                          <span>LIVE VIEW</span>
+                          <span>OPEN STREAM</span>
                           <ChevronRight className="w-3 h-3" />
                         </span>
                       </button>
