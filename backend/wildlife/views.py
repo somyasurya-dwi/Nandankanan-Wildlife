@@ -736,15 +736,24 @@ def _verify_subscription_token(token):
 @api_view(['POST'])
 def create_subscription_order(request):
     """
-    Creates a ₹100 Live Stream 30-Day Subscription order.
+    Creates a Live Stream Subscription order for the requested plan & amount.
     Integrates with Razorpay Orders API if credentials are configured;
     otherwise provides clearly labeled demonstration payment order mode.
     """
-    plan = request.data.get('plan', 'live_stream_30d')
+    plan = request.data.get('plan', 'live_stream_all_90d')
+    plan_title = request.data.get('plan_title') or 'Unlimited Wildlife Live Streaming'
     user_email = request.data.get('email', 'visitor@nandankanan.org')
     user_name = request.data.get('name', 'Wildlife Supporter')
-    amount_inr = 100
-    amount_paise = amount_inr * 100 # 10000 paise
+    animal_key = request.data.get('animal_key', 'all')
+    try:
+        amount_inr = max(1, int(request.data.get('amount') or 249))
+    except (TypeError, ValueError):
+        amount_inr = 249
+    try:
+        days = max(1, int(request.data.get('days') or 90))
+    except (TypeError, ValueError):
+        days = 90
+    amount_paise = amount_inr * 100
 
     razorpay_key_id = os.environ.get('RAZORPAY_KEY_ID', '').strip()
     razorpay_key_secret = os.environ.get('RAZORPAY_KEY_SECRET', '').strip()
@@ -763,7 +772,8 @@ def create_subscription_order(request):
                 "receipt": f"rcpt_{uuid.uuid4().hex[:10]}",
                 "notes": {
                     "sanctuary": "Nandankanan Wildlife Sanctuary",
-                    "plan": "Unlimited Live Camera Access (30 Days)",
+                    "plan": plan_title,
+                    "animal_key": animal_key,
                     "user_email": user_email
                 }
             }).encode('utf-8')
@@ -785,8 +795,10 @@ def create_subscription_order(request):
                     "order_id": order_data["id"],
                     "amount": amount_paise,
                     "currency": "INR",
-                    "plan": "Unlimited Wildlife Live Streaming (30 Days)",
-                    "price_inr": amount_inr
+                    "plan": plan_title,
+                    "price_inr": amount_inr,
+                    "days": days,
+                    "animal_key": animal_key
                 })
         except Exception as e:
             # Fall back to demonstration mode with clear message if network/key failed
@@ -801,8 +813,10 @@ def create_subscription_order(request):
         "order_id": demo_order_id,
         "amount": amount_paise,
         "currency": "INR",
-        "plan": "Unlimited Wildlife Live Streaming (30 Days)",
+        "plan": plan_title,
         "price_inr": amount_inr,
+        "days": days,
+        "animal_key": animal_key,
         "message": "Demonstration Payment Mode: Razorpay test credentials not configured in environment."
     })
 
@@ -818,7 +832,17 @@ def verify_subscription_payment(request):
     razorpay_signature = request.data.get('razorpay_signature', '').strip()
     user_email = request.data.get('email', 'visitor@nandankanan.org').strip()
     user_name = request.data.get('name', 'Wildlife Supporter').strip()
+    animal_key = request.data.get('animal_key', 'all').strip() or 'all'
     is_demo = request.data.get('is_demo', False)
+    try:
+        amount_inr = max(1, int(request.data.get('amount') or 249))
+    except (TypeError, ValueError):
+        amount_inr = 249
+    try:
+        days = max(1, int(request.data.get('days') or 90))
+    except (TypeError, ValueError):
+        days = 90
+    plan_title = (request.data.get('plan_title') or request.data.get('plan') or f"Unlimited Wildlife Live Streaming ({days} Days)").strip()
 
     if not razorpay_order_id or not razorpay_payment_id:
         return Response({
@@ -848,17 +872,17 @@ def verify_subscription_payment(request):
             }, status=status.HTTP_400_BAD_REQUEST)
         is_verified_demo = True
 
-    # Compute 30-day validity
+    # Compute plan validity
     now = timezone.now()
-    expires_at = now + timedelta(days=30)
+    expires_at = now + timedelta(days=days)
     sub_id = f"SUB-{now.year}-{uuid.uuid4().hex[:8].upper()}"
 
     sub = LiveStreamSubscription.objects.create(
         subscription_id=sub_id,
         user_email=user_email,
         user_name=user_name,
-        plan_name="Unlimited Wildlife Live Streaming (30 Days)",
-        amount=100,
+        plan_name=plan_title[:150],
+        amount=amount_inr,
         currency="INR",
         order_id=razorpay_order_id,
         payment_id=razorpay_payment_id,
@@ -876,6 +900,8 @@ def verify_subscription_payment(request):
         "message": "Subscription verified and activated successfully! Unlimited live viewing unlocked.",
         "subscription": {
             "id": sub.subscription_id,
+            "animal_key": animal_key,
+            "is_global": animal_key == 'all',
             "user_name": sub.user_name,
             "user_email": sub.user_email,
             "plan": sub.plan_name,
@@ -886,7 +912,8 @@ def verify_subscription_payment(request):
             "is_demo": sub.is_demo,
             "starts_at": sub.starts_at.isoformat(),
             "expires_at": sub.expires_at.isoformat(),
-            "days_remaining": 30,
+            "days": days,
+            "days_remaining": days,
             "token": token
         }
     })
@@ -926,28 +953,31 @@ def check_subscription_status(request):
 @api_view(['POST'])
 def track_preview_usage(request):
     """
-    Tracks playback seconds per session on the backend.
-    Enforces the 10-second lifetime preview limit across the platform.
+    Tracks playback seconds per session and animal on the backend.
+    Enforces a separate 5-second preview limit per animal.
     """
     session_id = request.data.get('session_id', '').strip()
+    animal_key = (request.data.get('animal_key') or 'default').strip().lower()
     seconds_delta = float(request.data.get('seconds_delta', 0.0))
 
     if not session_id:
         session_id = str(uuid.uuid4())
 
-    session, _ = PreviewSession.objects.get_or_create(session_id=session_id)
+    scoped_session_id = f"{session_id}:{animal_key}"[:100]
+    session, _ = PreviewSession.objects.get_or_create(session_id=scoped_session_id)
     session.seconds_watched += max(0.0, seconds_delta)
 
-    if session.seconds_watched >= 10.0:
-        session.seconds_watched = 10.0
+    if session.seconds_watched >= 5.0:
+        session.seconds_watched = 5.0
         session.exhausted = True
 
     session.save()
 
     return Response({
-        "session_id": session.session_id,
+        "session_id": session_id,
+        "animal_key": animal_key,
         "seconds_watched": round(session.seconds_watched, 2),
-        "seconds_remaining": max(0.0, round(10.0 - session.seconds_watched, 2)),
+        "seconds_remaining": max(0.0, round(5.0 - session.seconds_watched, 2)),
         "is_exhausted": session.exhausted
     })
 

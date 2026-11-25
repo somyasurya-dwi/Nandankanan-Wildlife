@@ -23,9 +23,9 @@ export const SUBSCRIPTION_PLANS = [
     id: 'plan_1m',
     durationMonths: 1,
     title: '1 Month',
-    subtitle: 'Explore Nandankanan for 30 days',
+    subtitle: 'Explore wildlife for 30 days',
     days: 30,
-    periodLabel: '/ month',
+    periodLabel: '/month',
     discount: null,
     isPopular: false,
     prices: {
@@ -45,7 +45,7 @@ export const SUBSCRIPTION_PLANS = [
     title: '3 Months',
     subtitle: 'Explore more, save more',
     days: 90,
-    periodLabel: '/ 3 months',
+    periodLabel: '/3 months',
     discount: 'Save 17%',
     isPopular: true,
     prices: {
@@ -65,7 +65,7 @@ export const SUBSCRIPTION_PLANS = [
     title: '6 Months',
     subtitle: 'Longer support for wildlife',
     days: 180,
-    periodLabel: '/ 6 months',
+    periodLabel: '/6 months',
     discount: 'Save 25%',
     isPopular: false,
     prices: {

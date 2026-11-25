@@ -18,7 +18,7 @@ const STORAGE_KEYS = {
   SESSION_ID: 'nkz_preview_session_id_v2'
 };
 
-const API_BASE = 'http://127.0.0.1:8000/api/subscription';
+const API_BASE = '/api/subscription';
 const MAX_PREVIEW_SECONDS = 5.0;
 
 class SubscriptionManager {
@@ -26,8 +26,6 @@ class SubscriptionManager {
     this.sessionId = this._getOrCreateSessionId();
     this.listeners = new Set();
     this._initStorageListener();
-    // Initialize default animal subscriptions map (ensuring Tiger is subscribed)
-    this._ensureTigerSubscribed();
   }
 
   // =========================================================================
@@ -35,9 +33,10 @@ class SubscriptionManager {
   // =========================================================================
 
   normalizeAnimalKey(animal) {
-    if (!animal) return 'tiger';
+    if (!animal) return 'all';
     if (typeof animal === 'string') {
       const s = animal.toLowerCase().trim();
+      if (s === 'all' || s === 'global' || s === 'premium' || s === 'wildlife') return 'all';
       if (s.includes('white') && s.includes('tiger')) return 'white-tiger';
       if (s.includes('tiger')) return 'tiger';
       if (s.includes('lion')) return 'lion';
@@ -52,6 +51,7 @@ class SubscriptionManager {
       if (s.includes('openbill') || s.includes('openbell') || s.includes('anastomus')) return 'asian-openbill';
       return s.replace(/[^a-z0-9_-]/g, '-');
     }
+    if (animal.isGlobal) return 'all';
     if (animal.slug) return this.normalizeAnimalKey(animal.slug);
     if (animal.animal_name) return this.normalizeAnimalKey(animal.animal_name);
     if (animal.id) {
@@ -71,7 +71,7 @@ class SubscriptionManager {
       };
       if (map[animal.id]) return map[animal.id];
     }
-    return 'tiger';
+    return 'all';
   }
 
   // =========================================================================
@@ -117,100 +117,87 @@ class SubscriptionManager {
   // INDIVIDUAL ANIMAL SUBSCRIPTIONS
   // =========================================================================
 
-  _ensureTigerSubscribed() {
-    try {
-      const map = this.getSubscriptionsMap();
-      if (!map['tiger'] || !map['tiger'].is_active) {
-        const now = new Date();
-        const expiresAt = new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000);
-        map['tiger'] = {
-          id: 'SUB-TIGER-30D',
-          animal_key: 'tiger',
-          animal_name: 'Royal Bengal Tiger',
-          plan: 'Royal Bengal Tiger Live Stream Pass (3 Months)',
-          plan_title: '3 Months Plan',
-          amount: 249,
-          currency: 'INR',
-          status: 'active',
-          is_active: true,
-          starts_at: now.toISOString(),
-          expires_at: expiresAt.toISOString(),
-          days: 90,
-          days_remaining: 90
-        };
-        localStorage.setItem(STORAGE_KEYS.SUBSCRIPTIONS_MAP, JSON.stringify(map));
-      }
-    } catch {}
-  }
-
   getSubscriptionsMap() {
     try {
       let map = JSON.parse(localStorage.getItem(STORAGE_KEYS.SUBSCRIPTIONS_MAP) || '{}');
       if (!map || typeof map !== 'object') map = {};
-
-      // Seed Tiger subscription as confirmed active by the user
-      if (!map['tiger'] || !map['tiger'].is_active) {
-        const now = new Date();
-        const expiresAt = new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000);
-        map['tiger'] = {
-          id: 'SUB-TIGER-30D',
-          animal_key: 'tiger',
-          animal_name: 'Royal Bengal Tiger',
-          plan: 'Royal Bengal Tiger Live Stream Pass (3 Months)',
-          plan_title: '3 Months Plan',
-          days: 90,
-          days_remaining: 90,
-          amount: 249,
-          currency: 'INR',
-          status: 'active',
-          is_active: true,
-          starts_at: now.toISOString(),
-          expires_at: expiresAt.toISOString()
-        };
+      // Clean up any legacy pre-seeded Tiger individual pass so no individual animal shows an unsolicited subscription
+      if (map['tiger'] && map['tiger'].id === 'SUB-TIGER-30D') {
+        delete map['tiger'];
         try {
           localStorage.setItem(STORAGE_KEYS.SUBSCRIPTIONS_MAP, JSON.stringify(map));
         } catch {}
       }
       return map;
     } catch {
-      return {
-        tiger: {
-          id: 'SUB-TIGER-30D',
-          animal_key: 'tiger',
-          animal_name: 'Royal Bengal Tiger',
-          plan: 'Royal Bengal Tiger Live Stream Pass (3 Months)',
-          plan_title: '3 Months Plan',
-          days: 90,
-          days_remaining: 90,
-          is_active: true
-        }
-      };
+      return {};
     }
   }
 
-  /**
-   * Checks whether the user has a valid active subscription for a specific animal.
-   * If no animal is provided, checks if any animal is subscribed.
-   */
-  isSubscribed(animal = null) {
-    const map = this.getSubscriptionsMap();
-    if (!animal) {
-      return Object.values(map).some(sub => sub && sub.is_active !== false && (!sub.expires_at || new Date(sub.expires_at).getTime() > Date.now()));
-    }
-    const key = this.normalizeAnimalKey(animal);
-    const sub = map[key];
+  _isEntryActive(sub) {
     return Boolean(sub && sub.is_active !== false && (!sub.expires_at || new Date(sub.expires_at).getTime() > Date.now()));
   }
 
   /**
-   * Returns subscription details for an animal (or default).
+   * Checks whether the user has an active Global Premium Wildlife Pass covering all live cameras.
+   * Marks expired passes as expired in storage if their expires_at timestamp has passed.
+   */
+  hasGlobalSubscription() {
+    const map = this.getSubscriptionsMap();
+    const globalSub = map['all'];
+    if (!globalSub) return false;
+    if (globalSub.expires_at && new Date(globalSub.expires_at).getTime() <= Date.now()) {
+      if (globalSub.is_active !== false || globalSub.status !== 'expired') {
+        map['all'] = { ...globalSub, is_active: false, status: 'expired' };
+        try {
+          localStorage.setItem(STORAGE_KEYS.SUBSCRIPTIONS_MAP, JSON.stringify(map));
+          localStorage.setItem(STORAGE_KEYS.SUBSCRIPTION, JSON.stringify(map['all']));
+        } catch {}
+      }
+      return false;
+    }
+    return this._isEntryActive(globalSub);
+  }
+
+  /**
+   * Returns true if a previously purchased Global Premium Wildlife Pass has expired.
+   */
+  hasExpiredGlobalSubscription() {
+    const map = this.getSubscriptionsMap();
+    const globalSub = map['all'];
+    if (!globalSub) return false;
+    return !this._isEntryActive(globalSub);
+  }
+
+  /**
+   * Checks whether the user has a valid active subscription for a specific animal.
+   * An active global 'all' pass unlocks every live animal camera.
+   * If no animal is provided, checks if any animal or global pass is subscribed.
+   */
+  isSubscribed(animal = null) {
+    const map = this.getSubscriptionsMap();
+    if (this._isEntryActive(map['all'])) {
+      return true;
+    }
+    if (!animal) {
+      return Object.values(map).some(sub => this._isEntryActive(sub));
+    }
+    const key = this.normalizeAnimalKey(animal);
+    return this._isEntryActive(map[key]);
+  }
+
+  /**
+   * Returns subscription details for an animal (or global pass if active).
    */
   getSubscription(animal = null) {
     const map = this.getSubscriptionsMap();
     const key = this.normalizeAnimalKey(animal);
     const sub = map[key];
-    if (sub && (!sub.expires_at || new Date(sub.expires_at).getTime() > Date.now())) {
+    if (this._isEntryActive(sub)) {
       return sub;
+    }
+    if (this._isEntryActive(map['all'])) {
+      return map['all'];
     }
     return null;
   }
@@ -273,7 +260,8 @@ class SubscriptionManager {
   // =========================================================================
 
   getRemainingPreviewSeconds(animal = null) {
-    if (this.isSubscribed(animal)) return Infinity;
+    if (this.hasGlobalSubscription()) return Infinity;
+    if (this.hasExpiredGlobalSubscription()) return 0;
     const key = this.normalizeAnimalKey(animal);
     try {
       const map = JSON.parse(localStorage.getItem(STORAGE_KEYS.PREVIEWS_MAP) || '{}');
@@ -289,7 +277,7 @@ class SubscriptionManager {
   }
 
   isPreviewExhausted(animal = null) {
-    if (this.isSubscribed(animal)) return false;
+    if (this.hasGlobalSubscription()) return false;
     return this.getRemainingPreviewSeconds(animal) <= 0;
   }
 
@@ -340,7 +328,8 @@ class SubscriptionManager {
   }
 
   recordPlayback(deltaSeconds, animal = null) {
-    if (this.isSubscribed(animal)) return Infinity;
+    if (this.hasGlobalSubscription()) return Infinity;
+    if (this.hasExpiredGlobalSubscription()) return 0;
     if (typeof deltaSeconds !== 'number' || deltaSeconds <= 0) return this.getRemainingPreviewSeconds(animal);
     const key = this.normalizeAnimalKey(animal);
 
@@ -393,16 +382,19 @@ class SubscriptionManager {
   // PAYMENT INTEGRATION (RAZORPAY & DEMO SANDBOX)
   // =========================================================================
 
-  async createPaymentOrder({ email = 'visitor@nandankanan.org', name = 'Wildlife Enthusiast', animal = null, amount = 353, planTitle = null, days = 90 } = {}) {
-    const key = this.normalizeAnimalKey(animal);
-    const animalDisplayName = animal?.animal_name || (key.charAt(0).toUpperCase() + key.slice(1));
-    const effectivePlanTitle = planTitle || `${animalDisplayName} Live Stream Pass (${days || 30} Days)`;
+  async createPaymentOrder({ email = 'visitor@nandankanan.org', name = 'Wildlife Enthusiast', animal = null, amount = 249, planTitle = null, days = 90 } = {}) {
+    const isGlobal = !animal || animal === 'all' || animal?.isGlobal;
+    const key = isGlobal ? 'all' : this.normalizeAnimalKey(animal);
+    const animalDisplayName = isGlobal ? 'Premium Wildlife Pass' : (animal?.animal_name || (key.charAt(0).toUpperCase() + key.slice(1)));
+    const effectivePlanTitle = planTitle || `${animalDisplayName} (${days || 90} Days)`;
     try {
       const res = await fetch(`${API_BASE}/create-order/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          plan: `live_stream_${key}_${days || 30}d`,
+          plan: `live_stream_${key}_${days || 90}d`,
+          plan_title: effectivePlanTitle,
+          days: days || 90,
           amount,
           currency: 'INR',
           email,
@@ -429,14 +421,16 @@ class SubscriptionManager {
       price_inr: amount,
       animal_key: key,
       animal_name: animalDisplayName,
-      days: days || 30
+      is_global: isGlobal,
+      days: days || 90
     };
   }
 
-  async verifyPayment({ orderId, paymentId, signature, email, name, animal = null, isDemo = false, amount = 353, planTitle = null, days = 90, planName = null }) {
-    const key = this.normalizeAnimalKey(animal);
-    const animalDisplayName = animal?.animal_name || (key.charAt(0).toUpperCase() + key.slice(1));
-    const effectivePlanTitle = planTitle || `${animalDisplayName} Live Stream Pass (${days || 30} Days)`;
+  async verifyPayment({ orderId, paymentId, signature, email, name, animal = null, isDemo = false, amount = 249, planTitle = null, days = 90, planName = null }) {
+    const isGlobal = !animal || animal === 'all' || animal?.isGlobal;
+    const key = isGlobal ? 'all' : this.normalizeAnimalKey(animal);
+    const animalDisplayName = isGlobal ? 'Premium Wildlife Pass' : (animal?.animal_name || (key.charAt(0).toUpperCase() + key.slice(1)));
+    const effectivePlanTitle = planTitle || `${animalDisplayName} (${days || 90} Days)`;
     try {
       const res = await fetch(`${API_BASE}/verify/`, {
         method: 'POST',
@@ -447,6 +441,9 @@ class SubscriptionManager {
           razorpay_signature: signature,
           email,
           name,
+          amount,
+          days: days || 90,
+          plan_title: effectivePlanTitle,
           animal_key: key,
           is_demo: isDemo
         })
@@ -455,11 +452,12 @@ class SubscriptionManager {
       if (res.ok) {
         const data = await res.json();
         if (data.success && data.subscription) {
-          const numDays = days || 30;
+          const numDays = days || 90;
           const planTitleLabel = planName ? (planName.toLowerCase().includes('plan') ? planName : `${planName} Plan`) : (numDays >= 300 ? '12 Months Plan' : numDays >= 150 ? '6 Months Plan' : numDays >= 60 ? '3 Months Plan' : '1 Month Plan');
           const enriched = {
             ...data.subscription,
             plan_title: planTitleLabel,
+            is_global: isGlobal,
             days: numDays
           };
           this.activateSubscription(enriched, key);
@@ -472,13 +470,14 @@ class SubscriptionManager {
 
     if (isDemo && paymentId && paymentId.startsWith('pay_')) {
       const now = new Date();
-      const numDays = days || 30;
+      const numDays = days || 90;
       const expiresAt = new Date(now.getTime() + numDays * 24 * 60 * 60 * 1000);
       const computedPlanTitle = planName ? (planName.toLowerCase().includes('plan') ? planName : `${planName} Plan`) : (numDays >= 300 ? '12 Months Plan' : numDays >= 150 ? '6 Months Plan' : numDays >= 60 ? '3 Months Plan' : '1 Month Plan');
       const subData = {
         id: 'SUB-' + key.toUpperCase() + '-' + Math.random().toString(36).substring(2, 8).toUpperCase(),
         animal_key: key,
         animal_name: animalDisplayName,
+        is_global: isGlobal,
         user_name: name || 'Wildlife Supporter',
         user_email: email || 'visitor@nandankanan.org',
         plan: effectivePlanTitle,

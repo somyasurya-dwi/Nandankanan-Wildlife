@@ -13,10 +13,11 @@ import {
   Type, 
   Sun, 
   Volume1, 
-  RotateCcw 
+  RotateCcw
 } from 'lucide-react';
 import { toggleRainforestAmbience } from '../utils/audioSynthesizer';
 import { useLanguage } from '../context/LanguageContext';
+import { subscriptionManager } from '../utils/subscriptionManager';
 import WalletModal from './WalletModal';
 import NewsNoticeModal from './NewsNoticeModal';
 
@@ -55,6 +56,7 @@ function UniversalAccessibilityIcon({ className = "w-5 h-5" }) {
 
 export default function Navbar({ 
   onOpenAuth, 
+  onOpenSubscription,
   currentUser, 
   onLogout, 
   onOpenAdmin,
@@ -72,6 +74,20 @@ export default function Navbar({
   const [walletModalOpen, setWalletModalOpen] = useState(false);
   const [newsNoticeModalOpen, setNewsNoticeModalOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [hasGlobalSub, setHasGlobalSub] = useState(() => subscriptionManager.hasGlobalSubscription());
+
+  useEffect(() => {
+    const unsub = subscriptionManager.subscribe(() => {
+      setHasGlobalSub(subscriptionManager.hasGlobalSubscription());
+    });
+    const expiryCheck = setInterval(() => {
+      setHasGlobalSub(subscriptionManager.hasGlobalSubscription());
+    }, 5000);
+    return () => {
+      unsub();
+      clearInterval(expiryCheck);
+    };
+  }, []);
 
   // Active section state: dynamically initialized from current route hash or 'hero'
   const [activeSection, setActiveSection] = useState(() => {
@@ -613,7 +629,7 @@ export default function Navbar({
             </div>
 
             {/* Right Action Area (Grouped Utility Controls + Eco-Wallet + User + Explore Button) */}
-            <div className="hidden lg:flex items-center gap-1.5 xl:gap-2 shrink-0">
+            <div className="hidden lg:flex items-center h-full gap-1.5 xl:gap-2 shrink-0">
               
               {/* Sleek Frosted Utility Hub (Accessibility + Language Switcher) */}
               <div className="flex items-center bg-[#092215]/85 border border-[#26734D]/50 rounded-xl px-1.5 py-0.5 shadow-inner">
@@ -809,6 +825,19 @@ export default function Navbar({
                 </span>
               </button>
 
+              {/* Subscribe Button (Left Side of Sign In, matching WALLET nav hover effect) */}
+              <button
+                id="navbar-subscribe-btn"
+                type="button"
+                onClick={onOpenSubscription}
+                className="h-full px-1.5 xl:px-2 text-[10.5px] xl:text-[11.5px] font-bold tracking-tight xl:tracking-wider uppercase text-[#F5F4EA]/90 hover:bg-[#1B6537]/60 hover:text-white transition-all duration-150 flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer"
+                title={hasGlobalSub ? 'Premium Wildlife Pass Active — Click to manage' : 'Subscribe for Unlimited Wildlife Live Streaming'}
+                aria-label="Subscribe to Wildlife Live Streaming"
+              >
+                <span>{hasGlobalSub ? (t('nav.subscribed') || 'Subscribed') : (t('nav.subscribe') || 'Subscribe')}</span>
+                {hasGlobalSub && <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />}
+              </button>
+
               {/* User Sign In / Dashboard */}
               {currentUser ? (
                 <div className="flex items-center gap-2">
@@ -909,6 +938,30 @@ export default function Navbar({
                 </a>
               );
             })}
+            <div className="pt-2 mt-2 border-t border-[#26734D]/40 flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  onOpenSubscription && onOpenSubscription();
+                }}
+                className="flex-1 px-3 py-2 rounded-lg text-white/90 hover:bg-[#123D2B] hover:text-[#C8A96B] font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
+              >
+                <span>{hasGlobalSub ? (t('nav.subscribed') || 'Subscribed') : (t('nav.subscribe') || 'Subscribe')}</span>
+              </button>
+              {!currentUser && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    onOpenAuth && onOpenAuth();
+                  }}
+                  className="px-3 py-2 rounded-lg bg-[#123D2B] border border-[#26734D]/60 text-[#F5F4EA] font-bold text-xs uppercase tracking-wider cursor-pointer"
+                >
+                  {t('nav.signIn')}
+                </button>
+              )}
+            </div>
           </div>
         )}
       </nav>

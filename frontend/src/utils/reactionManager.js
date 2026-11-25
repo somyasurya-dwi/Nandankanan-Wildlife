@@ -6,100 +6,76 @@
 
 export const ANIMAL_REACTIONS = {
   'royal-bengal-tiger': [
-    { id: 'tiger_love', name: 'Tiger Love', iconKey: 'tiger', emoji: '🐯', initialCount: 3420, effect: 'roar_trail' },
-    { id: 'love', name: 'Love', iconKey: 'heart_red', emoji: '❤️', initialCount: 4280, effect: 'heart_burst' },
-    { id: 'paw_prints', name: 'Paw Prints', iconKey: 'paw', emoji: '🐾', initialCount: 1890, effect: 'paw_step' },
-    { id: 'meat_appreciation', name: 'Meat Appreciation', iconKey: 'meat', emoji: '🥩', initialCount: 2150, effect: 'sizzle' },
-    { id: 'amazing', name: 'Amazing', iconKey: 'heart_eyes', emoji: '😍', initialCount: 1740, effect: 'sparkle' },
-    { id: 'exciting', name: 'Exciting', iconKey: 'fire', emoji: '🔥', initialCount: 2980, effect: 'fire_ember' }
+    { id: 'food_meat', name: 'Fresh Meat', iconKey: 'food_meat', emoji: '🥩', initialCount: 3420, effect: 'sizzle' },
+    { id: 'food_chicken', name: 'Chicken', iconKey: 'food_chicken', emoji: '🍗', initialCount: 2890, effect: 'roar_trail' },
+    { id: 'food_bone_meat', name: 'Bone Meat', iconKey: 'food_bone_meat', emoji: '🍖', initialCount: 2150, effect: 'fire_ember' },
+    { id: 'food_poultry', name: 'Buffalo Cut', iconKey: 'food_poultry', emoji: '🥓', initialCount: 1840, effect: 'sparkle' }
   ],
   'asiatic-lion': [
-    { id: 'lion_pride', name: 'Lion Pride', iconKey: 'lion', emoji: '🦁', initialCount: 3810, effect: 'pride_burst' },
-    { id: 'king_of_jungle', name: 'King of Jungle', iconKey: 'crown', emoji: '👑', initialCount: 4620, effect: 'golden_rays' },
-    { id: 'love', name: 'Love', iconKey: 'heart_red', emoji: '❤️', initialCount: 3950, effect: 'heart_burst' },
-    { id: 'paw_prints', name: 'Paw Prints', iconKey: 'paw', emoji: '🐾', initialCount: 1620, effect: 'paw_step' },
-    { id: 'roar', name: 'Roar', iconKey: 'fire', emoji: '🔥', initialCount: 3120, effect: 'roar_trail' },
-    { id: 'applause', name: 'Applause', iconKey: 'applause', emoji: '👏', initialCount: 1840, effect: 'cheer_waves' }
+    { id: 'food_meat', name: 'Meat', iconKey: 'food_meat', emoji: '🥩', initialCount: 3810, effect: 'sizzle' },
+    { id: 'food_chicken', name: 'Chicken', iconKey: 'food_chicken', emoji: '🍗', initialCount: 3120, effect: 'pride_burst' },
+    { id: 'food_bone_meat', name: 'Bone Meat', iconKey: 'food_bone_meat', emoji: '🍖', initialCount: 2640, effect: 'golden_rays' },
+    { id: 'food_buffalo_cut', name: 'Buffalo Meat', iconKey: 'food_buffalo_cut', emoji: '🥓', initialCount: 1950, effect: 'roar_trail' }
   ],
   'asian-elephant': [
-    { id: 'elephant_love', name: 'Elephant Love', iconKey: 'elephant', emoji: '🐘', initialCount: 4120, effect: 'gentle_wave' },
-    { id: 'support', name: 'Support', iconKey: 'heart_green', emoji: '💚', initialCount: 3490, effect: 'emerald_glow' },
-    { id: 'nature', name: 'Nature', iconKey: 'leaf', emoji: '🌿', initialCount: 2350, effect: 'leaf_drift' },
-    { id: 'care', name: 'Care', iconKey: 'heart_hands', emoji: '🫶', initialCount: 2890, effect: 'care_glow' },
-    { id: 'cute', name: 'Cute', iconKey: 'cute_face', emoji: '🥰', initialCount: 3180, effect: 'cute_bubbles' },
-    { id: 'water_love', name: 'Water Love', iconKey: 'water_drop', emoji: '💧', initialCount: 2760, effect: 'splash_ripple' }
+    { id: 'food_banana', name: 'Banana', iconKey: 'food_banana', emoji: '🍌', initialCount: 4120, effect: 'gentle_wave' },
+    { id: 'food_watermelon', name: 'Watermelon', iconKey: 'food_watermelon', emoji: '🍉', initialCount: 3490, effect: 'splash_ripple' },
+    { id: 'food_leaves', name: 'Bamboo Leaves', iconKey: 'food_leaves', emoji: '🌿', initialCount: 2890, effect: 'leaf_drift' },
+    { id: 'food_corn', name: 'Corn Stalks', iconKey: 'food_corn', emoji: '🌽', initialCount: 2350, effect: 'emerald_glow' }
   ],
   'spotted-deer': [
-    { id: 'deer_love', name: 'Deer Love', iconKey: 'deer', emoji: '🦌', initialCount: 2940, effect: 'graceful_drift' },
-    { id: 'beautiful', name: 'Beautiful', iconKey: 'cherry_blossom', emoji: '🌸', initialCount: 3820, effect: 'petal_shower' },
-    { id: 'nature_butterfly', name: 'Nature', iconKey: 'butterfly', emoji: '🦋', initialCount: 2470, effect: 'butterfly_flutter' },
-    { id: 'green_earth', name: 'Green Earth', iconKey: 'leaf', emoji: '🌿', initialCount: 2190, effect: 'leaf_drift' },
-    { id: 'love', name: 'Love', iconKey: 'heart_red', emoji: '❤️', initialCount: 3310, effect: 'heart_burst' },
-    { id: 'magical', name: 'Magical', iconKey: 'sparkles', emoji: '✨', initialCount: 3050, effect: 'sparkle' }
+    { id: 'food_leaves', name: 'Green Leaves', iconKey: 'food_leaves', emoji: '🌿', initialCount: 3310, effect: 'leaf_drift' },
+    { id: 'food_grass', name: 'Pasture Grass', iconKey: 'food_grass', emoji: '🌾', initialCount: 2940, effect: 'graceful_drift' },
+    { id: 'food_carrot', name: 'Carrot', iconKey: 'food_carrot', emoji: '🥕', initialCount: 2470, effect: 'sparkle' },
+    { id: 'food_apple', name: 'Apple', iconKey: 'food_apple', emoji: '🍎', initialCount: 2190, effect: 'petal_shower' }
   ],
   'sloth-bear': [
-    { id: 'bear_love', name: 'Bear Love', iconKey: 'bear', emoji: '🐻', initialCount: 2830, effect: 'bear_wobble' },
-    { id: 'paw_prints', name: 'Paw Prints', iconKey: 'paw', emoji: '🐾', initialCount: 1980, effect: 'paw_step' },
-    { id: 'honey_love', name: 'Honey Love', iconKey: 'honey_pot', emoji: '🍯', initialCount: 3640, effect: 'honey_drip' },
-    { id: 'cute', name: 'Cute', iconKey: 'cute_face', emoji: '🥰', initialCount: 2710, effect: 'cute_bubbles' },
-    { id: 'support', name: 'Support', iconKey: 'heart_green', emoji: '💚', initialCount: 2490, effect: 'emerald_glow' },
-    { id: 'amazing', name: 'Amazing', iconKey: 'fire', emoji: '🔥', initialCount: 2310, effect: 'fire_ember' }
+    { id: 'food_honey', name: 'Raw Honey', iconKey: 'food_honey', emoji: '🍯', initialCount: 3640, effect: 'honey_drip' },
+    { id: 'food_banana', name: 'Banana', iconKey: 'food_banana', emoji: '🍌', initialCount: 2830, effect: 'bear_wobble' },
+    { id: 'food_watermelon', name: 'Melon', iconKey: 'food_watermelon', emoji: '🍉', initialCount: 2490, effect: 'cute_bubbles' },
+    { id: 'food_egg', name: 'Boiled Egg', iconKey: 'food_egg', emoji: '🥚', initialCount: 1980, effect: 'emerald_glow' }
   ],
   'birds': [
-    { id: 'bird_love', name: 'Bird Love', iconKey: 'peacock', emoji: '🐦', initialCount: 3290, effect: 'feather_drift' },
-    { id: 'beautiful', name: 'Beautiful', iconKey: 'butterfly', emoji: '🦋', initialCount: 3510, effect: 'butterfly_flutter' },
-    { id: 'colorful', name: 'Colorful', iconKey: 'rainbow', emoji: '🌈', initialCount: 4180, effect: 'rainbow_arc' },
-    { id: 'green_earth_tree', name: 'Green Earth', iconKey: 'tree', emoji: '🌳', initialCount: 2620, effect: 'forest_shimmer' },
-    { id: 'nature_heart', name: 'Nature', iconKey: 'heart_green', emoji: '💚', initialCount: 2980, effect: 'emerald_glow' },
-    { id: 'wonderful', name: 'Wonderful', iconKey: 'sparkles', emoji: '✨', initialCount: 3740, effect: 'sparkle' }
+    { id: 'food_millet', name: 'Millet & Seeds', iconKey: 'food_millet', emoji: '🌾', initialCount: 3510, effect: 'feather_drift' },
+    { id: 'food_corn', name: 'Cracked Corn', iconKey: 'food_corn', emoji: '🌽', initialCount: 3290, effect: 'sparkle' },
+    { id: 'food_apple', name: 'Apple', iconKey: 'food_apple', emoji: '🍎', initialCount: 2980, effect: 'rainbow_arc' },
+    { id: 'food_grapes', name: 'Grapes', iconKey: 'food_grapes', emoji: '🍇', initialCount: 2620, effect: 'emerald_glow' }
   ],
   'white-bengal-tiger': [
-    { id: 'white_tiger_love', name: 'White Tiger Pride', iconKey: 'white_tiger', emoji: '🐅', initialCount: 3890, effect: 'roar_trail' },
-    { id: 'love', name: 'Love', iconKey: 'heart_red', emoji: '❤️', initialCount: 4420, effect: 'heart_burst' },
-    { id: 'majestic', name: 'Majestic Glow', iconKey: 'sparkles', emoji: '✨', initialCount: 3120, effect: 'sparkle' },
-    { id: 'paw_prints', name: 'Paw Prints', iconKey: 'paw', emoji: '🐾', initialCount: 2150, effect: 'paw_step' },
-    { id: 'meat_appreciation', name: 'Feast Meat', iconKey: 'meat', emoji: '🥩', initialCount: 2380, effect: 'sizzle' },
-    { id: 'exciting', name: 'Exciting', iconKey: 'fire', emoji: '🔥', initialCount: 3450, effect: 'fire_ember' }
+    { id: 'food_meat', name: 'Fresh Meat', iconKey: 'food_meat', emoji: '🥩', initialCount: 3890, effect: 'sizzle' },
+    { id: 'food_chicken', name: 'Chicken', iconKey: 'food_chicken', emoji: '🍗', initialCount: 3120, effect: 'roar_trail' },
+    { id: 'food_bone_meat', name: 'Bone Meat', iconKey: 'food_bone_meat', emoji: '🍖', initialCount: 2380, effect: 'fire_ember' },
+    { id: 'food_buffalo_cut', name: 'Buffalo Cut', iconKey: 'food_buffalo_cut', emoji: '🥓', initialCount: 2150, effect: 'sparkle' }
   ],
   'indian-pangolin': [
-    { id: 'pangolin_love', name: 'Pangolin Love', iconKey: 'pangolin', emoji: '🤎', initialCount: 2640, effect: 'care_glow' },
-    { id: 'nature', name: 'Forest Habitat', iconKey: 'leaf', emoji: '🌿', initialCount: 2890, effect: 'leaf_drift' },
-    { id: 'support', name: 'Conservation Care', iconKey: 'heart_green', emoji: '💚', initialCount: 3370, effect: 'emerald_glow' },
-    { id: 'paw_prints', name: 'Claw Dig', iconKey: 'paw', emoji: '🐾', initialCount: 1980, effect: 'paw_step' },
-    { id: 'cute', name: 'Gentle Snout', iconKey: 'cute_face', emoji: '🥰', initialCount: 3120, effect: 'cute_bubbles' },
-    { id: 'sparkles', name: 'Precious Soul', iconKey: 'sparkles', emoji: '✨', initialCount: 2540, effect: 'sparkle' }
+    { id: 'food_ants', name: 'Weaver Ants', iconKey: 'food_ants', emoji: '🐜', initialCount: 3370, effect: 'care_glow' },
+    { id: 'food_termites', name: 'Termites', iconKey: 'food_termites', emoji: '🪲', initialCount: 2890, effect: 'leaf_drift' },
+    { id: 'food_egg', name: 'Egg Yolk', iconKey: 'food_egg', emoji: '🥚', initialCount: 2640, effect: 'sparkle' },
+    { id: 'food_larvae', name: 'Grubs & Larvae', iconKey: 'food_larvae', emoji: '🪱', initialCount: 1980, effect: 'emerald_glow' }
   ],
   'gharial': [
-    { id: 'gharial_love', name: 'Gharial Honor', iconKey: 'gharial', emoji: '🐊', initialCount: 2780, effect: 'splash_ripple' },
-    { id: 'water_love', name: 'River Basin', iconKey: 'water_drop', emoji: '💧', initialCount: 3820, effect: 'splash_ripple' },
-    { id: 'nature', name: 'Wetland Shore', iconKey: 'leaf', emoji: '🌿', initialCount: 2240, effect: 'leaf_drift' },
-    { id: 'love', name: 'Love', iconKey: 'heart_red', emoji: '❤️', initialCount: 3010, effect: 'heart_burst' },
-    { id: 'applause', name: 'Sanctuary Salute', iconKey: 'applause', emoji: '👏', initialCount: 2190, effect: 'cheer_waves' },
-    { id: 'exciting', name: 'Wild Wonder', iconKey: 'fire', emoji: '🔥', initialCount: 2470, effect: 'fire_ember' }
+    { id: 'food_fish', name: 'River Fish', iconKey: 'food_fish', emoji: '🐟', initialCount: 3820, effect: 'splash_ripple' },
+    { id: 'food_carp', name: 'Rohu Carp', iconKey: 'food_carp', emoji: '🐠', initialCount: 3010, effect: 'splash_ripple' },
+    { id: 'food_mrigal', name: 'Mrigal Fish', iconKey: 'food_mrigal', emoji: '🐡', initialCount: 2470, effect: 'leaf_drift' },
+    { id: 'food_prawn', name: 'River Prawn', iconKey: 'food_prawn', emoji: '🦐', initialCount: 2190, effect: 'cheer_waves' }
   ],
   'king-cobra': [
-    { id: 'king_cobra_respect', name: 'Cobra Majesty', iconKey: 'king_cobra', emoji: '🐍', initialCount: 3480, effect: 'golden_rays' },
-    { id: 'royal_crown', name: 'Serpent King', iconKey: 'crown', emoji: '👑', initialCount: 4210, effect: 'golden_rays' },
-    { id: 'fire', name: 'Hypnotic Aura', iconKey: 'fire', emoji: '🔥', initialCount: 3690, effect: 'fire_ember' },
-    { id: 'love', name: 'Respect', iconKey: 'heart_red', emoji: '❤️', initialCount: 2840, effect: 'heart_burst' },
-    { id: 'nature', name: 'Rainforest Den', iconKey: 'leaf', emoji: '🌿', initialCount: 2160, effect: 'leaf_drift' },
-    { id: 'sparkles', name: 'Mystic Gaze', iconKey: 'sparkles', emoji: '✨', initialCount: 3310, effect: 'sparkle' }
+    { id: 'food_snake', name: 'Rat Snake', iconKey: 'food_snake', emoji: '🐍', initialCount: 3690, effect: 'golden_rays' },
+    { id: 'food_lizard', name: 'Monitor Lizard', iconKey: 'food_lizard', emoji: '🦎', initialCount: 3310, effect: 'fire_ember' },
+    { id: 'food_frog', name: 'Marsh Frog', iconKey: 'food_frog', emoji: '🐸', initialCount: 2840, effect: 'leaf_drift' },
+    { id: 'food_egg', name: 'Egg', iconKey: 'food_egg', emoji: '🥚', initialCount: 2160, effect: 'sparkle' }
   ],
   'indian-flapshell-turtle': [
-    { id: 'turtle_love', name: 'Turtle Peace', iconKey: 'flapshell_turtle', emoji: '🐢', initialCount: 2590, effect: 'gentle_wave' },
-    { id: 'water_love', name: 'Lotus Waters', iconKey: 'water_drop', emoji: '💧', initialCount: 3670, effect: 'splash_ripple' },
-    { id: 'support', name: 'Gentle Support', iconKey: 'heart_green', emoji: '💚', initialCount: 3180, effect: 'emerald_glow' },
-    { id: 'cute', name: 'Cute Shell', iconKey: 'cute_face', emoji: '🥰', initialCount: 2950, effect: 'cute_bubbles' },
-    { id: 'nature', name: 'Lily Haven', iconKey: 'leaf', emoji: '🌿', initialCount: 2420, effect: 'leaf_drift' },
-    { id: 'sparkles', name: 'Serenity', iconKey: 'sparkles', emoji: '✨', initialCount: 2810, effect: 'sparkle' }
+    { id: 'food_snail', name: 'Apple Snail', iconKey: 'food_snail', emoji: '🐌', initialCount: 3670, effect: 'splash_ripple' },
+    { id: 'food_worm', name: 'Earthworm', iconKey: 'food_worm', emoji: '🪱', initialCount: 3180, effect: 'gentle_wave' },
+    { id: 'food_shrimp', name: 'Small Shrimp', iconKey: 'food_shrimp', emoji: '🦐', initialCount: 2950, effect: 'emerald_glow' },
+    { id: 'food_greens', name: 'Water Lettuce', iconKey: 'food_greens', emoji: '🥬', initialCount: 2420, effect: 'leaf_drift' }
   ],
   'asian-openbill': [
-    { id: 'openbill_flight', name: 'Openbill Flight', iconKey: 'asian_openbill', emoji: '🦩', initialCount: 2950, effect: 'feather_drift' },
-    { id: 'water_love', name: 'Kanjia Shallows', iconKey: 'water_drop', emoji: '💧', initialCount: 3820, effect: 'splash_ripple' },
-    { id: 'nature', name: 'Lake Heronry', iconKey: 'leaf', emoji: '🌿', initialCount: 2680, effect: 'leaf_drift' },
-    { id: 'support', name: 'Wetland Protection', iconKey: 'heart_green', emoji: '💚', initialCount: 3410, effect: 'emerald_glow' },
-    { id: 'love', name: 'Stork Love', iconKey: 'heart_red', emoji: '❤️', initialCount: 3120, effect: 'heart_burst' },
-    { id: 'sparkles', name: 'Canopy Majesty', iconKey: 'sparkles', emoji: '✨', initialCount: 2790, effect: 'sparkle' }
+    { id: 'food_snail', name: 'Apple Snail', iconKey: 'food_snail', emoji: '🐌', initialCount: 3820, effect: 'splash_ripple' },
+    { id: 'food_mussel', name: 'Freshwater Mussel', iconKey: 'food_mussel', emoji: '🦪', initialCount: 3410, effect: 'feather_drift' },
+    { id: 'food_fish', name: 'Small Fish', iconKey: 'food_fish', emoji: '🐟', initialCount: 3120, effect: 'emerald_glow' },
+    { id: 'food_frog', name: 'Wetland Frog', iconKey: 'food_frog', emoji: '🐸', initialCount: 2790, effect: 'leaf_drift' }
   ]
 };
 
@@ -139,7 +115,7 @@ export const ALL_REACTIONS_CATALOG = [
   { id: 'sparkles', name: 'Magical Sparkles', iconKey: 'sparkles', emoji: '✨', category: 'cheers' }
 ];
 
-const STORAGE_KEY = 'nandankanan_reaction_counts_v1';
+const STORAGE_KEY = 'nandankanan_reaction_counts_v2';
 
 class ReactionManager {
   constructor() {
