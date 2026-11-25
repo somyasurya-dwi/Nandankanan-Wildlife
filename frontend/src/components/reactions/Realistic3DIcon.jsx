@@ -5,8 +5,26 @@ import React from 'react';
  * Provides premium, volumetric, richly lit 3D illustrations
  * with transparent backgrounds, specular highlights, and natural depth.
  */
-export default function Realistic3DIcon({ iconKey, size = 28, className = '', effect = null }) {
+export default function Realistic3DIcon({ iconKey, emoji = null, size = 28, className = '', effect = null }) {
   const pixelSize = typeof size === 'number' ? size : parseInt(size, 10) || 28;
+
+  if (iconKey && iconKey.startsWith('food_') && emoji) {
+    return (
+      <span
+        role="img"
+        aria-hidden="true"
+        className={`inline-flex items-center justify-center shrink-0 transition-transform duration-200 select-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.45)] ${className}`}
+        style={{
+          width: `${pixelSize}px`,
+          height: `${pixelSize}px`,
+          fontSize: `${Math.max(12, Math.round(pixelSize * 0.88))}px`,
+          lineHeight: 1
+        }}
+      >
+        {emoji}
+      </span>
+    );
+  }
 
   // Render the specific realistic 3D icon
   const renderIcon = () => {

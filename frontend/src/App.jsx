@@ -20,6 +20,7 @@ import ChatbotWidget from './components/ChatbotWidget';
 import AuthModal from './components/AuthModal';
 import SignInPage from './components/SignInPage';
 import AdminDashboard from './components/AdminDashboard';
+import SubscriptionModal from './components/SubscriptionModal';
 
 // Mock Data
 import { 
@@ -57,6 +58,8 @@ export default function App() {
     return 'hero';
   });
   const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [subscriptionModalOpen, setSubscriptionModalOpen] = useState(false);
+  const [subscriptionToast, setSubscriptionToast] = useState(null);
   const [adminOpen, setAdminOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [cameras, setCameras] = useState(INITIAL_CAMERAS);
@@ -117,6 +120,34 @@ export default function App() {
     window.addEventListener('hashchange', handleHash);
     return () => window.removeEventListener('hashchange', handleHash);
   }, [currentPage]);
+
+  // Redirect from Live Video 5-Second Lock Screen to Navbar Subscribe Button
+  useEffect(() => {
+    const handleRedirectToSubscribe = () => {
+      setActiveModalCamera(null);
+      if (window.location.hash && window.location.hash.startsWith('#live/')) {
+        window.history.replaceState(null, '', '#hero');
+      }
+      setActiveSection('hero');
+
+      if (lenisRef.current) {
+        lenisRef.current.scrollTo(0, { duration: 0.6, immediate: false });
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      setTimeout(() => {
+        const subBtn = document.getElementById('navbar-subscribe-btn');
+        if (subBtn) {
+          subBtn.focus({ preventScroll: true });
+        }
+        setSubscriptionModalOpen(true);
+      }, 280);
+    };
+
+    window.addEventListener('redirect-to-navbar-subscribe', handleRedirectToSubscribe);
+    return () => window.removeEventListener('redirect-to-navbar-subscribe', handleRedirectToSubscribe);
+  }, []);
 
   // Logout Handler
   const handleLogout = async () => {
@@ -318,6 +349,7 @@ export default function App() {
       {/* 2. Frosted Forest Green Navigation Bar */}
       <Navbar 
         onOpenAuth={() => setAuthModalOpen(true)}
+        onOpenSubscription={() => setSubscriptionModalOpen(true)}
         currentUser={currentUser}
         onLogout={handleLogout}
         onOpenAdmin={() => setAdminOpen(true)}
@@ -457,6 +489,52 @@ export default function App() {
           animals={animals}
           setAnimals={setAnimals}
         />
+      )}
+
+      {/* 17. Global Wildlife Live Streaming Subscription Modal */}
+      <SubscriptionModal
+        isOpen={subscriptionModalOpen}
+        onClose={() => setSubscriptionModalOpen(false)}
+        isPreviewEnded={false}
+        onSuccess={(sub) => {
+          setSubscriptionModalOpen(false);
+          setSubscriptionToast({
+            plan: sub?.plan_title || 'Premium Wildlife Pass'
+          });
+          setTimeout(() => setSubscriptionToast(null), 6500);
+          scrollToTarget('live-cameras-grid', 'live-wildlife');
+        }}
+      />
+
+      {/* Subscription Activated Toast Notification */}
+      {subscriptionToast && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[115] w-[92%] max-w-md bg-[#071D12]/95 border-2 border-[#C8A96B] rounded-2xl p-3.5 shadow-[0_20px_50px_rgba(0,0,0,0.85)] backdrop-blur-xl text-[#F5F4EA] flex items-center justify-between gap-3 animate-fadeIn">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <span className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#C8A96B] to-[#E5C378] text-[#071D12] flex items-center justify-center font-bold shrink-0">
+              ✓
+            </span>
+            <div className="min-w-0">
+              <p className="text-xs sm:text-sm font-bold text-[#E5C378] truncate">
+                {subscriptionToast.plan} Activated!
+              </p>
+              <p className="text-[11px] text-[#A7D7A9] truncate">
+                All wildlife live video streams are now unlocked.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setSubscriptionToast(null);
+              if (cameras && cameras.length > 0) {
+                setActiveModalCamera(cameras[0]);
+              }
+            }}
+            className="px-3 py-1.5 rounded-lg bg-[#C8A96B] hover:bg-[#E5C378] text-[#071D12] font-bold text-[11px] uppercase tracking-wider shrink-0 cursor-pointer transition-colors"
+          >
+            Watch Live
+          </button>
+        </div>
       )}
 
     </div>

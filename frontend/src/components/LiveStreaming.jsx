@@ -11,7 +11,6 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import LiveCameraPlayer from './LiveCameraPlayer';
-import { subscriptionManager } from '../utils/subscriptionManager';
 import Realistic3DIcon from './reactions/Realistic3DIcon';
 
 export default function LiveStreaming({ 
@@ -248,7 +247,6 @@ export default function LiveStreaming({
                         {camera.status}
                       </span>
                     )}
-
                     {/* Individual Animal Subscription Status Badge */}
                     {subscriptionManager.isSubscribed(camera) && (
                       <span 

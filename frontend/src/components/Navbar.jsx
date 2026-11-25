@@ -13,10 +13,11 @@ import {
   Sun, 
   Volume1, 
   RotateCcw,
-  Sparkles 
+  Sparkles
 } from 'lucide-react';
 import { toggleRainforestAmbience } from '../utils/audioSynthesizer';
 import { useLanguage } from '../context/LanguageContext';
+import { subscriptionManager } from '../utils/subscriptionManager';
 import WalletModal from './WalletModal';
 import NewsNoticeModal from './NewsNoticeModal';
 import SubscriptionModal from './SubscriptionModal';
@@ -56,6 +57,7 @@ function UniversalAccessibilityIcon({ className = "w-5 h-5" }) {
 
 export default function Navbar({ 
   onOpenAuth, 
+  onOpenSubscription,
   currentUser, 
   onLogout, 
   onOpenAdmin,
@@ -74,6 +76,20 @@ export default function Navbar({
   const [subscriptionModalOpen, setSubscriptionModalOpen] = useState(false);
   const [newsNoticeModalOpen, setNewsNoticeModalOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [hasGlobalSub, setHasGlobalSub] = useState(() => subscriptionManager.hasGlobalSubscription());
+
+  useEffect(() => {
+    const unsub = subscriptionManager.subscribe(() => {
+      setHasGlobalSub(subscriptionManager.hasGlobalSubscription());
+    });
+    const expiryCheck = setInterval(() => {
+      setHasGlobalSub(subscriptionManager.hasGlobalSubscription());
+    }, 5000);
+    return () => {
+      unsub();
+      clearInterval(expiryCheck);
+    };
+  }, []);
 
   useEffect(() => {
     const handleOpenSub = () => setSubscriptionModalOpen(true);
@@ -860,16 +876,18 @@ export default function Navbar({
                 </span>
               </button>
 
-              {/* VIP Live Streaming Subscribe Button (Matching Image 1) */}
+              {/* VIP Live Streaming Subscribe Button */}
               <button
+                id="navbar-subscribe-btn"
                 type="button"
-                onClick={() => setSubscriptionModalOpen(true)}
+                onClick={() => (onOpenSubscription ? onOpenSubscription() : setSubscriptionModalOpen(true))}
                 className="px-3 sm:px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-[#C8A96B] via-[#E5C378] to-[#C8A96B] text-[#071D12] font-black text-xs uppercase tracking-wider flex items-center gap-1.5 shadow-md hover:brightness-105 active:scale-95 transition-all cursor-pointer whitespace-nowrap"
-                title="Subscribe to Unlimited Wildlife Live Streaming"
+                title={hasGlobalSub ? 'Premium Wildlife Pass Active — Click to manage' : 'Subscribe to Unlimited Wildlife Live Streaming'}
                 aria-label="Subscribe to Live Streaming"
               >
                 <Sparkles className="w-3.5 h-3.5 text-[#071D12] fill-current" />
-                <span>SUBSCRIBE</span>
+                <span>{hasGlobalSub ? (t('nav.subscribed') || 'Subscribed') : (t('nav.subscribe') || 'Subscribe')}</span>
+                {hasGlobalSub && <span className="w-1.5 h-1.5 rounded-full bg-emerald-700 animate-pulse" />}
               </button>
 
               {/* Fast-Track Explore Action Button (Redirects to Live Videos) */}
@@ -958,12 +976,13 @@ export default function Navbar({
                 type="button"
                 onClick={() => {
                   setMobileMenuOpen(false);
-                  setSubscriptionModalOpen(true);
+                  if (onOpenSubscription) onOpenSubscription();
+                  else setSubscriptionModalOpen(true);
                 }}
                 className="flex-1 px-3 py-2 rounded-xl bg-gradient-to-r from-[#C8A96B] via-[#E5C378] to-[#C8A96B] text-[#071D12] font-black text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 shadow"
               >
                 <Sparkles className="w-3.5 h-3.5 fill-current" />
-                <span>SUBSCRIBE</span>
+                <span>{hasGlobalSub ? (t('nav.subscribed') || 'Subscribed') : (t('nav.subscribe') || 'Subscribe')}</span>
               </button>
             </div>
           </div>

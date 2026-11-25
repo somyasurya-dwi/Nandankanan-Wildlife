@@ -50,7 +50,6 @@ import { walletManager } from '../utils/walletManager';
 import { subscriptionManager } from '../utils/subscriptionManager';
 import Realistic3DIcon from './reactions/Realistic3DIcon';
 import { reactionManager } from '../utils/reactionManager';
-import SubscriptionModal from './SubscriptionModal';
 import ContributionModal from './ContributionModal';
 import AddMoneyModal from './AddMoneyModal';
 import WalletHistoryModal from './WalletHistoryModal';
@@ -177,7 +176,9 @@ export default function LiveCameraPlayer({
 
   // Selected camera feed being viewed in main video player (1, 2, or 3)
   const [selectedAngleId, setSelectedAngleId] = useState(1);
-  const [isPlaying, setIsPlaying] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(() => (
+    subscriptionManager.hasGlobalSubscription() || subscriptionManager.getRemainingPreviewSeconds(animal) > 0
+  ));
   const [isMuted, setIsMuted] = useState(false);
   const [reactions, setReactions] = useState([]);
 
@@ -313,18 +314,17 @@ export default function LiveCameraPlayer({
   const [streamSeconds, setStreamSeconds] = useState(24);
   const [syncTimecode, setSyncTimecode] = useState('');
 
-  // Individual Animal 5-Second Free Preview & Subscription System
-  const [isSubscribed, setIsSubscribed] = useState(() => subscriptionManager.isSubscribed(animal));
-  const [activePlanLabel, setActivePlanLabel] = useState(() => {
-    return subscriptionManager.getSubscriptionPlanLabel(animal) || '3 Months Plan';
-  });
-  const [remainingSeconds, setRemainingSeconds] = useState(() => {
-    if (subscriptionManager.isSubscribed(animal)) return Infinity;
-    return subscriptionManager.getRemainingPreviewSeconds(animal);
-  });
-  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
-  const [selectedSubscriptionPlan, setSelectedSubscriptionPlan] = useState(null);
-  const [isLocked, setIsLocked] = useState(false);
+  // Global Subscription 5-Second Free Preview & Fullscreen Lock State
+  const [isSubscribed, setIsSubscribed] = useState(() => subscriptionManager.hasGlobalSubscription());
+  const [remainingSeconds, setRemainingSeconds] = useState(() => (
+    subscriptionManager.hasGlobalSubscription()
+      ? Infinity
+      : subscriptionManager.getRemainingPreviewSeconds(animal)
+  ));
+  const [isLocked, setIsLocked] = useState(() => (
+    !subscriptionManager.hasGlobalSubscription() &&
+    subscriptionManager.getRemainingPreviewSeconds(animal) <= 0
+  ));
 
   // Auto-Tracking Mode (Automatic Camera Switching according to actual tiger location)
   const [autoTrackingEnabled, setAutoTrackingEnabled] = useState(true);
@@ -742,112 +742,121 @@ export default function LiveCameraPlayer({
     };
   }, []);
 
-  // Reset or grant fresh 5-second preview window upon opening or switching animals
+  // Sync per-animal 5-second preview window upon opening or switching animals (unless globally subscribed)
   useEffect(() => {
-    const sub = subscriptionManager.isSubscribed(animal);
+    const sub = subscriptionManager.hasGlobalSubscription();
     setIsSubscribed(sub);
-    setActivePlanLabel(subscriptionManager.getSubscriptionPlanLabel(animal) || '3 Months Plan');
     if (sub) {
       setRemainingSeconds(Infinity);
       setIsLocked(false);
-      setShowSubscriptionModal(false);
+      setIsPlaying(true);
       return;
     }
-    subscriptionManager.grantAdditionalPreview(5.0, animal);
-    setRemainingSeconds(5.0);
-    setIsLocked(false);
+    const rem = subscriptionManager.getRemainingPreviewSeconds(animal);
+    const locked = rem <= 0;
+    setRemainingSeconds(rem);
+    setIsLocked(locked);
+    if (locked) {
+      setIsPlaying(false);
+      [videoRefContinuous, videoRef1, videoRef2, videoRef3].forEach((ref) => {
+        if (ref.current) ref.current.pause();
+      });
+    } else {
+      setIsPlaying(true);
+      const activeVideo = viewMode === 'continuous' ? videoRefContinuous.current : videoRefs[selectedAngleId]?.current;
+      if (activeVideo) {
+        activeVideo.play().catch(() => {});
+      }
+    }
   }, [animal?.id, animal?.slug, animal?.animal_name]);
 
-  // Listen to subscription updates from subscriptionManager
+  // Listen to global subscription activation or expiry updates
   useEffect(() => {
     const unsubscribe = subscriptionManager.subscribe(() => {
-      const sub = subscriptionManager.isSubscribed(animal);
+      const sub = subscriptionManager.hasGlobalSubscription();
       setIsSubscribed(sub);
-      setActivePlanLabel(subscriptionManager.getSubscriptionPlanLabel(animal) || '3 Months Plan');
       if (sub) {
         setRemainingSeconds(Infinity);
         setIsLocked(false);
-        setShowSubscriptionModal(false);
+        setIsPlaying(true);
+      } else {
+        const rem = subscriptionManager.getRemainingPreviewSeconds(animal);
+        setRemainingSeconds(rem);
+        if (rem <= 0) {
+          setIsLocked(true);
+          setIsPlaying(false);
+          [videoRefContinuous, videoRef1, videoRef2, videoRef3].forEach((ref) => {
+            if (ref.current) ref.current.pause();
+          });
+        }
       }
     });
     return () => unsubscribe();
   }, [animal]);
 
-  // Monitor active video playback and decrement remaining preview time
+  // Monitor active subscription expiry while video player is open
   useEffect(() => {
-    if (isSubscribed) return;
+    if (!isSubscribed) return;
+
+    const expiryTimer = setInterval(() => {
+      if (!subscriptionManager.hasGlobalSubscription()) {
+        setIsSubscribed(false);
+        setRemainingSeconds(0);
+        setIsLocked(true);
+        setIsPlaying(false);
+        [videoRefContinuous, videoRef1, videoRef2, videoRef3].forEach((ref) => {
+          if (ref.current) ref.current.pause();
+        });
+        subscriptionManager._notifyListeners();
+      }
+    }, 1000);
+
+    return () => clearInterval(expiryTimer);
+  }, [isSubscribed]);
+
+  // Ensure video stays paused whenever locked
+  useEffect(() => {
+    if (!isLocked) return;
+    [videoRefContinuous, videoRef1, videoRef2, videoRef3].forEach((ref) => {
+      if (ref.current) ref.current.pause();
+    });
+  }, [isLocked]);
+
+  // Count 5 seconds of active playback per animal (persisted across refresh/reopen), then lock
+  useEffect(() => {
+    if (isSubscribed || isLocked) return;
 
     const interval = setInterval(() => {
       const activeVideo = viewMode === 'continuous' ? videoRefContinuous.current : videoRefs[selectedAngleId]?.current;
       if (activeVideo && !activeVideo.paused && !activeVideo.ended && activeVideo.readyState >= 2) {
-        setRemainingSeconds((prev) => {
-          const next = Math.max(0, Math.round((prev - 0.2) * 10) / 10);
-          subscriptionManager.recordPlayback(0.2, animal);
-          if (next <= 0) {
-            // 5-second preview finished! Lock playback and trigger subscription option alert
-            activeVideo.pause();
-            setIsPlaying(false);
-            setIsLocked(true);
-            setShowSubscriptionModal(true);
-          }
-          return next;
-        });
+        const next = subscriptionManager.recordPlayback(0.2, animal);
+        setRemainingSeconds(next);
+        if (next <= 0) {
+          activeVideo.pause();
+          setIsPlaying(false);
+          setIsLocked(true);
+        }
       }
     }, 200);
 
     return () => clearInterval(interval);
-  }, [isSubscribed, animal, viewMode, selectedAngleId, videoRefs]);
+  }, [isSubscribed, isLocked, animal, viewMode, selectedAngleId, videoRefs]);
 
-  const handlePreviewAgain = () => {
-    if (!subscriptionManager.isSubscribed(animal)) {
-      subscriptionManager.grantAdditionalPreview(5.0, animal);
-      setRemainingSeconds(5.0);
-      setIsLocked(false);
-      const activeVideo = viewMode === 'continuous' ? videoRefContinuous.current : videoRefs[selectedAngleId]?.current;
-      if (activeVideo) {
-        activeVideo.play().then(() => setIsPlaying(true)).catch(() => {});
-      }
+  const handleCloseLockScreen = useCallback(() => {
+    if (typeof document !== 'undefined' && document.fullscreenElement) {
+      document.exitFullscreen().catch(() => {});
     }
-  };
-
-  const handleDismissSubscriptionModal = () => {
-    setShowSubscriptionModal(false);
-    setSelectedSubscriptionPlan(null);
-    // Dismiss live player and redirect directly to Live Views section (#live-wildlife)
     if (onClose) {
       onClose();
     }
-    window.location.hash = '#live-wildlife';
-    try {
-      window.dispatchEvent(new HashChangeEvent('hashchange'));
-    } catch (e) {}
-    setTimeout(() => {
-      const el = document.getElementById('live-cameras-grid') || document.getElementById('live-wildlife');
-      if (el) {
-        const header = document.querySelector('header');
-        const headerHeight = header ? header.offsetHeight : 95;
-        if (window.__lenis) {
-          window.__lenis.scrollTo(el, { offset: -headerHeight - 12, duration: 1.0, immediate: false });
-        } else {
-          const pos = el.getBoundingClientRect().top + window.scrollY;
-          window.scrollTo({ top: Math.max(0, pos - headerHeight - 12), behavior: 'smooth' });
-        }
-      }
-    }, 60);
-  };
+  }, [onClose]);
 
-  const handleSubscriptionSuccess = (sub) => {
-    setIsSubscribed(true);
-    const label = (sub && sub.plan_title) || subscriptionManager.getSubscriptionPlanLabel(animal) || '3 Months Plan';
-    setActivePlanLabel(label);
-    setRemainingSeconds(Infinity);
-    setIsLocked(false);
-    setShowSubscriptionModal(false);
-    const activeVideo = viewMode === 'continuous' ? videoRefContinuous.current : videoRefs[selectedAngleId]?.current;
-    if (activeVideo) {
-      activeVideo.play().then(() => setIsPlaying(true)).catch(() => {});
+  const handleSubscribeNowRedirect = useCallback(() => {
+    if (typeof document !== 'undefined' && document.fullscreenElement) {
+      document.exitFullscreen().catch(() => {});
     }
-  };
+    window.dispatchEvent(new CustomEvent('redirect-to-navbar-subscribe'));
+  }, []);
 
   const formatTime = (secs) => {
     const hrs = Math.floor(secs / 3600);
@@ -872,7 +881,9 @@ export default function LiveCameraPlayer({
       if (['INPUT', 'TEXTAREA'].includes(e.target?.tagName)) return;
 
       if (e.key === 'Escape') {
-        if (activePopup) {
+        if (isLocked) {
+          handleCloseLockScreen();
+        } else if (activePopup) {
           setActivePopup(null);
         } else if (onClose) {
           onClose();
@@ -900,32 +911,12 @@ export default function LiveCameraPlayer({
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [activePopup, onClose, selectedAngleId, viewMode, handleAnimalScrollLeft, handleAnimalScrollRight]);
+  }, [activePopup, onClose, selectedAngleId, viewMode, handleAnimalScrollLeft, handleAnimalScrollRight, isLocked, handleCloseLockScreen]);
 
   // =========================================================================
-  // DYNAMIC ANIMAL-SPECIFIC REACTION SYSTEM WITH REALISTIC 3D ICONS
+  // DYNAMIC ANIMAL-SPECIFIC FOOD REACTION SYSTEM (4 FOOD EMOJIS PER ANIMAL)
   // =========================================================================
-  // Adjustable Reaction Dock Size: 'normal' (expanded dock) | 'mini' (collapsed pill) — 2-State Toggle
-  const [reactDockSize, setReactDockSize] = useState(() => {
-    try {
-      const saved = localStorage.getItem('nandankanan_react_size');
-      return saved === 'mini' ? 'mini' : 'normal';
-    } catch {
-      return 'normal';
-    }
-  });
-
-  const toggleReactDockSize = useCallback(() => {
-    setReactDockSize(prev => {
-      const next = prev === 'normal' ? 'mini' : 'normal';
-      try {
-        localStorage.setItem('nandankanan_react_size', next);
-      } catch { }
-      return next;
-    });
-  }, []);
-
-  // Automatically resolves the exact 6 main reactions for the currently selected animal
+  // Automatically resolves the 4 diet-specific food reactions for the currently selected animal
   const activeReactions = useMemo(() => {
     return reactionManager.getReactionsForAnimal(animal);
   }, [animal]);
@@ -935,14 +926,14 @@ export default function LiveCameraPlayer({
     return reactionManager.getAnimalCounts(animal);
   });
 
-  // When visitor switches animals, seamlessly update reaction counts without page reload or video reset
+  // Update reaction counts and clear selected reaction highlight when switching animals
   useEffect(() => {
     setReactionCounts(reactionManager.getAnimalCounts(animal));
+    setSelectedReactionId(null);
   }, [animal]);
 
+  const [selectedReactionId, setSelectedReactionId] = useState(null);
   const [bouncingEmojiId, setBouncingEmojiId] = useState(null);
-
-  // Dynamic Multi-Tap Combo Streak and Hold-to-Charge Mega Burst State
   const [comboCount, setComboCount] = useState(0);
   const [comboLabel, setComboLabel] = useState(null);
   const [floatingBadges, setFloatingBadges] = useState([]);
@@ -954,41 +945,35 @@ export default function LiveCameraPlayer({
   const chargeStartTimeRef = useRef(null);
   const isMegaBurstTriggeredRef = useRef(false);
 
-  // Compute combo label based on rapid streak
   const getComboTitle = (count) => {
-    if (count >= 25) return `🌟 ${count}x GODLIKE NATURE LOVER!`;
-    if (count >= 15) return `👑 ${count}x SANCTUARY LEGEND!`;
-    if (count >= 10) return `💥 ${count}x ROAR FRENZY!`;
-    if (count >= 6) return `⚡ ${count}x WILD HYPE!`;
+    if (count >= 25) return `🌟 ${count}x WILDLIFE FEAST LEGEND!`;
+    if (count >= 15) return `👑 ${count}x SANCTUARY KEEPER!`;
+    if (count >= 10) return `💥 ${count}x TREAT FRENZY!`;
+    if (count >= 6) return `⚡ ${count}x HAPPY FEED!`;
     if (count >= 3) return `🔥 ${count}x COMBO!`;
     return null;
   };
 
-  // Compute most popular reaction for the active animal
   const popularReactionId = useMemo(() => {
     return reactionManager.getPopularReactionId(animal, reactionCounts);
   }, [animal, reactionCounts]);
 
-  // Enhanced Multi-Trajectory Floating 3D Reaction Spawner with Dynamic Sound & Multi-Tap Combos
   const handleSendReaction = useCallback((item, isFromBurst = false) => {
-    // 1. Increment reaction count locally and sync in background
+    setSelectedReactionId(item.id);
     const newCount = reactionManager.sendReaction(animal, item);
     setReactionCounts(prev => ({
       ...prev,
       [item.id]: newCount
     }));
 
-    // 2. Button bounce animation
     setBouncingEmojiId(item.id);
     setTimeout(() => setBouncingEmojiId(null), 350);
 
-    // 3. Update Combo Counter and play rising-pitch pop sound
     if (!isFromBurst) {
       setComboCount(prev => {
         const next = prev + 1;
         playReactionPop(next);
-        const title = getComboTitle(next);
-        setComboLabel(title);
+        setComboLabel(getComboTitle(next));
         return next;
       });
 
@@ -998,7 +983,6 @@ export default function LiveCameraPlayer({
         setComboLabel(null);
       }, 1600);
 
-      // Spawn floating score badge near reaction dock
       const badgeId = Date.now() + Math.random();
       const badgeOffset = (Math.random() - 0.5) * 60;
       setFloatingBadges(prev => [
@@ -1010,23 +994,22 @@ export default function LiveCameraPlayer({
       }, 850);
     }
 
-    // 4. Spawn floating 3D particle animations over the live video
     const countToSpawn = Math.random() > 0.35 ? 2 : 1;
     const newParticles = [];
 
     for (let i = 0; i < countToSpawn; i++) {
       const id = Date.now() + Math.random() + i;
-      const startX = 20 + Math.random() * 60; // 20% to 80% width
-      const driftX = (Math.random() - 0.5) * 120; // -60px to +60px
-      const rotation = (Math.random() - 0.5) * 50; // -25deg to +25deg
-      const duration = 2.0 + Math.random() * 0.8; // 2.0s to 2.8s
-      const scale = 0.95 + Math.random() * 0.45; // 0.95x to 1.4x
-      const distanceY = 240 + Math.random() * 120; // 240px to 360px travel
+      const startX = 20 + Math.random() * 60;
+      const driftX = (Math.random() - 0.5) * 120;
+      const rotation = (Math.random() - 0.5) * 50;
+      const duration = 2.0 + Math.random() * 0.8;
+      const scale = 0.95 + Math.random() * 0.45;
+      const distanceY = 240 + Math.random() * 120;
 
       newParticles.push({
         id,
         iconKey: item.iconKey,
-        name: item.name || item.label,
+        name: item.name,
         emojiFallback: item.emoji,
         effect: item.effect,
         startX,
@@ -1037,7 +1020,6 @@ export default function LiveCameraPlayer({
         distanceY
       });
 
-      // Clean up particle
       setTimeout(() => {
         setReactions(prev => prev.filter(r => r.id !== id));
       }, duration * 1000 + 100);
@@ -1046,12 +1028,11 @@ export default function LiveCameraPlayer({
     setReactions(prev => [...prev, ...newParticles]);
   }, [animal]);
 
-  // Trigger Hold-to-Charge "Mega Burst": Fountain explosion of 14 particles + triumphant chord chime
   const triggerMegaBurst = useCallback((item) => {
+    setSelectedReactionId(item.id);
     isMegaBurstTriggeredRef.current = true;
     playMegaReactionBurst();
 
-    // Add +10 to reaction count
     let updatedCount = 0;
     for (let k = 0; k < 10; k++) {
       updatedCount = reactionManager.sendReaction(animal, item);
@@ -1061,11 +1042,9 @@ export default function LiveCameraPlayer({
       [item.id]: updatedCount
     }));
 
-    // Escalates combo
     setComboCount(prev => {
       const next = prev + 5;
-      const title = getComboTitle(next) || `💥 ${next}x MEGA COMBO!`;
-      setComboLabel(title);
+      setComboLabel(getComboTitle(next) || `💥 ${next}x MEGA COMBO!`);
       return next;
     });
     if (comboTimerRef.current) clearTimeout(comboTimerRef.current);
@@ -1074,31 +1053,30 @@ export default function LiveCameraPlayer({
       setComboLabel(null);
     }, 2200);
 
-    // Floating +10 Mega badge
     const badgeId = Date.now() + Math.random();
     setFloatingBadges(prev => [
       ...prev,
-      { id: badgeId, offset: 0, text: '💥 MEGA BURST +10!', isMega: true }
+      { id: badgeId, offset: 0, text: '💥 MEGA TREAT +10!', isMega: true }
     ]);
     setTimeout(() => {
       setFloatingBadges(prev => prev.filter(b => b.id !== badgeId));
     }, 1200);
 
-    // Erupt 14 fountain particles across the live video stream
     const fountainParticles = [];
     for (let i = 0; i < 14; i++) {
       const id = Date.now() + Math.random() + i;
-      const startX = 30 + Math.random() * 40; // concentrated center burst
-      const driftX = (Math.random() - 0.5) * 280; // wide explosive fountain drift
+      const startX = 30 + Math.random() * 40;
+      const driftX = (Math.random() - 0.5) * 280;
       const rotation = (Math.random() - 0.5) * 90;
       const duration = 2.4 + Math.random() * 1.0;
-      const scale = 1.1 + Math.random() * 0.7; // larger celebratory icons
-      const distanceY = 320 + Math.random() * 180; // high trajectory
+      const scale = 1.1 + Math.random() * 0.7;
+      const distanceY = 320 + Math.random() * 180;
 
       fountainParticles.push({
         id,
         iconKey: item.iconKey,
         name: item.name,
+        emojiFallback: item.emoji,
         startX,
         driftX,
         rotation,
@@ -1115,14 +1093,13 @@ export default function LiveCameraPlayer({
     setReactions(prev => [...prev, ...fountainParticles]);
   }, [animal]);
 
-  // Pointer & Touch handlers for Hold-to-Charge "Mega Burst"
-  const handlePointerDown = useCallback((item, e) => {
+  const handlePointerDown = useCallback((item) => {
     isMegaBurstTriggeredRef.current = false;
     chargeStartTimeRef.current = Date.now();
     setChargingReactionId(item.id);
     setChargeProgress(0);
 
-    const chargeDuration = 650; // ms to reach 100%
+    const chargeDuration = 650;
     if (chargeIntervalRef.current) clearInterval(chargeIntervalRef.current);
 
     chargeIntervalRef.current = setInterval(() => {
@@ -1151,7 +1128,6 @@ export default function LiveCameraPlayer({
     setChargingReactionId(null);
     setChargeProgress(0);
 
-    // If released before 650ms and Mega Burst was not triggered, treat as single tap
     if (!isMegaBurstTriggeredRef.current && elapsed < 650) {
       handleSendReaction(item);
     }
@@ -1173,20 +1149,9 @@ export default function LiveCameraPlayer({
     };
   }, []);
 
-  const addReaction = (emoji) => {
-    const item = activeReactions.find(r => r.emoji === emoji || r.iconKey === emoji) || {
-      id: 'custom',
-      iconKey: 'heart_red',
-      name: 'Love',
-      initialCount: 100
-    };
-    handleSendReaction(item);
-  };
-
   const togglePlay = () => {
-    // If user is not subscribed and preview has expired, block playback & show subscription modal
     if (!isSubscribed && (remainingSeconds <= 0 || isLocked)) {
-      setShowSubscriptionModal(true);
+      setIsLocked(true);
       return;
     }
 
@@ -1451,16 +1416,6 @@ export default function LiveCameraPlayer({
             </div>
 
             <div className="flex items-center gap-1 sm:gap-2 shrink-0">
-              {/* Donate / Contribution Button */}
-              <button
-                onClick={() => handleOpenContribution(50, animal)}
-                className="px-2 sm:px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#C8A96B] hover:bg-[#D4BA7E] text-[#071D12] flex items-center gap-1 sm:gap-1.5 transition-all shadow-md shadow-[#C8A96B]/20 cursor-pointer active:scale-95"
-                title="Share Happiness, Feed Wildlife"
-              >
-                <Sparkles className="w-3.5 h-3.5 text-[#071D12]" />
-                <span className="hidden sm:inline">Feed Wildlife</span>
-              </button>
-
               {/* Close Button */}
               <button
                 onClick={onClose}
@@ -1502,41 +1457,53 @@ export default function LiveCameraPlayer({
                 onDismiss={handleDismissDonationCelebration}
               />
 
-              {/* Locked Screen Overlay after 5-Second Free Preview finishes */}
+              {/* 5-Second Free Preview Ended Full-Screen Lock Page (Project Forest Green + Sanctuary Gold Palette) */}
               {isLocked && !isSubscribed && (
-                <div className="absolute inset-0 z-30 bg-black/90 backdrop-blur-md flex flex-col items-center justify-center p-4 sm:p-6 text-center select-none animate-fadeIn">
-                  <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-[#14532D] to-[#071D12] border-2 border-[#C8A96B] flex items-center justify-center text-[#C8A96B] shadow-2xl mb-3 sm:mb-4">
+                <div
+                  style={{
+                    background: 'radial-gradient(circle at 50% 45%, #123D2B 0%, #071D12 58%, #04120B 100%)'
+                  }}
+                  className="fixed inset-0 z-[140] flex flex-col items-center justify-center p-6 text-center select-none animate-fadeIn"
+                >
+                  {/* Top-Right Cross Button */}
+                  <button
+                    type="button"
+                    onClick={handleCloseLockScreen}
+                    className="absolute top-4 right-4 sm:top-6 sm:right-6 p-2.5 rounded-full bg-[#0B2A1A] hover:bg-[#1B6537] border border-[#C8A96B]/60 hover:border-[#E5C378] text-[#F5F4EA] hover:text-[#E5C378] shadow-lg transition-all cursor-pointer active:scale-95"
+                    title="Close"
+                    aria-label="Close"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+
+                  {/* Glowing Sanctuary Gold Lock Box */}
+                  <div className="w-16 h-16 sm:w-[72px] sm:h-[72px] rounded-2xl bg-[#0B2A1A] border-2 border-[#C8A96B] flex items-center justify-center text-[#E5C378] shadow-[0_0_32px_rgba(200,169,107,0.3)] mb-5">
                     <Lock className="w-7 h-7 sm:w-8 sm:h-8" />
                   </div>
-                  
-                  <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-mono mb-2">
-                    <span>5-Second Free Preview Ended</span>
+
+                  {/* Pill Badge */}
+                  <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-[#06180E] border border-[#C8A96B]/65 text-[#E5C378] text-[10.5px] sm:text-[11px] font-mono font-semibold tracking-[0.16em] uppercase leading-none mb-4 shadow-sm">
+                    <span>5-SECOND FREE PREVIEW ENDED</span>
                   </div>
 
-                  <h3 className="font-display font-bold text-lg sm:text-2xl text-white mb-1.5">
-                    Subscribe to {animal?.animal_name || 'Animal'} Live Stream
+                  {/* Main Heading */}
+                  <h3 className="font-display font-bold text-xl sm:text-3xl tracking-wide text-[#F5F4EA] uppercase mb-2.5">
+                    SUBSCRIBE TO PREMIUM LIVE STREAM
                   </h3>
 
-                  <p className="text-xs sm:text-sm text-white/80 max-w-md mb-4 sm:mb-5 leading-relaxed">
-                    Enjoy uninterrupted, 24/7 high-definition live streaming of {animal?.animal_name || 'this animal'} across all camera angles.
+                  {/* Subtitle */}
+                  <p className="text-xs sm:text-sm text-[#A7D7A9] max-w-md mb-7 leading-relaxed">
+                    Enjoy uninterrupted, 24/7 high-definition live streaming across all camera angles.
                   </p>
 
-                  <div className="flex flex-col sm:flex-row items-center gap-2.5 sm:gap-3 w-full max-w-xs">
-                    <button
-                      onClick={() => setShowSubscriptionModal(true)}
-                      className="w-full px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#C8A96B] to-[#D4BA7E] hover:from-[#D4BA7E] hover:to-[#E0C68E] text-[#071D12] font-bold text-xs sm:text-sm shadow-xl shadow-[#C8A96B]/25 transition-all transform active:scale-95 cursor-pointer flex items-center justify-center gap-2"
-                    >
-                      <Sparkles className="w-4 h-4 text-[#071D12]" />
-                      <span>Subscribe to {animal?.animal_name || 'Animal'} – ₹50</span>
-                    </button>
-
-                    <button
-                      onClick={handlePreviewAgain}
-                      className="w-full px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-white/80 hover:text-white font-mono text-xs transition-colors cursor-pointer"
-                    >
-                      Preview Again (5s)
-                    </button>
-                  </div>
+                  {/* Subscribe Now Button (Redirects to Navbar Subscribe) */}
+                  <button
+                    type="button"
+                    onClick={handleSubscribeNowRedirect}
+                    className="px-8 py-3 rounded-xl bg-gradient-to-r from-[#C8A96B] via-[#E5C378] to-[#C8A96B] hover:brightness-105 text-[#071D12] font-bold text-sm shadow-[0_0_26px_rgba(200,169,107,0.38)] transition-all transform active:scale-95 cursor-pointer"
+                  >
+                    Subscribe Now
+                  </button>
                 </div>
               )}
 
@@ -1547,7 +1514,7 @@ export default function LiveCameraPlayer({
                     ref={videoRefContinuous}
                     key={`${animal?.id || 'cam'}-continuous`}
                     poster={animal?.thumbnail_url || animal?.photo_url || (isWhiteTiger ? '/images/white_tiger.jpg?v=20261124' : isPangolin ? '/images/pangolin.jpg' : isGharial ? '/images/gharial.jpg' : isCobra ? '/images/king_cobra.jpg' : '/images/royal_bengal_tiger.jpg')}
-                    autoPlay
+                    autoPlay={!isLocked}
                     loop
                     muted={isMuted}
                     playsInline
@@ -1651,48 +1618,41 @@ export default function LiveCameraPlayer({
               {/* Top Over-Video Overlay Bar: Left Badges & Right Controls (Unified Non-Overlapping Responsive Flex Layout) */}
               <div className="absolute top-2.5 sm:top-3.5 inset-x-2.5 sm:inset-x-3.5 z-20 pointer-events-none flex items-center justify-between gap-2">
                 {/* Clean, Non-Cluttering Top Over-Video Badges */}
-                {!isFullscreen && (
-                  <div className="pointer-events-auto flex items-center flex-nowrap gap-1.5 sm:gap-2 min-w-0 flex-1 overflow-hidden">
-                    <div className="px-2 sm:px-2.5 py-1 rounded-xl bg-black/75 backdrop-blur-md border border-[#C8A96B]/30 text-[10px] sm:text-[11px] font-mono text-[#F5F4EA] flex items-center gap-1.5 shadow-lg pointer-events-none shrink min-w-0">
-                      {(animal?.thumbnail_url || animal?.photo_url) && (
-                        <img 
-                          src={animal.thumbnail_url || animal.photo_url} 
-                          alt={animal.animal_name} 
-                          className="w-4 h-4 rounded-full object-cover border border-[#C8A96B]/60 shrink-0" 
-                        />
-                      )}
-                      <span className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-red-500 animate-pulse shrink-0" />
-                      <span className="text-[#C8A96B] font-bold truncate max-w-[85px] sm:max-w-[120px] md:max-w-[150px]">{animal?.animal_name}</span>
-                      <span className="text-white/40 hidden md:inline">•</span>
-                      <span className="text-white hidden md:inline truncate max-w-[80px] lg:max-w-[110px]">{currentCam.camera_name || currentCam.name}</span>
-                      <span className="text-white/40 hidden 2xl:inline">•</span>
-                      <span className="text-emerald-400 hidden 2xl:inline">{displayBitrate}</span>
-                    </div>
-
-                    {/* Live Stream Status Badge */}
-                    <div className="px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-xl bg-black/80 border border-emerald-500/50 text-[9px] sm:text-[10px] font-mono text-emerald-400 font-bold flex items-center gap-1 shadow-lg backdrop-blur-md pointer-events-none uppercase tracking-wider shrink-0">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
-                      <span>LIVE</span>
-                    </div>
-
-                    {/* 5-Second Free Preview Countdown / Subscription Plan Badge (e.g. 3 Months Plan, 1 Month Plan, 6 Months Plan) */}
-                    {!isSubscribed ? (
-                      <div className="px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-xl bg-black/85 border border-amber-500/60 text-[9px] sm:text-[10px] font-mono text-amber-300 font-bold flex items-center gap-1 shadow-lg backdrop-blur-md pointer-events-none shrink-0 whitespace-nowrap">
-                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse shrink-0" />
-                        <span>{Math.max(0, Math.ceil(remainingSeconds))}s<span className="hidden sm:inline"> Preview</span></span>
+                <div className="pointer-events-auto flex items-center flex-nowrap gap-1.5 sm:gap-2 min-w-0 flex-1 overflow-hidden">
+                  {!isFullscreen && (
+                    <>
+                      <div className="px-2 sm:px-2.5 py-1 rounded-xl bg-black/75 backdrop-blur-md border border-[#C8A96B]/30 text-[10px] sm:text-[11px] font-mono text-[#F5F4EA] flex items-center gap-1.5 shadow-lg pointer-events-none shrink min-w-0">
+                        {(animal?.thumbnail_url || animal?.photo_url) && (
+                          <img 
+                            src={animal.thumbnail_url || animal.photo_url} 
+                            alt={animal.animal_name} 
+                            className="w-4 h-4 rounded-full object-cover border border-[#C8A96B]/60 shrink-0" 
+                          />
+                        )}
+                        <span className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-red-500 animate-pulse shrink-0" />
+                        <span className="text-[#C8A96B] font-bold truncate max-w-[85px] sm:max-w-[120px] md:max-w-[150px]">{animal?.animal_name}</span>
+                        <span className="text-white/40 hidden md:inline">•</span>
+                        <span className="text-white hidden md:inline truncate max-w-[80px] lg:max-w-[110px]">{currentCam.camera_name || currentCam.name}</span>
+                        <span className="text-white/40 hidden 2xl:inline">•</span>
+                        <span className="text-emerald-400 hidden 2xl:inline">{displayBitrate}</span>
                       </div>
-                    ) : (
-                      <div 
-                        className="px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-xl bg-black/90 border border-[#C8A96B] text-[10px] sm:text-[11px] font-mono text-[#F5F4EA] font-extrabold flex items-center gap-1.5 shadow-xl backdrop-blur-md pointer-events-none shrink-0 whitespace-nowrap"
-                        title={`VIP Unlimited Access — ${activePlanLabel}`}
-                        aria-label={`VIP ${activePlanLabel}`}
-                      >
-                        <Sparkles className="w-3.5 h-3.5 text-[#C8A96B] shrink-0 fill-[#C8A96B]/30" />
-                        <span className="text-[#F5F4EA] font-extrabold">{activePlanLabel}</span>
+
+                      {/* Live Stream Status Badge */}
+                      <div className="px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-xl bg-black/80 border border-emerald-500/50 text-[9px] sm:text-[10px] font-mono text-emerald-400 font-bold flex items-center gap-1 shadow-lg backdrop-blur-md pointer-events-none uppercase tracking-wider shrink-0">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+                        <span>LIVE</span>
                       </div>
-                    )}
-                  </div>
-                )}
+                    </>
+                  )}
+
+                  {/* 5-Second Free Preview Countdown Badge (5s -> 4s -> 3s -> 2s -> 1s) */}
+                  {!isSubscribed && !isLocked && (
+                    <div className="px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-xl bg-[#0B2A1A]/90 border border-[#C8A96B]/75 text-[10px] sm:text-[11px] font-mono text-[#E5C378] font-bold flex items-center gap-1.5 shadow-lg backdrop-blur-md pointer-events-none shrink-0 whitespace-nowrap">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#E5C378] animate-pulse shrink-0" />
+                      <span>{Math.max(1, Math.ceil(remainingSeconds))}s preview</span>
+                    </div>
+                  )}
+                </div>
 
                 {/* Top-Right Corner Live Video Controls: Watching Badge, Quality Selector & Interactive Digital Zoom */}
                 <div className="pointer-events-auto flex items-center gap-1.5 sm:gap-2 shrink-0 ml-auto">
@@ -1959,7 +1919,7 @@ export default function LiveCameraPlayer({
 
 
 
-              {/* Floating Multi-Particle 3D Reactions Layer */}
+              {/* Floating Multi-Particle Food Reactions Layer */}
               <div className="absolute inset-0 pointer-events-none overflow-hidden z-30">
                 {reactions.map((r) => (
                   <div
@@ -1976,6 +1936,7 @@ export default function LiveCameraPlayer({
                   >
                     <Realistic3DIcon
                       iconKey={r.iconKey}
+                      emoji={r.emojiFallback}
                       size={Math.round(36 * (r.scale || 1))}
                       effect={r.effect}
                     />
@@ -1983,134 +1944,88 @@ export default function LiveCameraPlayer({
                 ))}
               </div>
 
-              {/* Right-Aligned Floating Glassmorphism Reaction Dock with Realistic 3D Icons & Adjustable Sizing */}
-              {!isFullscreen && (reactDockSize === 'mini' ? (
-                <div className="absolute bottom-11 sm:bottom-12 md:bottom-12.5 right-3 sm:right-5 md:right-6 z-20 pointer-events-auto animate-fadeIn">
-                  <button
-                    type="button"
-                    onClick={toggleReactDockSize}
-                    className="px-2.5 py-1 rounded-full bg-black/85 hover:bg-black/95 backdrop-blur-xl border border-[#C8A96B]/50 hover:border-[#C8A96B] shadow-2xl flex items-center gap-1.5 text-xs font-mono text-[#F5F4EA] transition-all cursor-pointer group hover:scale-105 active:scale-95"
-                    title="Expand Reaction Dock"
-                    aria-label="Expand Reaction Dock"
-                  >
-                    <Sparkles className="w-3.5 h-3.5 text-[#C8A96B] animate-pulse" />
-                    <Realistic3DIcon
-                      iconKey={activeReactions[0]?.iconKey || 'heart'}
-                      size={14}
-                    />
-                    <span className="text-[10px] text-white/80 font-mono">
-                      {popularReactionId ? (reactionCounts[popularReactionId] >= 1000 ? `${(reactionCounts[popularReactionId] / 1000).toFixed(1)}k` : reactionCounts[popularReactionId]) : '4.6k'}
-                    </span>
-                    <Maximize2 className="w-3 h-3 text-[#C8A96B] opacity-70 group-hover:opacity-100 ml-0.5" />
-                  </button>
-                </div>
-              ) : (
-                <div className="absolute bottom-11 sm:bottom-12 md:bottom-12.5 right-3 sm:right-5 md:right-6 w-fit max-w-[calc(100%-1.5rem)] z-20 flex flex-col items-end pointer-events-auto origin-bottom-right scale-75 xs:scale-80 sm:scale-85 md:scale-90 lg:scale-95 xl:scale-100">
+              {/* Right-Aligned Floating Food Reaction Dock (4 Diet-Specific Emojis per Animal — Normal & Fullscreen) */}
+              <div className={`absolute ${isFullscreen ? 'bottom-12 sm:bottom-14' : 'bottom-11 sm:bottom-12 md:bottom-12.5'} right-3 sm:right-5 md:right-6 w-fit max-w-[calc(100%-1.5rem)] z-20 flex flex-col items-end pointer-events-auto origin-bottom-right scale-75 xs:scale-80 sm:scale-85 md:scale-90 lg:scale-95 xl:scale-100`}>
 
-                  {/* Multi-Tap Combo Streak Escalation Badge */}
-                  {comboLabel && (
-                    <div className="mb-1 pointer-events-none animate-comboPop whitespace-nowrap">
-                      <div className="px-3 py-0.5 rounded-full bg-gradient-to-r from-amber-500 via-[#C8A96B] to-yellow-400 text-[#071D12] text-[10.5px] font-black font-mono shadow-[0_0_20px_rgba(200,169,107,0.9)] border border-amber-200 flex items-center gap-1.5 animate-pulse">
-                        <Flame className="w-3.5 h-3.5 text-[#071D12] fill-current" />
-                        <span>{comboLabel}</span>
-                      </div>
+                {/* Multi-Tap Combo Streak Escalation Badge */}
+                {comboLabel && (
+                  <div className="mb-1 pointer-events-none animate-comboPop whitespace-nowrap">
+                    <div className="px-3 py-0.5 rounded-full bg-gradient-to-r from-[#C8A96B] via-[#E5C378] to-[#C8A96B] text-[#071D12] text-[10.5px] font-black font-mono shadow-[0_0_20px_rgba(200,169,107,0.9)] border border-[#F5F4EA]/50 flex items-center gap-1.5 animate-pulse">
+                      <Flame className="w-3.5 h-3.5 text-[#071D12] fill-current" />
+                      <span>{comboLabel}</span>
                     </div>
-                  )}
-
-                  {/* Floating Score Badges (+1, +10 MEGA BURST) */}
-                  <div className="relative w-full h-0 pointer-events-none">
-                    {floatingBadges.map((badge) => (
-                      <div
-                        key={badge.id}
-                        className="absolute bottom-1 right-8 pointer-events-none animate-floatNumber font-mono font-black select-none z-30"
-                        style={{ transform: `translateX(${badge.offset}px)` }}
-                      >
-                        <span className={`px-2 py-0.5 rounded-full text-[10px] shadow-xl ${
-                          badge.isMega
-                            ? 'bg-gradient-to-r from-amber-400 to-yellow-300 text-black border border-white font-black'
-                            : 'bg-white/95 text-[#071D12] border border-[#C8A96B]'
-                        }`}>
-                          {badge.text}
-                        </span>
-                      </div>
-                    ))}
                   </div>
+                )}
 
-                  {/* Glassmorphic Reaction Dock with Jewel Glows & Hold-to-Charge Ring */}
-                  <div className="flex items-center justify-center rounded-2xl bg-black/80 backdrop-blur-2xl border border-white/20 shadow-2xl transition-all duration-200 hover:scale-[1.01] overflow-x-auto scrollbar-none px-1.5 sm:px-2.5 py-0.5 sm:py-1">
-                    <button
-                      type="button"
-                      onClick={toggleReactDockSize}
-                      className="p-1 rounded-xl text-[#C8A96B] hover:text-white hover:bg-white/10 mr-0.5 sm:mr-1 flex items-center justify-center shrink-0 cursor-pointer transition-colors"
-                      title="Minimize Reaction Dock (Click to collapse)"
-                      aria-label="Minimize Reaction Dock"
+                {/* Floating Score Badges */}
+                <div className="relative w-full h-0 pointer-events-none">
+                  {floatingBadges.map((badge) => (
+                    <div
+                      key={badge.id}
+                      className="absolute bottom-1 right-8 pointer-events-none animate-floatNumber font-mono font-black select-none z-30"
+                      style={{ transform: `translateX(${badge.offset}px)` }}
                     >
-                      <Sparkles className="w-3 h-3 text-[#C8A96B]" />
-                    </button>
-                    <div className="flex items-center gap-1 sm:gap-1.5">
-                      {activeReactions.map((item) => {
-                        const isHot = item.id === popularReactionId;
-                        const isBouncing = bouncingEmojiId === item.id;
-                        const isCharging = chargingReactionId === item.id;
-                        const count = reactionCounts[item.id] !== undefined ? reactionCounts[item.id] : item.initialCount;
-                        const countStr = count >= 1000 ? `${(count / 1000).toFixed(1)}k` : count;
-
-                        return (
-                          <button
-                            key={item.id}
-                            onPointerDown={(e) => handlePointerDown(item, e)}
-                            onPointerUp={() => handlePointerUp(item)}
-                            onPointerLeave={handlePointerLeave}
-                            onContextMenu={(e) => e.preventDefault()}
-                            className={`group relative flex items-center gap-1 sm:gap-1.5 rounded-xl transition-all duration-150 cursor-pointer select-none shrink-0 overflow-hidden px-1.5 sm:px-2 py-0.5 sm:py-1 ${
-                              isHot
-                                ? 'bg-[#C8A96B]/25 border border-[#C8A96B]/80 shadow-[0_0_15px_rgba(200,169,107,0.45)] ring-1 ring-[#C8A96B]/50'
-                                : 'bg-white/5 hover:bg-white/15 border border-white/10 hover:border-[#C8A96B]/40 hover:shadow-[0_0_12px_rgba(200,169,107,0.25)]'
-                            } ${isBouncing ? 'scale-125 -translate-y-1' : ''} ${
-                              isCharging ? 'scale-110 shadow-[0_0_20px_rgba(200,169,107,0.8)] border-[#C8A96B]' : 'hover:scale-105 active:scale-95'
-                            }`}
-                            title={`${item.name} (${count.toLocaleString()}) • Hold for Mega Burst!`}
-                          >
-                            {/* Hold-to-Charge Progress Fill */}
-                            {isCharging && (
-                              <div
-                                className="absolute inset-0 bg-gradient-to-r from-[#C8A96B]/40 to-amber-400/60 transition-all pointer-events-none z-0"
-                                style={{ width: `${chargeProgress}%` }}
-                              />
-                            )}
-
-                            <Realistic3DIcon
-                              iconKey={item.iconKey}
-                              size={17}
-                              className={`relative z-10 transition-transform ${isCharging ? 'animate-pulse scale-120' : 'group-hover:scale-115'}`}
-                            />
-                            <span className={`relative z-10 font-mono font-medium leading-none text-[9px] sm:text-[10px] ${
-                              isHot ? 'text-[#C8A96B] font-bold' : 'text-white/80 group-hover:text-white'
-                            }`}>
-                              {countStr}
-                            </span>
-                          </button>
-                        );
-                      })}
-
-                      {/* Size Adjuster Button (Toggle Normal / Mini - 2 States) */}
-                      <button
-                        type="button"
-                        onClick={toggleReactDockSize}
-                        className="p-1 sm:p-1.5 rounded-xl border border-white/10 hover:border-[#C8A96B]/50 bg-white/5 hover:bg-white/15 text-[#C8A96B] transition-all duration-200 cursor-pointer flex items-center justify-center shrink-0 ml-0.5"
-                        title={reactDockSize === 'normal' ? "Minimize Reaction Dock (Click to collapse)" : "Expand Reaction Dock (Click to expand)"}
-                        aria-label="Toggle React Dock Size"
-                      >
-                        {reactDockSize === 'normal' ? (
-                          <Minimize2 className="w-3 h-3 text-[#C8A96B]" />
-                        ) : (
-                          <Maximize2 className="w-3 h-3 text-[#C8A96B]" />
-                        )}
-                      </button>
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] shadow-xl ${
+                        badge.isMega
+                          ? 'bg-gradient-to-r from-[#C8A96B] to-[#E5C378] text-[#071D12] border border-white font-black'
+                          : 'bg-white/95 text-[#071D12] border border-[#C8A96B]'
+                      }`}>
+                        {badge.text}
+                      </span>
                     </div>
+                  ))}
+                </div>
+
+                {/* Glassmorphic 4-Emoji Food Reaction Dock */}
+                <div className="flex items-center justify-center rounded-2xl bg-black/80 backdrop-blur-2xl border border-white/20 shadow-2xl transition-all duration-200 hover:scale-[1.01] overflow-x-auto scrollbar-none px-1.5 sm:px-2.5 py-0.5 sm:py-1">
+                  <div className="flex items-center gap-1 sm:gap-1.5">
+                    {activeReactions.map((item) => {
+                      const isSelected = item.id === selectedReactionId;
+                      const isBouncing = bouncingEmojiId === item.id;
+                      const isCharging = chargingReactionId === item.id;
+                      const count = reactionCounts[item.id] !== undefined ? reactionCounts[item.id] : item.initialCount;
+                      const countStr = count >= 1000 ? `${(count / 1000).toFixed(1)}k` : count;
+
+                      return (
+                        <button
+                          key={item.id}
+                          onPointerDown={() => handlePointerDown(item)}
+                          onPointerUp={() => handlePointerUp(item)}
+                          onPointerLeave={handlePointerLeave}
+                          onContextMenu={(e) => e.preventDefault()}
+                          className={`group relative flex items-center gap-1 sm:gap-1.5 rounded-xl transition-all duration-150 cursor-pointer select-none shrink-0 overflow-hidden px-2 sm:px-2.5 py-0.5 sm:py-1 ${
+                            isSelected
+                              ? 'bg-[#C8A96B]/25 border border-[#C8A96B]/80 shadow-[0_0_15px_rgba(200,169,107,0.45)] ring-1 ring-[#C8A96B]/50'
+                              : 'bg-white/5 hover:bg-white/15 border border-white/10 hover:border-[#C8A96B]/40 hover:shadow-[0_0_12px_rgba(200,169,107,0.25)]'
+                          } ${isBouncing ? 'scale-125 -translate-y-1' : ''} ${
+                            isCharging ? 'scale-110 shadow-[0_0_20px_rgba(200,169,107,0.8)] border-[#C8A96B]' : 'hover:scale-105 active:scale-95'
+                          }`}
+                          title={`${item.name} (${count.toLocaleString()}) • Tap to send or hold for Mega Treat!`}
+                        >
+                          {isCharging && (
+                            <div
+                              className="absolute inset-0 bg-gradient-to-r from-[#C8A96B]/40 to-[#E5C378]/60 transition-all pointer-events-none z-0"
+                              style={{ width: `${chargeProgress}%` }}
+                            />
+                          )}
+
+                          <Realistic3DIcon
+                            iconKey={item.iconKey}
+                            emoji={item.emoji}
+                            size={18}
+                            className={`relative z-10 transition-transform ${isCharging ? 'animate-pulse scale-120' : 'group-hover:scale-115'}`}
+                          />
+                          <span className={`relative z-10 font-mono font-medium leading-none text-[9.5px] sm:text-[10.5px] ${
+                            isSelected ? 'text-[#C8A96B] font-bold' : 'text-white/85 group-hover:text-white'
+                          }`}>
+                            {countStr}
+                          </span>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
-              ))}
+              </div>
 
               {/* Bottom Organized Video Controls Bar */}
               <div className="absolute bottom-0 inset-x-0 px-2 sm:px-4 py-1.5 sm:py-2.5 bg-gradient-to-t from-black/95 via-black/75 to-transparent flex items-center justify-between gap-1.5 sm:gap-2 z-20">
@@ -2601,16 +2516,6 @@ export default function LiveCameraPlayer({
           onShareSuccess={(newMoment) => {
             setActiveDonationCelebration(newMoment);
           }}
-        />
-
-        {/* SUBSCRIPTION MODAL POPUP (Individual Animal 5-Second Free Preview Limit / ₹50 Subscription) */}
-        <SubscriptionModal
-          isOpen={showSubscriptionModal}
-          onClose={handleDismissSubscriptionModal}
-          onSuccess={handleSubscriptionSuccess}
-          animal={animal}
-          animalName={animal?.animal_name}
-          initialPlan={selectedSubscriptionPlan}
         />
 
       </div>
