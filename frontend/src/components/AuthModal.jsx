@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import confetti from 'canvas-confetti';
 import { 
   X, 
@@ -10,12 +10,11 @@ import {
   CheckCircle2, 
   AlertCircle, 
   RefreshCw, 
-  Eye, 
-  EyeOff, 
   ShieldCheck,
   Sparkles,
-  HelpCircle,
-  ArrowLeft
+  ArrowLeft,
+  Send,
+  Clock
 } from 'lucide-react';
 import { playTargetLockedSound } from '../utils/audioSynthesizer';
 
@@ -25,21 +24,32 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess, onSuccess }
     if (onSuccess) onSuccess(userData);
   };
 
-  const [activeTab, setActiveTab] = useState('login'); // 'login' | 'register' | 'forgot'
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [activeTab, setActiveTab] = useState('signin'); // 'signin' | 'register'
+  const [otpStep, setOtpStep] = useState('input_email'); // 'input_email' | 'verify_otp'
 
   // Form Fields
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [otpCode, setOtpCode] = useState('');
+
+  // Resend cooldown timer
+  const [resendCooldown, setResendCooldown] = useState(0);
 
   // Status & Feedback
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [redirecting, setRedirecting] = useState(false);
+
+  useEffect(() => {
+    let timer = null;
+    if (resendCooldown > 0) {
+      timer = setInterval(() => {
+        setResendCooldown((prev) => Math.max(0, prev - 1));
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
 
   if (!isOpen) return null;
 
@@ -88,55 +98,42 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess, onSuccess }
     }, 1100);
   };
 
-  // 1. REGISTER
-  const handleRegister = async (e) => {
+  // SEND OTP
+  const handleSendOtp = async (e) => {
     if (e) e.preventDefault();
     setError('');
     setSuccessMsg('');
 
-    const cleanName = fullName.trim();
     const cleanEmail = email.trim().toLowerCase();
-    const cleanPassword = password.trim();
-    const cleanConfirm = confirmPassword.trim();
+    const cleanName = fullName.trim();
 
-    if (!cleanName) {
+    if (!cleanEmail || !cleanEmail.includes('@') || !cleanEmail.includes('.')) {
+      setError('Please enter a valid Gmail address.');
+      return;
+    }
+
+    if (activeTab === 'register' && !cleanName) {
       setError('Please enter your Full Name.');
       return;
     }
-    if (!cleanEmail || !cleanEmail.includes('@') || !cleanEmail.includes('.')) {
-      setError('Please enter a valid Email Address.');
-      return;
-    }
-    if (!cleanPassword) {
-      setError('Please enter a Password.');
-      return;
-    }
-    if (cleanPassword.length < 6) {
-      setError('Password must be at least 6 characters in length.');
-      return;
-    }
-    if (cleanPassword !== cleanConfirm) {
-      setError('Passwords do not match. Please verify your confirm password.');
-      return;
-    }
 
     setIsLoading(true);
 
     try {
-      const response = await callApi('/api/auth/register/', {
-        name: cleanName,
+      const response = await callApi('/api/auth/send-email-otp/', {
         email: cleanEmail,
-        password: cleanPassword,
-        confirm_password: cleanConfirm
+        name: cleanName
       });
 
       const data = await response.json();
 
       if (response.ok && data.success) {
-        setSuccessMsg(data.message || 'Account created successfully!');
-        finishAuth(data.user, data.token);
+        setOtpStep('verify_otp');
+        setOtpCode('');
+        setResendCooldown(30);
+        setSuccessMsg(data.message || `A secure verification code has been sent directly to ${cleanEmail}.`);
       } else {
-        setError(data.error || 'Registration failed.');
+        setError(data.error || 'Failed to dispatch verification email.');
       }
     } catch (err) {
       setError('Cannot connect to backend server. Please verify the Django API is running.');
@@ -145,69 +142,42 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess, onSuccess }
     }
   };
 
-  // 2. LOGIN
-  const handleLogin = async (e) => {
-    if (e) e.preventDefault();
-    setError('');
-    setSuccessMsg('');
-
-    const cleanEmail = email.trim();
-    const cleanPassword = password.trim();
-
-    if (!cleanEmail || !cleanPassword) {
-      setError('Please enter both your Email Address and Password.');
-      return;
-    }
-
-    setIsLoading(true);
-
-    try {
-      const response = await callApi('/api/auth/login/', {
-        email: cleanEmail,
-        username: cleanEmail,
-        password: cleanPassword
-      });
-
-      const data = await response.json();
-
-      if (response.ok && data.success) {
-        setSuccessMsg(data.message || 'Signed in successfully!');
-        finishAuth(data.user, data.token);
-      } else {
-        setError(data.error || 'Invalid email or password.');
-      }
-    } catch (err) {
-      setError('Cannot connect to backend server. Please verify the Django API is running.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // 3. FORGOT PASSWORD
-  const handleForgotPassword = async (e) => {
+  // VERIFY OTP
+  const handleVerifyOtp = async (e) => {
     if (e) e.preventDefault();
     setError('');
     setSuccessMsg('');
 
     const cleanEmail = email.trim().toLowerCase();
-    if (!cleanEmail || !cleanEmail.includes('@')) {
-      setError('Please enter a valid registered Email Address.');
+    const cleanOtp = otpCode.trim();
+    const cleanName = fullName.trim();
+
+    if (!cleanOtp) {
+      setError('Please enter the verification code received in your email.');
+      return;
+    }
+
+    if (cleanOtp.length < 6 || cleanOtp.length > 20) {
+      setError('Please enter a valid verification code.');
       return;
     }
 
     setIsLoading(true);
 
     try {
-      const response = await callApi('/api/auth/forgot-password/', {
-        email: cleanEmail
+      const response = await callApi('/api/auth/verify-email-otp/', {
+        email: cleanEmail,
+        otp: cleanOtp,
+        name: cleanName
       });
 
       const data = await response.json();
 
       if (response.ok && data.success) {
-        setSuccessMsg(data.message || 'Password reset link sent to your email.');
+        setSuccessMsg(data.message || 'Verification successful!');
+        finishAuth(data.user, data.token);
       } else {
-        setError(data.error || 'Could not process request.');
+        setError(data.error || 'Invalid verification code. Please check your Gmail inbox.');
       }
     } catch (err) {
       setError('Cannot connect to backend server.');
@@ -239,26 +209,26 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess, onSuccess }
             />
           </div>
           <h3 className="font-serif text-lg font-bold text-[#F5F4EA]">
-            {activeTab === 'login' ? 'Sanctuary Sign In' : activeTab === 'register' ? 'Guardian Registration' : 'Password Recovery'}
+            {otpStep === 'verify_otp' ? 'Enter Email OTP' : activeTab === 'signin' ? 'Sanctuary Sign In' : 'Guardian Registration'}
           </h3>
           <p className="text-[11px] text-[#C8A96B] tracking-wider uppercase font-semibold">
             Nandankanan Zoological Park
           </p>
         </div>
 
-        {/* Tabs for Login vs Register */}
-        {activeTab !== 'forgot' ? (
+        {/* Tabs for Login vs Register (only shown on step 1) */}
+        {otpStep === 'input_email' && (
           <div className="grid grid-cols-2 p-1 rounded-xl bg-[#05140d] border border-[#26734D]/50 mb-3.5">
             <button
               type="button"
-              onClick={() => { setActiveTab('login'); setError(''); setSuccessMsg(''); }}
+              onClick={() => { setActiveTab('signin'); setError(''); setSuccessMsg(''); }}
               className={`py-1.5 text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${
-                activeTab === 'login'
+                activeTab === 'signin'
                   ? 'bg-gradient-to-r from-[#C8A96B] to-[#b39352] text-[#071D12] shadow-sm'
                   : 'text-[#F5F4EA]/70 hover:text-white'
               }`}
             >
-              Sign In
+              Sign In (OTP)
             </button>
             <button
               type="button"
@@ -269,42 +239,47 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess, onSuccess }
                   : 'text-[#F5F4EA]/70 hover:text-white'
               }`}
             >
-              Register
+              Register (OTP)
             </button>
-          </div>
-        ) : (
-          <div className="mb-3.5 flex items-center justify-between border-b border-[#26734D]/40 pb-2">
-            <button
-              type="button"
-              onClick={() => { setActiveTab('login'); setError(''); setSuccessMsg(''); }}
-              className="text-xs text-[#C8A96B] hover:underline flex items-center gap-1"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Back to Sign In</span>
-            </button>
-            <span className="text-[10px] font-mono text-[#F5F4EA]/60 uppercase">Reset Password</span>
           </div>
         )}
 
         {/* Alerts */}
         {successMsg && (
-          <div className="mb-3 p-2.5 rounded-xl bg-[#14532D]/90 border border-[#26734D] text-[#F5F4EA] text-xs flex items-center gap-2">
+          <div className="mb-3 p-2.5 rounded-xl bg-[#14532D]/90 border border-[#26734D] text-[#F5F4EA] text-xs flex items-center gap-2 animate-fadeIn">
             <CheckCircle2 className="w-4 h-4 text-[#C8A96B] shrink-0" />
-            <span>{successMsg}</span>
+            <span className="leading-relaxed">{successMsg}</span>
           </div>
         )}
         {error && (
-          <div className="mb-3 p-2.5 rounded-xl bg-red-950/85 border border-red-500/50 text-red-200 text-xs flex items-center gap-2">
+          <div className="mb-3 p-2.5 rounded-xl bg-red-950/85 border border-red-500/50 text-red-200 text-xs flex items-center gap-2 animate-fadeIn">
             <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
-            <span>{error}</span>
+            <span className="leading-relaxed">{error}</span>
           </div>
         )}
 
-        {/* FORM: LOGIN */}
-        {activeTab === 'login' && (
-          <form onSubmit={handleLogin} className="space-y-3">
+        {/* STEP 1: REQUEST OTP */}
+        {otpStep === 'input_email' && (
+          <form onSubmit={handleSendOtp} className="space-y-3">
+            {activeTab === 'register' && (
+              <div>
+                <label className="block text-xs font-medium text-[#F5F4EA]/80 mb-1">Full Name</label>
+                <div className="relative">
+                  <User className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#C8A96B]" />
+                  <input
+                    type="text"
+                    required
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    placeholder="e.g. Soumya Surya"
+                    className="w-full pl-9 pr-3 py-2 rounded-xl bg-[#06180f] border border-[#26734D]/60 text-xs text-[#F5F4EA] placeholder-[#F5F4EA]/30 focus:border-[#C8A96B] focus:outline-none"
+                  />
+                </div>
+              </div>
+            )}
+
             <div>
-              <label className="block text-xs font-medium text-[#F5F4EA]/80 mb-1">Email Address</label>
+              <label className="block text-xs font-medium text-[#F5F4EA]/80 mb-1">Gmail / Email Address</label>
               <div className="relative">
                 <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#C8A96B]" />
                 <input
@@ -312,193 +287,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess, onSuccess }
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="e.g. ranger@nandankanan.org"
-                  className="w-full pl-9 pr-3 py-2 rounded-xl bg-[#06180f] border border-[#26734D]/60 text-xs text-[#F5F4EA] placeholder-[#F5F4EA]/30 focus:border-[#C8A96B] focus:outline-none"
-                />
-              </div>
-            </div>
-
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <label className="text-xs font-medium text-[#F5F4EA]/80">Password</label>
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="text-[10px] text-[#C8A96B] hover:underline flex items-center gap-1"
-                >
-                  {showPassword ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
-                  <span>{showPassword ? 'Hide' : 'Show'}</span>
-                </button>
-              </div>
-              <div className="relative">
-                <KeyRound className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#C8A96B]" />
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter password"
-                  className="w-full pl-9 pr-3 py-2 rounded-xl bg-[#06180f] border border-[#26734D]/60 text-xs text-[#F5F4EA] placeholder-[#F5F4EA]/30 focus:border-[#C8A96B] focus:outline-none"
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between text-xs pt-0.5">
-              <button
-                type="button"
-                onClick={() => { setActiveTab('forgot'); setError(''); setSuccessMsg(''); }}
-                className="text-[11px] text-[#C8A96B] hover:underline flex items-center gap-1"
-              >
-                <HelpCircle className="w-3 h-3 text-[#C8A96B]" />
-                <span>Forgot Password?</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => { setActiveTab('register'); setError(''); setSuccessMsg(''); }}
-                className="text-[11px] text-[#F5F4EA]/70 hover:text-[#C8A96B] hover:underline"
-              >
-                Create Account &rarr;
-              </button>
-            </div>
-
-            <button
-              type="submit"
-              disabled={isLoading || redirecting}
-              className="w-full mt-1.5 py-2.5 px-4 rounded-xl bg-gradient-to-r from-[#C8A96B] to-[#b39352] text-[#071D12] font-serif font-bold text-xs uppercase tracking-wider shadow-md hover:from-[#d8b87a] hover:to-[#C8A96B] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-            >
-              {isLoading ? (
-                <RefreshCw className="w-4 h-4 animate-spin text-[#071D12]" />
-              ) : redirecting ? (
-                <Sparkles className="w-4 h-4 text-[#071D12] animate-bounce" />
-              ) : (
-                <>
-                  <span>Sign In</span>
-                  <ArrowRight className="w-4 h-4 text-[#071D12]" />
-                </>
-              )}
-            </button>
-          </form>
-        )}
-
-        {/* FORM: REGISTER */}
-        {activeTab === 'register' && (
-          <form onSubmit={handleRegister} className="space-y-3">
-            <div>
-              <label className="block text-xs font-medium text-[#F5F4EA]/80 mb-1">Full Name</label>
-              <div className="relative">
-                <User className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#C8A96B]" />
-                <input
-                  type="text"
-                  required
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  placeholder="e.g. Soumya Surya"
-                  className="w-full pl-9 pr-3 py-2 rounded-xl bg-[#06180f] border border-[#26734D]/60 text-xs text-[#F5F4EA] placeholder-[#F5F4EA]/30 focus:border-[#C8A96B] focus:outline-none"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-[#F5F4EA]/80 mb-1">Email Address</label>
-              <div className="relative">
-                <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#C8A96B]" />
-                <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="e.g. user@gmail.com"
-                  className="w-full pl-9 pr-3 py-2 rounded-xl bg-[#06180f] border border-[#26734D]/60 text-xs text-[#F5F4EA] placeholder-[#F5F4EA]/30 focus:border-[#C8A96B] focus:outline-none"
-                />
-              </div>
-            </div>
-
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <label className="text-xs font-medium text-[#F5F4EA]/80">Password (min. 6)</label>
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="text-[10px] text-[#C8A96B] hover:underline"
-                >
-                  {showPassword ? 'Hide' : 'Show'}
-                </button>
-              </div>
-              <div className="relative">
-                <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#C8A96B]" />
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  minLength={6}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Create password"
-                  className="w-full pl-9 pr-3 py-2 rounded-xl bg-[#06180f] border border-[#26734D]/60 text-xs text-[#F5F4EA] placeholder-[#F5F4EA]/30 focus:border-[#C8A96B] focus:outline-none"
-                />
-              </div>
-            </div>
-
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <label className="text-xs font-medium text-[#F5F4EA]/80">Confirm Password</label>
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="text-[10px] text-[#C8A96B] hover:underline"
-                >
-                  {showConfirmPassword ? 'Hide' : 'Show'}
-                </button>
-              </div>
-              <div className="relative">
-                <ShieldCheck className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#C8A96B]" />
-                <input
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  required
-                  minLength={6}
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Confirm password"
-                  className="w-full pl-9 pr-3 py-2 rounded-xl bg-[#06180f] border border-[#26734D]/60 text-xs text-[#F5F4EA] placeholder-[#F5F4EA]/30 focus:border-[#C8A96B] focus:outline-none"
-                />
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={isLoading || redirecting}
-              className="w-full mt-1.5 py-2.5 px-4 rounded-xl bg-gradient-to-r from-[#26734D] to-[#1e5c3e] text-[#F5F4EA] font-serif font-bold text-xs uppercase tracking-wider shadow-md hover:from-[#2e8c5d] hover:to-[#26734D] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-            >
-              {isLoading ? (
-                <RefreshCw className="w-4 h-4 animate-spin text-[#C8A96B]" />
-              ) : redirecting ? (
-                <Sparkles className="w-4 h-4 text-[#C8A96B] animate-bounce" />
-              ) : (
-                <>
-                  <span>Register Account</span>
-                  <ArrowRight className="w-4 h-4 text-[#C8A96B]" />
-                </>
-              )}
-            </button>
-          </form>
-        )}
-
-        {/* FORM: FORGOT PASSWORD */}
-        {activeTab === 'forgot' && (
-          <form onSubmit={handleForgotPassword} className="space-y-3">
-            <p className="text-xs text-[#F5F4EA]/80 leading-relaxed">
-              Enter your registered Email Address to receive a password reset link.
-            </p>
-
-            <div>
-              <label className="block text-xs font-medium text-[#F5F4EA]/80 mb-1">Registered Email</label>
-              <div className="relative">
-                <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#C8A96B]" />
-                <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="e.g. user@gmail.com"
+                  placeholder="e.g. yourname@gmail.com"
                   className="w-full pl-9 pr-3 py-2 rounded-xl bg-[#06180f] border border-[#26734D]/60 text-xs text-[#F5F4EA] placeholder-[#F5F4EA]/30 focus:border-[#C8A96B] focus:outline-none"
                 />
               </div>
@@ -510,11 +299,91 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess, onSuccess }
               className="w-full mt-1.5 py-2.5 px-4 rounded-xl bg-gradient-to-r from-[#C8A96B] to-[#b39352] text-[#071D12] font-serif font-bold text-xs uppercase tracking-wider shadow-md hover:from-[#d8b87a] hover:to-[#C8A96B] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
             >
               {isLoading ? (
-                <RefreshCw className="w-4 h-4 animate-spin text-[#071D12]" />
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin text-[#071D12]" />
+                  <span>Dispatching OTP...</span>
+                </>
               ) : (
-                <span>Send Reset Link</span>
+                <>
+                  <Send className="w-4 h-4 text-[#071D12]" />
+                  <span>Send Verification Code to Gmail</span>
+                </>
               )}
             </button>
+          </form>
+        )}
+
+        {/* STEP 2: VERIFY OTP */}
+        {otpStep === 'verify_otp' && (
+          <form onSubmit={handleVerifyOtp} className="space-y-3.5 animate-fadeIn">
+            <div className="p-2.5 rounded-xl bg-[#071810] border border-[#26734D] text-xs">
+              <span className="text-[#C8A96B] font-semibold block">OTP dispatched to:</span>
+              <span className="text-[#F5F4EA] break-all">{email}</span>
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-[#F5F4EA]/80 text-center mb-1">
+                Enter Verification Code (Letters, Numbers & Symbols)
+              </label>
+              <div className="relative">
+                <KeyRound className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#C8A96B]" />
+                <input
+                  type="text"
+                  autoComplete="one-time-code"
+                  required
+                  maxLength={16}
+                  value={otpCode}
+                  onChange={(e) => setOtpCode(e.target.value.trim())}
+                  placeholder="e.g. A7#k9!X2"
+                  className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-[#06180f] border border-[#26734D] text-center text-base font-mono tracking-[0.2em] text-[#F5F4EA] placeholder-[#F5F4EA]/30 focus:border-[#C8A96B] focus:outline-none"
+                  autoFocus
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={isLoading || redirecting || !otpCode.trim()}
+              className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-[#26734D] to-[#1e5c3e] text-[#F5F4EA] font-serif font-bold text-xs uppercase tracking-wider shadow-md hover:from-[#2e8c5d] hover:to-[#26734D] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+            >
+              {isLoading ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin text-[#C8A96B]" />
+                  <span>Verifying Code...</span>
+                </>
+              ) : redirecting ? (
+                <>
+                  <Sparkles className="w-4 h-4 text-[#C8A96B] animate-bounce" />
+                  <span>Entering Sanctuary...</span>
+                </>
+              ) : (
+                <>
+                  <ShieldCheck className="w-4 h-4 text-[#C8A96B]" />
+                  <span>Verify OTP & Sign In</span>
+                </>
+              )}
+            </button>
+
+            <div className="flex items-center justify-between text-xs pt-1 border-t border-[#26734D]/35">
+              <button
+                type="button"
+                onClick={() => { setOtpStep('input_email'); setError(''); }}
+                className="text-[11px] text-[#F5F4EA]/70 hover:text-[#C8A96B] flex items-center gap-1"
+              >
+                <ArrowLeft className="w-3 h-3" />
+                <span>Change Email</span>
+              </button>
+
+              <button
+                type="button"
+                disabled={resendCooldown > 0 || isLoading}
+                onClick={handleSendOtp}
+                className="text-[11px] text-[#C8A96B] hover:underline disabled:opacity-50 flex items-center gap-1 font-semibold"
+              >
+                <Clock className="w-3 h-3" />
+                {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend Code'}
+              </button>
+            </div>
           </form>
         )}
 

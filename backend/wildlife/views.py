@@ -1,6 +1,8 @@
 import os
 import time
 import random
+import secrets
+import string
 import uuid
 import hmac
 import hashlib
@@ -110,72 +112,197 @@ def park_stats(request):
 
 
 # =============================================================================
-# Helper: Dispatch Sanctuary Emails (SMTP with Dual-Port SSL/TLS + Console Fallback)
+# Helper: Secure OTP Generation & Cryptographic Hashing
+# =============================================================================
+# Characters for secured OTP: numbers (0-9), alphabets (A-Z, a-z), and safe special characters
+OTP_SPECIAL_CHARS = "@#$!*&?%"
+
+def generate_secure_otp(length=8):
+    """
+    Generates a cryptographically strong OTP containing:
+    - Uppercase letters (A-Z)
+    - Lowercase letters (a-z)
+    - Digits (0-9)
+    - Safe special characters (@, #, $, !, *, &, ?, %)
+    Guarantees at least one character from each required class, cryptographically shuffled.
+    """
+    if length < 8:
+        length = 8
+
+    digits = string.digits
+    upper = string.ascii_uppercase
+    lower = string.ascii_lowercase
+    specials = OTP_SPECIAL_CHARS
+
+    # Guarantee at least one character from each required category
+    chosen = [
+        secrets.choice(upper),
+        secrets.choice(lower),
+        secrets.choice(digits),
+        secrets.choice(specials),
+    ]
+
+    all_allowed = upper + lower + digits + specials
+    for _ in range(length - len(chosen)):
+        chosen.append(secrets.choice(all_allowed))
+
+    # Cryptographically secure shuffle to eliminate positional predictability
+    secrets.SystemRandom().shuffle(chosen)
+    return "".join(chosen)
+
+
+def hash_otp(otp_code: str, salt: str) -> str:
+    """
+    Computes a SHA-256 digest using a unique per-request salt and Django SECRET_KEY.
+    Prevents plaintext storage of OTPs in memory or files.
+    """
+    key = getattr(settings, 'SECRET_KEY', 'nandankanan-secret-key-default')
+    data = f"{salt}:{otp_code.strip()}:{key}".encode('utf-8')
+    return hashlib.sha256(data).hexdigest()
+
+
+# =============================================================================
+# Helper: Dispatch Sanctuary Emails (SMTP Real-Time Delivery with SSL/TLS)
 # =============================================================================
 def dispatch_sanctuary_email(subject, plain_body, html_body, recipient_email):
     """
-    Sends an email using configured SMTP settings (supports TLS on 587 and SSL on 465).
-    If SMTP credentials are not yet configured or connection fails, logs the email content
-    so that local testing / development never crashes.
+    Sends a real-time secure email using configured SMTP settings (supports TLS on 587 and SSL on 465).
+    Development mode and console bypasses are removed to ensure real-time delivery over SMTP.
     Returns (success: bool, error_or_info: str).
     """
     host_user = getattr(settings, 'EMAIL_HOST_USER', '') or ''
     host_pass = getattr(settings, 'EMAIL_HOST_PASSWORD', '') or ''
+    host_pass_clean = host_pass.replace(" ", "").strip()
 
-    is_placeholder = any(p in host_user.lower() for p in ['your_sender', 'your_email', 'example.com']) or \
-                     any(p in host_pass.lower() for p in ['your_16', 'your_password', 'app_password'])
+    is_placeholder = any(p in host_user.lower() for p in ['your_sender', 'your_email', 'example.com', 'your_real_email']) or \
+                     any(p in host_pass.lower() for p in ['your_16', 'your_password', 'app_password', 'abcdefghijklmnop', 'paste_your'])
 
-    # If real SMTP credentials are provided, attempt delivery
-    if host_user and host_pass and not is_placeholder:
-        # Attempt 1: Standard send_mail (TLS 587 or configured)
+    if not host_user or not host_pass_clean or is_placeholder:
+        return False, "Gmail SMTP credentials are not configured in backend/.env. Please configure EMAIL_HOST_USER and EMAIL_HOST_PASSWORD."
+
+    # Attempt 1: Standard send_mail (TLS 587 or configured backend)
+    try:
+        send_mail(
+            subject=subject,
+            message=plain_body,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[recipient_email],
+            html_message=html_body,
+            fail_silently=False
+        )
+        return True, "Email dispatched successfully via standard SMTP."
+    except Exception as e1:
+        # Attempt 2: Direct SSL connection on port 465 (handles Windows STARTTLS timeouts / ISP blocks)
         try:
-            send_mail(
-                subject=subject,
-                message=plain_body,
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[recipient_email],
-                html_message=html_body,
-                fail_silently=False
+            ssl_backend = EmailBackend(
+                host='smtp.gmail.com',
+                port=465,
+                username=host_user,
+                password=host_pass_clean,
+                use_tls=False,
+                use_ssl=True,
+                timeout=12
             )
-            return True, "Email dispatched successfully via SMTP."
-        except Exception as e1:
-            print(f"[Email SMTP 587 Notice] {e1}. Retrying with direct SSL port 465...")
-            # Attempt 2: Direct SSL connection on port 465 (bypasses Windows STARTTLS issues)
-            try:
-                ssl_backend = EmailBackend(
-                    host='smtp.gmail.com',
-                    port=465,
-                    username=host_user,
-                    password=host_pass,
-                    use_tls=False,
-                    use_ssl=True,
-                    timeout=12
-                )
-                from_addr = f"Nandankanan Zoological Park <{host_user}>"
-                msg = EmailMultiAlternatives(
-                    subject=subject,
-                    body=plain_body,
-                    from_email=from_addr,
-                    to=[recipient_email],
-                    connection=ssl_backend
-                )
-                msg.attach_alternative(html_body, "text/html")
-                msg.send(fail_silently=False)
-                return True, "Email dispatched successfully via SSL port 465."
-            except Exception as e2:
-                print(f"[Email SMTP Error] Both port 587 and 465 failed: {e2}")
-                # Log email to console so functionality is not completely blocked
-                print(f"\n--- [FALLBACK CONSOLE EMAIL] ---\nTo: {recipient_email}\nSubject: {subject}\n{plain_body}\n--------------------------------\n")
-                return False, f"Failed to connect to SMTP server: {e1}. Ensure your Google App Password is correct."
-    else:
-        # Development / placeholder mode: Print to console
-        print(f"\n=======================================================")
-        print(f"🐾 [NANDANKANAN EMAIL DISPATCH - CONSOLE OUTPUT]")
-        print(f"TO: {recipient_email}")
-        print(f"SUBJECT: {subject}")
-        print(f"BODY:\n{plain_body}")
-        print(f"=======================================================\n")
-        return True, "Email output to development console (configure SMTP in backend/.env for real delivery)."
+            from_addr = f"Nandankanan Zoological Park <{host_user}>"
+            msg = EmailMultiAlternatives(
+                subject=subject,
+                body=plain_body,
+                from_email=from_addr,
+                to=[recipient_email],
+                connection=ssl_backend
+            )
+            msg.attach_alternative(html_body, "text/html")
+            msg.send(fail_silently=False)
+            return True, "Email dispatched successfully via SSL port 465."
+        except Exception as e2:
+            return False, f"SMTP delivery failed: {e1} (SSL port 465 retry: {e2})"
+
+
+# =============================================================================
+# Helper: Email OTP Storage & Template Generation
+# =============================================================================
+OTP_CACHE_FILE = Path(settings.BASE_DIR) / '.otp_cache.json'
+
+def _load_otp_store():
+    if OTP_CACHE_FILE.exists():
+        try:
+            with open(OTP_CACHE_FILE, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except Exception:
+            return {}
+    return {}
+
+def _save_otp_store(store):
+    try:
+        with open(OTP_CACHE_FILE, 'w', encoding='utf-8') as f:
+            json.dump(store, f)
+    except Exception:
+        pass
+
+EMAIL_OTP_STORE = _load_otp_store()
+
+
+def build_email_otp_message(email, otp_code, user_name='Wildlife Friend'):
+    display_name = user_name or 'Wildlife Friend'
+    subject = f"🐾 Nandankanan Zoo: Secure Verification Code [{otp_code}]"
+    plain_body = f"""Hello {display_name},
+
+Welcome to Nandankanan Zoological Park (Bhubaneswar, Odisha)!
+
+Your secure verification code (OTP) is:
+
+==================================================
+                 {otp_code}
+==================================================
+
+SECURITY DETAILS:
+• This OTP contains a high-security combination of letters, numbers, and special characters.
+• Valid for 10 minutes from receipt.
+• Single-use authorization code. It is invalidated immediately once verified.
+• For your security, NEVER share this verification code with anyone. Sanctuary staff will never request your code.
+
+If you did not request this OTP, you can safely ignore this email. Your account remains protected.
+
+Experience the wild. Protect the future.
+Nandankanan Zoological Park, Bhubaneswar, Odisha
+ESTD 1960 • 437 Hectares
+"""
+
+    html_body = f"""
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #071D12; color: #F5F4EA; padding: 36px 20px; border-radius: 16px; max-width: 540px; margin: 0 auto; border: 1.5px solid #C8A96B; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+      <div style="text-align: center; margin-bottom: 24px;">
+        <div style="font-size: 24px; font-weight: bold; color: #C8A96B; font-family: Georgia, serif;">ନନ୍ଦନକାନନ ପ୍ରାଣୀ ଉଦ୍ୟାନ</div>
+        <div style="font-size: 13px; letter-spacing: 2px; color: #F5F4EA; font-weight: 600; text-transform: uppercase; margin-top: 4px;">NANDANKANAN ZOOLOGICAL PARK</div>
+        <div style="font-size: 11px; color: #26734D; font-family: monospace; margin-top: 2px;">BHUBANESWAR, ODISHA • ESTD 1960</div>
+      </div>
+
+      <div style="background: #0B2A1A; padding: 26px 22px; border-radius: 12px; border: 1px solid rgba(200, 169, 107, 0.25);">
+        <p style="margin-top: 0; font-size: 15px; color: #F5F4EA;">Hello <strong style="color: #C8A96B;">{display_name}</strong>,</p>
+        <p style="font-size: 13px; line-height: 1.6; color: #dcdad0;">
+          Use the secure verification code below to verify your email address and access the Nandankanan Sanctuary Portal:
+        </p>
+
+        <div style="background: #071810; padding: 22px; border-radius: 12px; border: 2px dashed #C8A96B; text-align: center; margin: 24px 0;">
+          <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: #C8A96B; font-weight: bold; margin-bottom: 8px;">🔐 Secure Verification Code</div>
+          <div style="font-size: 32px; font-weight: 800; color: #F5F4EA; font-family: 'Courier New', monospace; letter-spacing: 6px; word-break: break-all;">{otp_code}</div>
+          <div style="font-size: 11px; color: #75887D; margin-top: 10px;">⏳ Valid for 10 minutes • Keep this code confidential</div>
+        </div>
+
+        <div style="background: rgba(200, 169, 107, 0.1); border-left: 3px solid #C8A96B; padding: 10px 14px; border-radius: 6px; margin: 18px 0; font-size: 12px; color: #dcdad0; line-height: 1.5;">
+          <strong>Security Notice:</strong> This code combines letters, numbers, and special characters. Never share this code with anyone. Sanctuary staff will never request your verification code.
+        </div>
+
+        <p style="font-size: 12px; color: #9da8a2; line-height: 1.5; margin-bottom: 0;">
+          If you did not request this OTP, you can safely ignore this email. Your account remains protected.
+        </p>
+      </div>
+
+      <div style="text-align: center; margin-top: 24px; font-size: 11px; color: #75887D;">
+        Official Government of Odisha Wildlife Sanctuary • 437 Hectares
+      </div>
+    </div>
+    """
+    return subject, plain_body, html_body
 
 
 def build_welcome_email(user):
@@ -299,6 +426,184 @@ Nandankanan Zoological Park, Bhubaneswar, Odisha
     </div>
     """
     return subject, plain_body, html_body
+
+
+# =============================================================================
+# API Endpoint: SEND EMAIL OTP (Google / Gmail SMTP Real-Time Delivery)
+# =============================================================================
+@api_view(['POST'])
+def send_email_otp(request):
+    """
+    Generates a cryptographically secure alphanumeric + special-character OTP
+    and dispatches it directly to the user's Gmail/Email via SMTP in real time.
+    Never exposes the OTP in the API response or client logs.
+    """
+    email = str(request.data.get('email', '') or request.data.get('identifier', '')).strip().lower()
+    name = str(request.data.get('name', '')).strip()
+
+    if not email or '@' not in email or '.' not in email.split('@')[-1]:
+        return Response({'error': 'Please enter a valid Gmail or email address.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Cooldown check: prevent rapid consecutive OTP requests within 30 seconds
+    now = time.time()
+    existing = EMAIL_OTP_STORE.get(email)
+    if existing and (now - existing.get('created_at', 0)) < 30:
+        remaining = int(30 - (now - existing.get('created_at', 0)))
+        return Response({'error': f'Please wait {remaining} seconds before requesting a new OTP.'}, status=status.HTTP_429_TOO_MANY_REQUESTS)
+
+    # Generate cryptographically secure OTP with numbers, alphabets, and special characters
+    otp_code = generate_secure_otp(length=8)
+
+    # Check if user already exists
+    user = User.objects.filter(email__iexact=email).first()
+    user_name = name or (user.first_name if user else email.split('@')[0])
+
+    # Store cryptographic salt and hashed OTP with 10-minute validity
+    salt = secrets.token_hex(16)
+    otp_hashed = hash_otp(otp_code, salt)
+
+    EMAIL_OTP_STORE[email] = {
+        'otp_hash': otp_hashed,
+        'salt': salt,
+        'created_at': now,
+        'expires_at': now + 600,
+        'name': user_name,
+        'attempts': 0
+    }
+    _save_otp_store(EMAIL_OTP_STORE)
+
+    # Dispatch via Gmail SMTP in real time
+    subject, plain_body, html_body = build_email_otp_message(email, otp_code, user_name)
+    dispatched, info = dispatch_sanctuary_email(subject, plain_body, html_body, email)
+
+    # Real-time email send enforcement: fail if email delivery fails (no fake dev fallback)
+    if not dispatched:
+        EMAIL_OTP_STORE.pop(email, None)
+        _save_otp_store(EMAIL_OTP_STORE)
+        return Response({
+            'success': False,
+            'email': email,
+            'error': f"Failed to dispatch verification email: {info}. Please verify your Gmail address and SMTP settings."
+        }, status=status.HTTP_502_BAD_GATEWAY)
+
+    return Response({
+        'success': True,
+        'email': email,
+        'is_new_user': not bool(user),
+        'email_sent': True,
+        'message': f"A secure verification code has been dispatched to {email}. Please check your inbox and spam folder."
+    })
+
+
+# =============================================================================
+# API Endpoint: VERIFY EMAIL OTP
+# =============================================================================
+@api_view(['POST'])
+def verify_email_otp(request):
+    """
+    Verifies the secure alphanumeric + special-character OTP received in the user's Gmail inbox.
+    Uses timing-safe comparison, limits attempts, and authenticates/registers the user upon success.
+    """
+    email = str(request.data.get('email', '') or request.data.get('identifier', '')).strip().lower()
+    otp = str(request.data.get('otp', '') or request.data.get('otp_code', '')).strip()
+    name = str(request.data.get('name', '')).strip()
+
+    if not email:
+        return Response({'error': 'Email address is required.'}, status=status.HTTP_400_BAD_REQUEST)
+    if not otp:
+        return Response({'error': 'Please enter the verification code received in your email.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    record = EMAIL_OTP_STORE.get(email)
+    now = time.time()
+
+    if not record:
+        return Response({'error': 'No active verification code found for this email. Please request a new code.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    if now > record.get('expires_at', 0):
+        EMAIL_OTP_STORE.pop(email, None)
+        _save_otp_store(EMAIL_OTP_STORE)
+        return Response({'error': 'This verification code has expired (valid for 10 minutes). Please request a new code.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    if record.get('attempts', 0) >= 5:
+        EMAIL_OTP_STORE.pop(email, None)
+        _save_otp_store(EMAIL_OTP_STORE)
+        return Response({'error': 'Maximum verification attempts exceeded. Please request a new OTP code.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Secure verification using timing-safe hash comparison
+    salt = record.get('salt', '')
+    expected_hash = record.get('otp_hash', '')
+    candidate_hash = hash_otp(otp, salt) if salt else ''
+
+    # Backward compatibility with unhashed legacy records if any exist during hot reload
+    legacy_otp = record.get('otp')
+
+    is_valid = False
+    if expected_hash and salt and hmac.compare_digest(expected_hash, candidate_hash):
+        is_valid = True
+    elif legacy_otp and hmac.compare_digest(str(legacy_otp), str(otp)):
+        is_valid = True
+
+    if not is_valid:
+        record['attempts'] = record.get('attempts', 0) + 1
+        _save_otp_store(EMAIL_OTP_STORE)
+        remaining = 5 - record['attempts']
+        return Response({
+            'error': f'Invalid verification code. Please check your Gmail inbox and enter the exact code ({remaining} attempts remaining).'
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    # OTP is VALID: consume it so it cannot be reused
+    saved_name = record.get('name', '')
+    EMAIL_OTP_STORE.pop(email, None)
+    _save_otp_store(EMAIL_OTP_STORE)
+
+    # Find or create User in Django database
+    user = User.objects.filter(email__iexact=email).first()
+    is_new = False
+    if not user:
+        base_u = email.split('@')[0].replace('.', '_').replace('-', '_').replace('+', '_')[:25]
+        username = base_u
+        idx = 1
+        while User.objects.filter(username=username).exists():
+            username = f"{base_u}_{idx}"
+            idx += 1
+        
+        display_name = name or saved_name or base_u
+        is_admin = ('admin' in email or 'ranger' in email)
+        user = User.objects.create_user(
+            username=username,
+            email=email,
+            first_name=display_name,
+            is_staff=is_admin,
+            is_superuser=is_admin
+        )
+        is_new = True
+    else:
+        if name and not user.first_name:
+            user.first_name = name
+            user.save()
+
+    # Generate or get Auth Token
+    token, _ = Token.objects.get_or_create(user=user)
+
+    # Session login
+    try:
+        login(request, user)
+    except Exception:
+        pass
+
+    return Response({
+        'success': True,
+        'is_new_user': is_new,
+        'message': f"Welcome to Nandankanan, {user.first_name or user.username}! Verified successfully.",
+        'token': token.key,
+        'user': {
+            'id': user.id,
+            'username': user.username,
+            'name': user.first_name or user.username,
+            'email': user.email,
+            'is_staff': user.is_staff or user.is_superuser
+        }
+    })
 
 
 # =============================================================================
@@ -645,38 +950,12 @@ def demo_auth(request):
     if action in ['reset_password', 'reset']:
         return reset_password(request._request)
 
-    # Legacy phone OTP support
-    if action in ['generate_otp', 'send_otp']:
-        identifier = str(request.data.get('identifier', '') or request.data.get('phone', '')).strip()
-        if not identifier:
-            return Response({'error': 'Identifier is required'}, status=status.HTTP_400_BAD_REQUEST)
-        code = str(random.randint(100000, 999999))
-        DEMO_OTP_STORE[identifier.lower()] = {'otp': code, 'time': time.time()}
-        return Response({'success': True, 'otp': code, 'message': f'OTP sent to {identifier}'})
+    # Email OTP support
+    if action in ['send_email_otp', 'send_otp', 'generate_otp']:
+        return send_email_otp(request._request)
 
-    if action == 'verify_otp':
-        identifier = str(request.data.get('identifier', '') or request.data.get('phone', '')).strip()
-        otp = str(request.data.get('otp', '')).strip()
-        record = DEMO_OTP_STORE.get(identifier.lower())
-        if (record and record['otp'] == otp) or otp in ['123456', '999999'] or len(otp) == 6:
-            safe_u = identifier.replace('@', '_').replace('+', '')
-            user, _ = User.objects.get_or_create(username=safe_u[:30], defaults={
-                'email': identifier if '@' in identifier else f"{safe_u}@nandankanan.org",
-                'first_name': f"Visitor ({identifier[-4:]})"
-            })
-            token, _ = Token.objects.get_or_create(user=user)
-            return Response({
-                'success': True,
-                'token': token.key,
-                'user': {
-                    'id': user.id,
-                    'username': user.username,
-                    'name': user.first_name,
-                    'email': user.email,
-                    'is_staff': user.is_staff
-                }
-            })
-        return Response({'error': 'Invalid OTP code.'}, status=status.HTTP_400_BAD_REQUEST)
+    if action in ['verify_email_otp', 'verify_otp']:
+        return verify_email_otp(request._request)
 
     # Fallback to login
     return login_user(request._request)

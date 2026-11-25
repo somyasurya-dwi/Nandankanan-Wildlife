@@ -14,27 +14,39 @@ import {
   EyeOff, 
   ShieldCheck,
   Sparkles,
-  HelpCircle
+  HelpCircle,
+  Send,
+  Clock
 } from 'lucide-react';
 import { playTargetLockedSound } from '../utils/audioSynthesizer';
 
 export default function SignInPage({ onLoginSuccess, onBackToSanctuary }) {
-  // Current view: 'login' | 'register' | 'forgot' | 'reset'
-  const [activeView, setActiveView] = useState('login');
+  // Method: 'otp' | 'password' (default is 'otp')
+  const [authMethod, setAuthMethod] = useState('otp');
   
-  // Password Visibility
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  // Tabs: 'signin' | 'register'
+  const [activeTab, setActiveTab] = useState('signin');
+
+  // OTP Step: 'input_email' | 'verify_otp'
+  const [otpStep, setOtpStep] = useState('input_email');
 
   // Form Fields
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
+  const [otpCode, setOtpCode] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
-  // Password Reset URL Parameters
+  // Password Recovery / Reset
+  const [isForgotView, setIsForgotView] = useState(false);
+  const [isResetView, setIsResetView] = useState(false);
   const [resetUid, setResetUid] = useState('');
   const [resetToken, setResetToken] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // Timer for Resend OTP
+  const [resendCooldown, setResendCooldown] = useState(0);
 
   // UI States & Feedback
   const [isLoading, setIsLoading] = useState(false);
@@ -42,7 +54,18 @@ export default function SignInPage({ onLoginSuccess, onBackToSanctuary }) {
   const [successMsg, setSuccessMsg] = useState('');
   const [redirecting, setRedirecting] = useState(false);
 
-  // Parse URL hash on mount or hash change
+  // Countdown timer effect
+  useEffect(() => {
+    let timer = null;
+    if (resendCooldown > 0) {
+      timer = setInterval(() => {
+        setResendCooldown((prev) => Math.max(0, prev - 1));
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
+
+  // Parse URL hash on mount or change
   useEffect(() => {
     const handleHash = () => {
       const hash = window.location.hash || '';
@@ -52,16 +75,18 @@ export default function SignInPage({ onLoginSuccess, onBackToSanctuary }) {
           const params = new URLSearchParams(hash.substring(qIdx));
           setResetUid(params.get('uid') || '');
           setResetToken(params.get('token') || '');
-          setActiveView('reset');
+          setIsResetView(true);
+          setAuthMethod('password');
         } else {
-          setActiveView('reset');
+          setIsResetView(true);
+          setAuthMethod('password');
         }
       } else if (hash === '#register') {
-        setActiveView('register');
-      } else if (hash === '#forgot-password') {
-        setActiveView('forgot');
+        setActiveTab('register');
+        setOtpStep('input_email');
       } else if (hash === '#signin' || hash === '#login') {
-        setActiveView('login');
+        setActiveTab('signin');
+        setOtpStep('input_email');
       }
     };
 
@@ -123,55 +148,42 @@ export default function SignInPage({ onLoginSuccess, onBackToSanctuary }) {
     }, 1100);
   };
 
-  // 1. REGISTRATION HANDLER
-  const handleRegister = async (e) => {
+  // 1. STEP 1: SEND SECURE OTP TO GMAIL
+  const handleSendOtp = async (e) => {
     if (e) e.preventDefault();
     setError('');
     setSuccessMsg('');
 
-    const cleanName = fullName.trim();
     const cleanEmail = email.trim().toLowerCase();
-    const cleanPassword = password.trim();
-    const cleanConfirm = confirmPassword.trim();
+    const cleanName = fullName.trim();
 
-    if (!cleanName) {
-      setError('Please enter your Full Name.');
-      return;
-    }
     if (!cleanEmail || !cleanEmail.includes('@') || !cleanEmail.includes('.')) {
-      setError('Please enter a valid Email Address.');
+      setError('Please enter a valid Gmail or email address.');
       return;
     }
-    if (!cleanPassword) {
-      setError('Please enter a Password.');
-      return;
-    }
-    if (cleanPassword.length < 6) {
-      setError('Password must be at least 6 characters in length.');
-      return;
-    }
-    if (cleanPassword !== cleanConfirm) {
-      setError('Passwords do not match. Please verify your confirm password.');
+
+    if (activeTab === 'register' && !cleanName) {
+      setError('Please enter your Full Name.');
       return;
     }
 
     setIsLoading(true);
 
     try {
-      const response = await callApi('/api/auth/register/', {
-        name: cleanName,
+      const response = await callApi('/api/auth/send-email-otp/', {
         email: cleanEmail,
-        password: cleanPassword,
-        confirm_password: cleanConfirm
+        name: cleanName
       });
 
       const data = await response.json();
 
       if (response.ok && data.success) {
-        setSuccessMsg(data.message || 'Account registered successfully! Welcome to Nandankanan.');
-        finishAuth(data.user, data.token);
+        setOtpStep('verify_otp');
+        setOtpCode('');
+        setResendCooldown(30);
+        setSuccessMsg(data.message || `A secure verification code has been sent directly to ${cleanEmail}.`);
       } else {
-        setError(data.error || 'Registration failed. Please verify your details.');
+        setError(data.error || 'Failed to dispatch verification email. Please check backend SMTP settings.');
       }
     } catch (err) {
       setError('Cannot connect to backend server. Please verify the Django API is running on port 8000.');
@@ -180,8 +192,58 @@ export default function SignInPage({ onLoginSuccess, onBackToSanctuary }) {
     }
   };
 
-  // 2. LOGIN HANDLER
-  const handleLogin = async (e) => {
+  // 2. STEP 2: VERIFY SECURE OTP
+  const handleVerifyOtp = async (e) => {
+    if (e) e.preventDefault();
+    setError('');
+    setSuccessMsg('');
+
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanOtp = otpCode.trim();
+    const cleanName = fullName.trim();
+
+    if (!cleanOtp) {
+      setError('Please enter the verification code received in your email.');
+      return;
+    }
+
+    if (cleanOtp.length < 6 || cleanOtp.length > 20) {
+      setError('Please enter a valid verification code.');
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const response = await callApi('/api/auth/verify-email-otp/', {
+        email: cleanEmail,
+        otp: cleanOtp,
+        name: cleanName
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setSuccessMsg(data.message || 'Verification successful! Logging you in...');
+        finishAuth(data.user, data.token);
+      } else {
+        setError(data.error || 'Invalid verification code. Please check your Gmail inbox and enter the exact code.');
+      }
+    } catch (err) {
+      setError('Cannot connect to backend server. Please verify the Django API is running on port 8000.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // 3. RESEND OTP
+  const handleResendOtp = async () => {
+    if (resendCooldown > 0 || isLoading) return;
+    await handleSendOtp();
+  };
+
+  // 4. PASSWORD LOGIN HANDLER (FALLBACK)
+  const handlePasswordLogin = async (e) => {
     if (e) e.preventDefault();
     setError('');
     setSuccessMsg('');
@@ -209,16 +271,16 @@ export default function SignInPage({ onLoginSuccess, onBackToSanctuary }) {
         setSuccessMsg(data.message || 'Signed in successfully!');
         finishAuth(data.user, data.token);
       } else {
-        setError(data.error || 'Invalid email or password. Please verify your credentials.');
+        setError(data.error || 'Invalid email or password.');
       }
     } catch (err) {
-      setError('Cannot connect to backend server. Please verify the Django API is running on port 8000.');
+      setError('Cannot connect to backend server.');
     } finally {
       setIsLoading(false);
     }
   };
 
-  // 3. FORGOT PASSWORD HANDLER
+  // 5. FORGOT PASSWORD HANDLER
   const handleForgotPassword = async (e) => {
     if (e) e.preventDefault();
     setError('');
@@ -233,25 +295,21 @@ export default function SignInPage({ onLoginSuccess, onBackToSanctuary }) {
     setIsLoading(true);
 
     try {
-      const response = await callApi('/api/auth/forgot-password/', {
-        email: cleanEmail
-      });
-
+      const response = await callApi('/api/auth/forgot-password/', { email: cleanEmail });
       const data = await response.json();
-
       if (response.ok && data.success) {
-        setSuccessMsg(data.message || `Password reset instructions dispatched to ${cleanEmail}.`);
+        setSuccessMsg(data.message || `Password reset link sent to ${cleanEmail}.`);
       } else {
         setError(data.error || 'Could not process password reset request.');
       }
     } catch (err) {
-      setError('Cannot connect to backend server. Please verify the Django API is running on port 8000.');
+      setError('Cannot connect to backend server.');
     } finally {
       setIsLoading(false);
     }
   };
 
-  // 4. RESET PASSWORD HANDLER
+  // 6. RESET PASSWORD HANDLER
   const handleResetPassword = async (e) => {
     if (e) e.preventDefault();
     setError('');
@@ -260,20 +318,12 @@ export default function SignInPage({ onLoginSuccess, onBackToSanctuary }) {
     const cleanPassword = password.trim();
     const cleanConfirm = confirmPassword.trim();
 
-    if (!cleanPassword) {
-      setError('Please enter your new password.');
-      return;
-    }
-    if (cleanPassword.length < 6) {
+    if (!cleanPassword || cleanPassword.length < 6) {
       setError('Password must be at least 6 characters in length.');
       return;
     }
     if (cleanPassword !== cleanConfirm) {
-      setError('Passwords do not match. Please verify your confirm password.');
-      return;
-    }
-    if (!resetUid || !resetToken) {
-      setError('Password reset token is missing or invalid. Please click the link from your email.');
+      setError('Passwords do not match.');
       return;
     }
 
@@ -286,17 +336,15 @@ export default function SignInPage({ onLoginSuccess, onBackToSanctuary }) {
         password: cleanPassword,
         confirm_password: cleanConfirm
       });
-
       const data = await response.json();
-
       if (response.ok && data.success) {
         setSuccessMsg(data.message || 'Password reset successfully! Logging you in...');
         finishAuth(data.user, data.token);
       } else {
-        setError(data.error || 'Failed to reset password. The link may have expired (valid for 1 hour).');
+        setError(data.error || 'Failed to reset password. Link may have expired.');
       }
     } catch (err) {
-      setError('Cannot connect to backend server. Please verify the Django API is running on port 8000.');
+      setError('Cannot connect to backend server.');
     } finally {
       setIsLoading(false);
     }
@@ -316,7 +364,7 @@ export default function SignInPage({ onLoginSuccess, onBackToSanctuary }) {
         <div className="absolute bottom-10 right-10 w-80 h-80 bg-[#C8A96B]/15 rounded-full blur-3xl pointer-events-none" />
       </div>
 
-      {/* 2. TOP HEADER BAR: RETURN LINK */}
+      {/* 2. TOP HEADER BAR */}
       <header className="relative z-20 w-full px-4 sm:px-8 py-3.5 flex items-center justify-between border-b border-[#26734D]/35 bg-[#071D12]/75 backdrop-blur-md">
         <button
           type="button"
@@ -335,7 +383,7 @@ export default function SignInPage({ onLoginSuccess, onBackToSanctuary }) {
         </div>
       </header>
 
-      {/* 3. VERTICAL BOX: CENTERED CLEAN CARD */}
+      {/* 3. VERTICAL BOX: CENTERED CARD */}
       <main className="relative z-10 flex-1 flex items-center justify-center p-4 sm:p-6 my-auto">
         <div className="w-full max-w-md rounded-3xl bg-[#092217]/95 border border-[#C8A96B]/35 shadow-[0_25px_60px_rgba(0,0,0,0.85)] p-6 sm:p-8 backdrop-blur-2xl flex flex-col">
           
@@ -356,51 +404,34 @@ export default function SignInPage({ onLoginSuccess, onBackToSanctuary }) {
             </p>
           </div>
 
-          {/* VIEW SWITCHER TABS (Login vs Register) */}
-          {(activeView === 'login' || activeView === 'register') && (
+          {/* VIEW SWITCHER TABS (Sign In vs Register) when in OTP mode or Password mode */}
+          {authMethod === 'otp' && otpStep === 'input_email' && (
             <div className="grid grid-cols-2 p-1 rounded-xl bg-[#05140d] border border-[#26734D]/50 mb-4">
               <button
                 type="button"
-                onClick={() => { setActiveView('login'); setError(''); setSuccessMsg(''); }}
+                onClick={() => { setActiveTab('signin'); setError(''); setSuccessMsg(''); }}
                 className={`py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all flex items-center justify-center gap-1.5 ${
-                  activeView === 'login'
+                  activeTab === 'signin'
                     ? 'bg-gradient-to-r from-[#C8A96B] to-[#b39352] text-[#071D12] shadow-md'
                     : 'text-[#F5F4EA]/70 hover:text-white'
                 }`}
               >
                 <KeyRound className="w-3.5 h-3.5" />
-                <span>SIGN IN</span>
+                <span>SIGN IN (OTP)</span>
               </button>
 
               <button
                 type="button"
-                onClick={() => { setActiveView('register'); setError(''); setSuccessMsg(''); }}
+                onClick={() => { setActiveTab('register'); setError(''); setSuccessMsg(''); }}
                 className={`py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all flex items-center justify-center gap-1.5 ${
-                  activeView === 'register'
+                  activeTab === 'register'
                     ? 'bg-gradient-to-r from-[#C8A96B] to-[#b39352] text-[#071D12] shadow-md'
                     : 'text-[#F5F4EA]/70 hover:text-white'
                 }`}
               >
                 <User className="w-3.5 h-3.5" />
-                <span>REGISTER</span>
+                <span>REGISTER (OTP)</span>
               </button>
-            </div>
-          )}
-
-          {/* Breadcrumb back to Login when in Forgot or Reset mode */}
-          {(activeView === 'forgot' || activeView === 'reset') && (
-            <div className="mb-4 flex items-center justify-between border-b border-[#26734D]/40 pb-2">
-              <button
-                type="button"
-                onClick={() => { setActiveView('login'); setError(''); setSuccessMsg(''); }}
-                className="text-xs text-[#C8A96B] hover:underline flex items-center gap-1"
-              >
-                <ArrowLeft className="w-3.5 h-3.5" />
-                <span>Back to Sign In</span>
-              </button>
-              <span className="text-[11px] font-mono text-[#F5F4EA]/60 uppercase tracking-wider">
-                {activeView === 'forgot' ? 'Password Recovery' : 'Create New Password'}
-              </span>
             </div>
           )}
 
@@ -421,122 +452,42 @@ export default function SignInPage({ onLoginSuccess, onBackToSanctuary }) {
           )}
 
           {/* ============================================================= */}
-          {/* VIEW 1: SIGN IN PAGE */}
+          {/* METHOD 1: EMAIL OTP (STEP 1: REQUEST OTP) */}
           {/* ============================================================= */}
-          {activeView === 'login' && (
-            <form onSubmit={handleLogin} className="space-y-3.5">
-              <div>
-                <label className="block text-xs font-medium text-[#F5F4EA]/85 mb-1">
-                  Email Address
-                </label>
-                <div className="relative">
-                  <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#C8A96B]" />
-                  <input
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="e.g. ranger@nandankanan.org"
-                    className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-[#06180f] border border-[#26734D]/60 text-xs text-[#F5F4EA] placeholder-[#F5F4EA]/30 focus:border-[#C8A96B] focus:outline-none transition-colors"
-                  />
-                </div>
+          {authMethod === 'otp' && otpStep === 'input_email' && (
+            <form onSubmit={handleSendOtp} className="space-y-3.5">
+              
+              <div className="p-3 rounded-xl bg-[#06180f] border border-[#26734D]/40 text-xs text-[#F5F4EA]/80 leading-relaxed flex items-center gap-2">
+                <Mail className="w-4 h-4 text-[#C8A96B] shrink-0" />
+                <span>
+                  {activeTab === 'register' 
+                    ? "Enter your details. A secure verification code will be sent directly to your Gmail inbox."
+                    : "Enter your Gmail address to receive an official login OTP code."}
+                </span>
               </div>
 
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label className="text-xs font-medium text-[#F5F4EA]/85">
-                    Password
+              {activeTab === 'register' && (
+                <div>
+                  <label className="block text-xs font-medium text-[#F5F4EA]/85 mb-1">
+                    Full Name
                   </label>
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="text-[10px] text-[#C8A96B] hover:underline flex items-center gap-1"
-                  >
-                    {showPassword ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
-                    <span>{showPassword ? 'Hide' : 'Show'}</span>
-                  </button>
+                  <div className="relative">
+                    <User className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#C8A96B]" />
+                    <input
+                      type="text"
+                      required
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      placeholder="e.g. Soumya Surya"
+                      className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-[#06180f] border border-[#26734D]/60 text-xs text-[#F5F4EA] placeholder-[#F5F4EA]/30 focus:border-[#C8A96B] focus:outline-none transition-colors"
+                    />
+                  </div>
                 </div>
-                <div className="relative">
-                  <KeyRound className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#C8A96B]" />
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter your password"
-                    className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-[#06180f] border border-[#26734D]/60 text-xs text-[#F5F4EA] placeholder-[#F5F4EA]/30 focus:border-[#C8A96B] focus:outline-none transition-colors"
-                  />
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between text-xs pt-1">
-                <button
-                  type="button"
-                  onClick={() => { setActiveView('forgot'); setError(''); setSuccessMsg(''); }}
-                  className="text-xs text-[#C8A96B] hover:underline flex items-center gap-1"
-                >
-                  <HelpCircle className="w-3 h-3 text-[#C8A96B]" />
-                  <span>Forgot Password?</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => { setActiveView('register'); setError(''); setSuccessMsg(''); }}
-                  className="text-xs text-[#F5F4EA]/75 hover:text-[#C8A96B] hover:underline"
-                >
-                  Create account &rarr;
-                </button>
-              </div>
-
-              <button
-                type="submit"
-                disabled={isLoading || redirecting}
-                className="w-full mt-2 py-3 px-4 rounded-xl bg-gradient-to-r from-[#C8A96B] to-[#b39352] hover:from-[#d8b87a] hover:to-[#C8A96B] text-[#071D12] font-serif font-bold text-xs uppercase tracking-[0.14em] shadow-lg shadow-[#C8A96B]/20 hover:shadow-[#C8A96B]/35 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-              >
-                {isLoading ? (
-                  <>
-                    <RefreshCw className="w-4 h-4 animate-spin text-[#071D12]" />
-                    <span>Verifying Credentials...</span>
-                  </>
-                ) : redirecting ? (
-                  <>
-                    <Sparkles className="w-4 h-4 text-[#071D12] animate-bounce" />
-                    <span>Entering Sanctuary...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>SIGN IN TO SANCTUARY PORTAL</span>
-                    <ArrowRight className="w-4 h-4 text-[#071D12]" />
-                  </>
-                )}
-              </button>
-            </form>
-          )}
-
-          {/* ============================================================= */}
-          {/* VIEW 2: REGISTRATION PAGE */}
-          {/* ============================================================= */}
-          {activeView === 'register' && (
-            <form onSubmit={handleRegister} className="space-y-3.5">
-              <div>
-                <label className="block text-xs font-medium text-[#F5F4EA]/85 mb-1">
-                  Full Name
-                </label>
-                <div className="relative">
-                  <User className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#C8A96B]" />
-                  <input
-                    type="text"
-                    required
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    placeholder="e.g. Soumya Surya"
-                    className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-[#06180f] border border-[#26734D]/60 text-xs text-[#F5F4EA] placeholder-[#F5F4EA]/30 focus:border-[#C8A96B] focus:outline-none transition-colors"
-                  />
-                </div>
-              </div>
+              )}
 
               <div>
                 <label className="block text-xs font-medium text-[#F5F4EA]/85 mb-1">
-                  Email Address
+                  Gmail / Email Address
                 </label>
                 <div className="relative">
                   <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#C8A96B]" />
@@ -551,123 +502,6 @@ export default function SignInPage({ onLoginSuccess, onBackToSanctuary }) {
                 </div>
               </div>
 
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label className="text-xs font-medium text-[#F5F4EA]/85">
-                    Password (min. 6 characters)
-                  </label>
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="text-[10px] text-[#C8A96B] hover:underline flex items-center gap-1"
-                  >
-                    {showPassword ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
-                    <span>{showPassword ? 'Hide' : 'Show'}</span>
-                  </button>
-                </div>
-                <div className="relative">
-                  <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#C8A96B]" />
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    required
-                    minLength={6}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Create a strong password"
-                    className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-[#06180f] border border-[#26734D]/60 text-xs text-[#F5F4EA] placeholder-[#F5F4EA]/30 focus:border-[#C8A96B] focus:outline-none transition-colors"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label className="text-xs font-medium text-[#F5F4EA]/85">
-                    Confirm Password
-                  </label>
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="text-[10px] text-[#C8A96B] hover:underline flex items-center gap-1"
-                  >
-                    {showConfirmPassword ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
-                    <span>{showConfirmPassword ? 'Hide' : 'Show'}</span>
-                  </button>
-                </div>
-                <div className="relative">
-                  <ShieldCheck className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#C8A96B]" />
-                  <input
-                    type={showConfirmPassword ? 'text' : 'password'}
-                    required
-                    minLength={6}
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Re-type your password"
-                    className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-[#06180f] border border-[#26734D]/60 text-xs text-[#F5F4EA] placeholder-[#F5F4EA]/30 focus:border-[#C8A96B] focus:outline-none transition-colors"
-                  />
-                </div>
-              </div>
-
-              <div className="pt-1 text-center">
-                <button
-                  type="button"
-                  onClick={() => { setActiveView('login'); setError(''); setSuccessMsg(''); }}
-                  className="text-xs text-[#F5F4EA]/75 hover:text-[#C8A96B] hover:underline"
-                >
-                  Already have an account? <strong className="text-[#C8A96B]">Sign In</strong>
-                </button>
-              </div>
-
-              <button
-                type="submit"
-                disabled={isLoading || redirecting}
-                className="w-full mt-2 py-3 px-4 rounded-xl bg-gradient-to-r from-[#26734D] to-[#1e5c3e] hover:from-[#2e8c5d] hover:to-[#26734D] text-[#F5F4EA] font-serif font-bold text-xs uppercase tracking-[0.14em] shadow-lg shadow-[#26734D]/25 border border-[#C8A96B]/30 hover:border-[#C8A96B] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-              >
-                {isLoading ? (
-                  <>
-                    <RefreshCw className="w-4 h-4 animate-spin text-[#C8A96B]" />
-                    <span>Creating Guardian Account...</span>
-                  </>
-                ) : redirecting ? (
-                  <>
-                    <Sparkles className="w-4 h-4 text-[#C8A96B] animate-bounce" />
-                    <span>Entering Sanctuary...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>REGISTER ACCOUNT</span>
-                    <ArrowRight className="w-4 h-4 text-[#C8A96B]" />
-                  </>
-                )}
-              </button>
-            </form>
-          )}
-
-          {/* ============================================================= */}
-          {/* VIEW 3: FORGOT PASSWORD PAGE */}
-          {/* ============================================================= */}
-          {activeView === 'forgot' && (
-            <form onSubmit={handleForgotPassword} className="space-y-3.5">
-              <div className="p-3 rounded-xl bg-[#06180f] border border-[#26734D]/40 text-xs text-[#F5F4EA]/80 leading-relaxed">
-                Enter your registered Email Address. We will send you a secure, time-limited reset link to create a new password.
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-[#F5F4EA]/85 mb-1">
-                  Registered Email Address
-                </label>
-                <div className="relative">
-                  <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#C8A96B]" />
-                  <input
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="e.g. debasmitabehera924@gmail.com"
-                    className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-[#06180f] border border-[#26734D]/60 text-xs text-[#F5F4EA] placeholder-[#F5F4EA]/30 focus:border-[#C8A96B] focus:outline-none transition-colors"
-                  />
-                </div>
-              </div>
-
               <button
                 type="submit"
                 disabled={isLoading}
@@ -676,12 +510,12 @@ export default function SignInPage({ onLoginSuccess, onBackToSanctuary }) {
                 {isLoading ? (
                   <>
                     <RefreshCw className="w-4 h-4 animate-spin text-[#071D12]" />
-                    <span>Dispatching Reset Link...</span>
+                    <span>Dispatching OTP to Gmail...</span>
                   </>
                 ) : (
                   <>
-                    <span>SEND PASSWORD RESET LINK</span>
-                    <ArrowRight className="w-4 h-4 text-[#071D12]" />
+                    <Send className="w-4 h-4 text-[#071D12]" />
+                    <span>SEND VERIFICATION CODE TO GMAIL</span>
                   </>
                 )}
               </button>
@@ -689,29 +523,153 @@ export default function SignInPage({ onLoginSuccess, onBackToSanctuary }) {
               <div className="text-center pt-2">
                 <button
                   type="button"
-                  onClick={() => { setActiveView('login'); setError(''); setSuccessMsg(''); }}
-                  className="text-xs text-[#F5F4EA]/75 hover:text-[#C8A96B] hover:underline"
+                  onClick={() => { setAuthMethod('password'); setError(''); setSuccessMsg(''); }}
+                  className="text-xs text-[#F5F4EA]/60 hover:text-[#C8A96B] hover:underline"
                 >
-                  Remember your password? <strong className="text-[#C8A96B]">Sign In</strong>
+                  Or sign in with Password &rarr;
                 </button>
               </div>
+
             </form>
           )}
 
           {/* ============================================================= */}
-          {/* VIEW 4: RESET PASSWORD PAGE */}
+          {/* METHOD 1: EMAIL OTP (STEP 2: VERIFY SECURE CODE) */}
           {/* ============================================================= */}
-          {activeView === 'reset' && (
-            <form onSubmit={handleResetPassword} className="space-y-3.5">
-              <div className="p-3 rounded-xl bg-[#06180f] border border-[#26734D]/40 text-xs text-[#F5F4EA]/80 leading-relaxed">
-                Choose a strong new password for your Nandankanan Sanctuary account.
+          {authMethod === 'otp' && otpStep === 'verify_otp' && (
+            <form onSubmit={handleVerifyOtp} className="space-y-4 animate-fadeIn">
+              
+              {/* Notice Banner */}
+              <div className="p-3.5 rounded-2xl bg-gradient-to-r from-[#123D2B] to-[#19523a] border border-[#C8A96B] text-xs">
+                <div className="flex items-start gap-2.5">
+                  <span className="p-1.5 rounded-lg bg-[#C8A96B]/20 text-[#C8A96B] shrink-0 mt-0.5">
+                    <Mail className="w-4 h-4" />
+                  </span>
+                  <div className="flex-1">
+                    <div className="text-[10px] uppercase font-mono font-bold text-[#C8A96B] tracking-wider">
+                      ✉️ VERIFICATION CODE SENT TO EMAIL
+                    </div>
+                    <div className="text-xs text-[#F5F4EA] font-semibold mt-0.5 break-all">
+                      {email}
+                    </div>
+                    <p className="text-[11px] text-[#F5F4EA]/80 mt-1 leading-relaxed">
+                      Check your Gmail inbox (and spam/junk folder) for the secure verification code (letters, numbers & symbols).
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Secure Verification Code Input */}
+              <div>
+                <label className="block text-xs font-medium text-[#F5F4EA]/85 text-center mb-1.5">
+                  Enter Verification Code (Letters, Numbers & Symbols)
+                </label>
+                <div className="relative">
+                  <KeyRound className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#C8A96B]" />
+                  <input
+                    type="text"
+                    autoComplete="one-time-code"
+                    required
+                    maxLength={16}
+                    value={otpCode}
+                    onChange={(e) => setOtpCode(e.target.value.trim())}
+                    placeholder="e.g. A7#k9!X2"
+                    className="w-full pl-9 pr-3 py-3 rounded-xl bg-[#06180f] border border-[#26734D] text-center text-lg font-mono tracking-[0.2em] text-[#F5F4EA] placeholder-[#F5F4EA]/25 focus:border-[#C8A96B] focus:outline-none"
+                    autoFocus
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isLoading || redirecting || !otpCode.trim()}
+                className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-[#26734D] to-[#1e5c3e] hover:from-[#2e8c5d] hover:to-[#26734D] text-[#F5F4EA] font-serif font-bold text-xs uppercase tracking-[0.14em] shadow-lg shadow-[#26734D]/25 border border-[#C8A96B]/30 hover:border-[#C8A96B] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                {isLoading ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 animate-spin text-[#C8A96B]" />
+                    <span>Verifying Code...</span>
+                  </>
+                ) : redirecting ? (
+                  <>
+                    <Sparkles className="w-4 h-4 text-[#C8A96B] animate-bounce" />
+                    <span>Entering Sanctuary...</span>
+                  </>
+                ) : (
+                  <>
+                    <ShieldCheck className="w-4 h-4 text-[#C8A96B]" />
+                    <span>VERIFY OTP & ENTER SANCTUARY</span>
+                  </>
+                )}
+              </button>
+
+              {/* Resend and Edit Actions */}
+              <div className="flex items-center justify-between text-xs pt-1 border-t border-[#26734D]/35">
+                <button
+                  type="button"
+                  onClick={() => { setOtpStep('input_email'); setError(''); }}
+                  className="text-xs text-[#F5F4EA]/70 hover:text-[#C8A96B] flex items-center gap-1"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <span>Change Email</span>
+                </button>
+
+                <button
+                  type="button"
+                  disabled={resendCooldown > 0 || isLoading}
+                  onClick={handleResendOtp}
+                  className="text-xs text-[#C8A96B] hover:underline disabled:opacity-50 flex items-center gap-1 font-semibold"
+                >
+                  <Clock className="w-3.5 h-3.5" />
+                  {resendCooldown > 0 ? (
+                    <span>Resend in {resendCooldown}s</span>
+                  ) : (
+                    <span>Resend Code</span>
+                  )}
+                </button>
+              </div>
+
+            </form>
+          )}
+
+          {/* ============================================================= */}
+          {/* METHOD 2: PASSWORD LOGIN (OPTIONAL FALLBACK FOR RANGERS) */}
+          {/* ============================================================= */}
+          {authMethod === 'password' && !isForgotView && !isResetView && (
+            <form onSubmit={handlePasswordLogin} className="space-y-3.5">
+              
+              <div className="flex items-center justify-between border-b border-[#26734D]/40 pb-2 mb-2">
+                <button
+                  type="button"
+                  onClick={() => { setAuthMethod('otp'); setOtpStep('input_email'); setError(''); setSuccessMsg(''); }}
+                  className="text-xs text-[#C8A96B] hover:underline flex items-center gap-1"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <span>Back to Email OTP</span>
+                </button>
+                <span className="text-[11px] font-mono text-[#F5F4EA]/60 uppercase">Password Login</span>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-[#F5F4EA]/85 mb-1">
+                  Email Address
+                </label>
+                <div className="relative">
+                  <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#C8A96B]" />
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="e.g. ranger@nandankanan.org"
+                    className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-[#06180f] border border-[#26734D]/60 text-xs text-[#F5F4EA] placeholder-[#F5F4EA]/30 focus:border-[#C8A96B] focus:outline-none"
+                  />
+                </div>
               </div>
 
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="text-xs font-medium text-[#F5F4EA]/85">
-                    New Password (min. 6 characters)
-                  </label>
+                  <label className="text-xs font-medium text-[#F5F4EA]/85">Password</label>
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
@@ -726,29 +684,112 @@ export default function SignInPage({ onLoginSuccess, onBackToSanctuary }) {
                   <input
                     type={showPassword ? 'text' : 'password'}
                     required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter password"
+                    className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-[#06180f] border border-[#26734D]/60 text-xs text-[#F5F4EA] placeholder-[#F5F4EA]/30 focus:border-[#C8A96B] focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between text-xs pt-1">
+                <button
+                  type="button"
+                  onClick={() => { setIsForgotView(true); setError(''); setSuccessMsg(''); }}
+                  className="text-xs text-[#C8A96B] hover:underline flex items-center gap-1"
+                >
+                  <HelpCircle className="w-3 h-3 text-[#C8A96B]" />
+                  <span>Forgot Password?</span>
+                </button>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isLoading || redirecting}
+                className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-[#C8A96B] to-[#b39352] text-[#071D12] font-serif font-bold text-xs uppercase tracking-[0.14em] shadow-lg shadow-[#C8A96B]/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                {isLoading ? (
+                  <RefreshCw className="w-4 h-4 animate-spin text-[#071D12]" />
+                ) : (
+                  <>
+                    <span>Sign In With Password</span>
+                    <ArrowRight className="w-4 h-4 text-[#071D12]" />
+                  </>
+                )}
+              </button>
+
+            </form>
+          )}
+
+          {/* ============================================================= */}
+          {/* FORGOT PASSWORD VIEW */}
+          {/* ============================================================= */}
+          {isForgotView && (
+            <form onSubmit={handleForgotPassword} className="space-y-3.5">
+              <div className="flex items-center justify-between border-b border-[#26734D]/40 pb-2 mb-2">
+                <button
+                  type="button"
+                  onClick={() => { setIsForgotView(false); setError(''); }}
+                  className="text-xs text-[#C8A96B] hover:underline flex items-center gap-1"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <span>Back to Login</span>
+                </button>
+                <span className="text-[11px] font-mono text-[#F5F4EA]/60 uppercase">Password Reset</span>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-[#F5F4EA]/85 mb-1">Registered Email</label>
+                <div className="relative">
+                  <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#C8A96B]" />
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="e.g. user@gmail.com"
+                    className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-[#06180f] border border-[#26734D]/60 text-xs text-[#F5F4EA] placeholder-[#F5F4EA]/30 focus:border-[#C8A96B] focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-[#C8A96B] to-[#b39352] text-[#071D12] font-serif font-bold text-xs uppercase tracking-wider shadow-md transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                {isLoading ? <RefreshCw className="w-4 h-4 animate-spin text-[#071D12]" /> : <span>Send Reset Link</span>}
+              </button>
+            </form>
+          )}
+
+          {/* ============================================================= */}
+          {/* RESET PASSWORD VIEW */}
+          {/* ============================================================= */}
+          {isResetView && (
+            <form onSubmit={handleResetPassword} className="space-y-3.5">
+              <div className="p-3 rounded-xl bg-[#06180f] border border-[#26734D]/40 text-xs text-[#F5F4EA]/80 leading-relaxed">
+                Choose a strong new password for your account.
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-[#F5F4EA]/85 mb-1">New Password (min. 6)</label>
+                <div className="relative">
+                  <KeyRound className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#C8A96B]" />
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    required
                     minLength={6}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Enter new password"
-                    className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-[#06180f] border border-[#26734D]/60 text-xs text-[#F5F4EA] placeholder-[#F5F4EA]/30 focus:border-[#C8A96B] focus:outline-none transition-colors"
+                    className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-[#06180f] border border-[#26734D]/60 text-xs text-[#F5F4EA] placeholder-[#F5F4EA]/30 focus:border-[#C8A96B] focus:outline-none"
                   />
                 </div>
               </div>
 
               <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label className="text-xs font-medium text-[#F5F4EA]/85">
-                    Confirm New Password
-                  </label>
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="text-[10px] text-[#C8A96B] hover:underline flex items-center gap-1"
-                  >
-                    {showConfirmPassword ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
-                    <span>{showConfirmPassword ? 'Hide' : 'Show'}</span>
-                  </button>
-                </div>
+                <label className="block text-xs font-medium text-[#F5F4EA]/85 mb-1">Confirm New Password</label>
                 <div className="relative">
                   <ShieldCheck className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#C8A96B]" />
                   <input
@@ -758,32 +799,17 @@ export default function SignInPage({ onLoginSuccess, onBackToSanctuary }) {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="Confirm new password"
-                    className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-[#06180f] border border-[#26734D]/60 text-xs text-[#F5F4EA] placeholder-[#F5F4EA]/30 focus:border-[#C8A96B] focus:outline-none transition-colors"
+                    className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-[#06180f] border border-[#26734D]/60 text-xs text-[#F5F4EA] placeholder-[#F5F4EA]/30 focus:border-[#C8A96B] focus:outline-none"
                   />
                 </div>
               </div>
 
               <button
                 type="submit"
-                disabled={isLoading || redirecting}
-                className="w-full mt-2 py-3 px-4 rounded-xl bg-gradient-to-r from-[#C8A96B] to-[#b39352] hover:from-[#d8b87a] hover:to-[#C8A96B] text-[#071D12] font-serif font-bold text-xs uppercase tracking-[0.14em] shadow-lg shadow-[#C8A96B]/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                disabled={isLoading}
+                className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-[#C8A96B] to-[#b39352] text-[#071D12] font-serif font-bold text-xs uppercase tracking-wider shadow-md transition-all flex items-center justify-center gap-2 disabled:opacity-50"
               >
-                {isLoading ? (
-                  <>
-                    <RefreshCw className="w-4 h-4 animate-spin text-[#071D12]" />
-                    <span>Updating Password...</span>
-                  </>
-                ) : redirecting ? (
-                  <>
-                    <Sparkles className="w-4 h-4 text-[#071D12] animate-bounce" />
-                    <span>Entering Sanctuary...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>RESET & SECURE ACCOUNT</span>
-                    <ArrowRight className="w-4 h-4 text-[#071D12]" />
-                  </>
-                )}
+                {isLoading ? <RefreshCw className="w-4 h-4 animate-spin text-[#071D12]" /> : <span>Reset Password</span>}
               </button>
             </form>
           )}
