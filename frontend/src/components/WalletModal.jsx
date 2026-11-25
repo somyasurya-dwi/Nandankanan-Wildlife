@@ -20,8 +20,12 @@ import {
   Smartphone,
   Building2,
   Loader2,
-  AlertCircle
+  AlertCircle,
+  Heart
 } from 'lucide-react';
+import confetti from 'canvas-confetti';
+import { ANIMAL_PROGRAMS, FOOD_CONTRIBUTIONS } from './ContributionModal';
+import { walletManager } from '../utils/walletManager';
 import { useLanguage } from '../context/LanguageContext';
 
 const DEFAULT_ORDERS = [
@@ -77,7 +81,7 @@ const DEFAULT_ORDERS = [
   }
 ];
 
-export default function WalletModal({ isOpen, onClose }) {
+export default function WalletModal({ isOpen, onClose, onOpenSubscription }) {
   const { language, t } = useLanguage();
 
   // Persistent Eco-Balance state
@@ -183,6 +187,7 @@ export default function WalletModal({ isOpen, onClose }) {
     try {
       localStorage.setItem('nkz_eco_balance', String(newBalance));
       window.dispatchEvent(new Event('nkz_eco_balance_updated'));
+      walletManager._saveWallet({ ...walletManager.getWallet(), balance: newBalance });
     } catch (e) {
       console.warn('Could not persist eco balance:', e);
     }
@@ -194,11 +199,142 @@ export default function WalletModal({ isOpen, onClose }) {
       const updated = [newOrder, ...prev];
       try {
         localStorage.setItem('nkz_eco_orders', JSON.stringify(updated));
+        window.dispatchEvent(new Event('nkz_eco_orders_updated'));
       } catch (e) {
         console.warn('Could not persist orders:', e);
       }
       return updated;
     });
+  };
+
+  // Synchronize with external balance & order updates (e.g. from LiveCameraPlayer)
+  useEffect(() => {
+    const handleSync = () => {
+      try {
+        const saved = localStorage.getItem('nkz_eco_balance');
+        if (saved !== null) setBalance(Number(saved));
+        const savedOrders = localStorage.getItem('nkz_eco_orders');
+        if (savedOrders !== null) setOrders(JSON.parse(savedOrders));
+      } catch (e) {}
+    };
+    window.addEventListener('nkz_eco_balance_updated', handleSync);
+    window.addEventListener('nkz_eco_orders_updated', handleSync);
+    return () => {
+      window.removeEventListener('nkz_eco_balance_updated', handleSync);
+      window.removeEventListener('nkz_eco_orders_updated', handleSync);
+    };
+  }, []);
+
+  // Feed Wildlife States
+  const [feedAnimal, setFeedAnimal] = useState(() => (ANIMAL_PROGRAMS && ANIMAL_PROGRAMS.length > 0 ? ANIMAL_PROGRAMS[0] : {
+    slug: 'royal-bengal-tiger',
+    name: 'Royal Bengal Tiger',
+    emoji: '🐯',
+    desc: 'Support approved meat and nutrition programs'
+  }));
+  const [feedFoodId, setFeedFoodId] = useState('chicken-leg');
+  const [feedIsCustom, setFeedIsCustom] = useState(false);
+  const [feedCustomAmount, setFeedCustomAmount] = useState('100');
+  const [feedDonorName, setFeedDonorName] = useState('Priya Sharma');
+  const [feedMessage, setFeedMessage] = useState('Sending love to our majestic friends! ❤️');
+  const [feedAnonymous, setFeedAnonymous] = useState(false);
+  const [feedPaymentMethod, setFeedPaymentMethod] = useState('wallet'); // 'wallet' | 'razorpay'
+  const [feedSubmitting, setFeedSubmitting] = useState(false);
+  const [feedError, setFeedError] = useState(null);
+  const [feedSuccess, setFeedSuccess] = useState(null);
+
+  const currentFeedFood = (FOOD_CONTRIBUTIONS || []).find((f) => f.id === feedFoodId);
+  const feedEffectiveAmount = feedIsCustom ? (parseInt(feedCustomAmount, 10) || 0) : (currentFeedFood?.price || 50);
+  const feedCanPayFromWallet = balance >= feedEffectiveAmount;
+
+  const handleFoodSelect = (food) => {
+    setFeedIsCustom(false);
+    setFeedFoodId(food.id);
+    if (balance < food.price && feedPaymentMethod === 'wallet') {
+      setFeedPaymentMethod('razorpay');
+    }
+  };
+
+  const handleCustomFoodClick = () => {
+    setFeedIsCustom(true);
+    setFeedFoodId(null);
+    if (!feedCustomAmount) setFeedCustomAmount('100');
+  };
+
+  const handleConfirmFeed = async (e) => {
+    if (e) e.preventDefault();
+    setFeedError(null);
+
+    if (feedEffectiveAmount < 10) {
+      setFeedError('Please enter a valid contribution amount of at least ₹10.');
+      return;
+    }
+
+    if (feedPaymentMethod === 'wallet' && !feedCanPayFromWallet) {
+      setFeedError(`Insufficient Eco-Wallet balance (₹${balance}). Please top up your wallet or pay via UPI/Card.`);
+      return;
+    }
+
+    setFeedSubmitting(true);
+    try {
+      const foodName = feedIsCustom ? 'Custom Nutrition Contribution' : (currentFeedFood?.name || 'Care Food');
+      const donorDisplayName = feedAnonymous ? 'Anonymous Wildlife Friend' : (feedDonorName.trim() || 'Wildlife Supporter');
+
+      // 1. Call walletManager.makeContribution so it posts to Live Sharing Moments and registers globally
+      await walletManager.makeContribution({
+        animal: feedAnimal,
+        amount: feedEffectiveAmount,
+        foodItem: feedIsCustom ? null : currentFeedFood,
+        foodName,
+        donorName: donorDisplayName,
+        personalMessage: feedMessage,
+        isAnonymous: feedAnonymous,
+        paymentMethod: feedPaymentMethod
+      });
+
+      // 2. If paid via wallet, deduct and update balance
+      if (feedPaymentMethod === 'wallet') {
+        const newBalance = Math.max(0, balance - feedEffectiveAmount);
+        updateBalance(newBalance);
+      }
+
+      // 3. Add to Order Ledger
+      const newOrderId = `NK-ORD-${Math.floor(10000 + Math.random() * 90000)}`;
+      const newOrder = {
+        id: newOrderId,
+        title: `${feedAnimal.name} Sanctuary Care & Nutrition (${foodName})`,
+        category: 'donation',
+        date: 'Just Now',
+        paymentMethod: feedPaymentMethod === 'wallet' ? 'Deducted from Eco-Wallet' : 'UPI / Card / NetBanking',
+        amount: -feedEffectiveAmount,
+        status: 'VERIFIED',
+        invoiceId: `INV-${Math.floor(10000 + Math.random() * 90000)}`
+      };
+      addOrder(newOrder);
+
+      // 4. Trigger celebratory confetti
+      try {
+        confetti({
+          particleCount: 90,
+          spread: 75,
+          origin: { y: 0.6 },
+          colors: ['#C8A96B', '#10B981', '#F59E0B', '#EF4444']
+        });
+      } catch (err) {}
+
+      // 5. Success feedback
+      setFeedSuccess({
+        amount: feedEffectiveAmount,
+        animalName: feedAnimal.name,
+        foodName,
+        orderId: newOrderId
+      });
+
+    } catch (err) {
+      setFeedError('Something went wrong processing contribution. Please try again.');
+    } finally {
+      setFeedSubmitting(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -384,6 +520,18 @@ Visit: https://nandankanan.org | Eco-Helpline: 1800-345-6789
     setTimeout(() => setInvoiceToast(null), 3000);
   };
 
+  // Redirect to VIP Subscription modal with all plans and multi-user tiers
+  const handleExploreMoreSubscriptions = () => {
+    if (onOpenSubscription) {
+      onOpenSubscription();
+    } else {
+      if (onClose) onClose();
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('open-subscription-modal'));
+      }, 80);
+    }
+  };
+
   // Filtered orders
   const filteredOrders = orders.filter((o) => {
     if (orderFilter === 'all') return true;
@@ -391,11 +539,10 @@ Visit: https://nandankanan.org | Eco-Helpline: 1800-345-6789
   });
 
   return createPortal(
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-5 bg-black/85 backdrop-blur-md animate-fadeIn">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-2.5 sm:p-5 bg-black/85 backdrop-blur-md animate-fadeIn">
       <div 
-        className="relative w-full max-w-4xl lg:max-w-5xl bg-[#071D12]/98 border border-gold-500/60 rounded-3xl shadow-2xl shadow-black/95 overflow-hidden flex flex-col max-h-[88vh]"
+        className="relative w-full max-w-4xl lg:max-w-5xl bg-[#071D12]/98 border border-gold-500/60 rounded-3xl shadow-2xl shadow-black/95 overflow-hidden flex flex-col max-h-[92vh] sm:max-h-[88vh]"
         onClick={(e) => e.stopPropagation()}
-        onWheel={handleWheelScroll}
       >
         {/* =========================================================================
             HEADER & BALANCE BAR (Polished Single-Line Layout with Luxury Gold Top-Up)
@@ -500,6 +647,23 @@ Visit: https://nandankanan.org | Eco-Helpline: 1800-345-6789
               <CreditCard className="w-3.5 h-3.5" />
               <span>Add Money</span>
             </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab('feed');
+                setFeedSuccess(null);
+                setFeedError(null);
+              }}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+                activeTab === 'feed' 
+                  ? 'bg-[#1B6537] text-white shadow ring-1 ring-emerald-400/50' 
+                  : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              <Heart className="w-3.5 h-3.5 text-rose-400 fill-current" />
+              <span>Feed Wildlife</span>
+            </button>
           </div>
 
           {/* Security & Government Guarantee Badge */}
@@ -531,6 +695,27 @@ Visit: https://nandankanan.org | Eco-Helpline: 1800-345-6789
           </div>
         )}
 
+        {feedSuccess && (
+          <div className="mx-4 sm:mx-6 mt-3 p-3 rounded-xl bg-emerald-500/20 border border-emerald-500/50 text-emerald-300 text-xs flex items-center justify-between gap-2 animate-fadeIn shadow-lg">
+            <div className="flex items-center gap-2">
+              <Heart className="w-4 h-4 text-rose-400 fill-current shrink-0" />
+              <span>
+                Successfully contributed <strong>₹{feedSuccess.amount}.00</strong> to feed <strong>{feedSuccess.animalName}</strong> ({feedSuccess.foodName})!
+              </span>
+            </div>
+            <button
+              onClick={() => {
+                setFeedSuccess(null);
+                setActiveTab('orders');
+                setOrderFilter('donation');
+              }}
+              className="text-[10.5px] font-bold text-gold-400 hover:text-white underline cursor-pointer shrink-0 ml-2"
+            >
+              View in Order Ledger →
+            </button>
+          </div>
+        )}
+
         {/* =========================================================================
             CONTENT BODY (Unified Smooth Mousewheel Scrolling Canvas)
             ========================================================================= */}
@@ -538,7 +723,6 @@ Visit: https://nandankanan.org | Eco-Helpline: 1800-345-6789
           ref={contentScrollRef}
           data-lenis-prevent
           style={{ 
-            scrollBehavior: 'smooth', 
             overscrollBehavior: 'contain', 
             WebkitOverflowScrolling: 'touch' 
           }}
@@ -573,9 +757,24 @@ Visit: https://nandankanan.org | Eco-Helpline: 1800-345-6789
                   ))}
                 </div>
 
-                <span className="text-[11px] text-gray-400 font-mono">
-                  Showing {filteredOrders.length} verified transactions
-                </span>
+                <div className="flex items-center gap-3">
+                  <span className="text-[11px] text-gray-400 font-mono">
+                    Showing {filteredOrders.length} verified transactions
+                  </span>
+
+                  {orderFilter === 'subscription' && (
+                    <button
+                      type="button"
+                      onClick={handleExploreMoreSubscriptions}
+                      className="px-3 py-1 rounded-xl bg-gold-500/20 hover:bg-gold-500/30 border border-gold-500/50 text-gold-300 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ml-auto"
+                      title="Explore All Subscription Passes & Pricing Plans"
+                    >
+                      <Sparkles className="w-3.5 h-3.5 fill-current text-gold-400" />
+                      <span>Explore More Subscriptions</span>
+                      <ChevronRight className="w-3.5 h-3.5 stroke-[2.5]" />
+                    </button>
+                  )}
+                </div>
               </div>
 
               {/* Data Table */}
@@ -683,9 +882,9 @@ Visit: https://nandankanan.org | Eco-Helpline: 1800-345-6789
               TAB 2: NETFLIX STYLE SUBSCRIPTIONS HUB (With Functional Termination)
               ----------------------------------------------------------------------- */}
           {activeTab === 'subscriptions' && (
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
-              {/* Left Column: Active Membership Overview & Termination Controls */}
-              <div className="lg:col-span-7 p-4 sm:p-5 rounded-3xl bg-gradient-to-br from-[#0B2A1A] via-[#123D2B] to-[#0B2A1A] border border-gold-500/60 shadow-xl space-y-3.5">
+            <div className="w-full max-w-4xl mx-auto space-y-4">
+              {/* Active Membership Overview & Termination Controls */}
+              <div className="p-5 sm:p-6 rounded-3xl bg-gradient-to-br from-[#0B2A1A] via-[#123D2B] to-[#0B2A1A] border border-gold-500/60 shadow-xl space-y-4">
                 <div className="flex items-center justify-between flex-wrap gap-2">
                   <div className="flex items-center gap-2">
                     <span className={`px-2.5 py-1 rounded-md font-black text-[10px] uppercase tracking-wider ${
@@ -695,9 +894,7 @@ Visit: https://nandankanan.org | Eco-Helpline: 1800-345-6789
                     }`}>
                       {subscriptionStatus === 'ACTIVE' ? '★ Active VIP Membership' : '✕ Subscription Terminated'}
                     </span>
-                    <span className="text-xs font-mono text-emerald-400 font-bold">
-                      Netflix-Grade 4K Stream
-                    </span>
+                  
                   </div>
 
                   <span className="text-xs font-mono text-gray-300 flex items-center gap-1.5">
@@ -707,10 +904,10 @@ Visit: https://nandankanan.org | Eco-Helpline: 1800-345-6789
                 </div>
 
                 <div>
-                  <h3 className="font-display font-black text-lg text-ivory-50 flex items-center gap-2">
+                  <h3 className="font-display font-black text-lg sm:text-xl text-ivory-50 flex items-center gap-2">
                     <span>🐅 Royal Bengal Tiger — VIP Live Safari 4K Pass</span>
                   </h3>
-                  <p className="text-xs text-[#A7D7A9] leading-relaxed mt-1">
+                  <p className="text-xs sm:text-sm text-[#A7D7A9] leading-relaxed mt-1">
                     {subscriptionStatus === 'ACTIVE'
                       ? 'Continuous 30-day unthrottled live multi-angle surveillance feeds across all sector tiger enclosures with priority PTZ joystick camera control.'
                       : 'Subscription is currently cancelled. Your stream access remains valid until 23 Dec 2026. No automatic renewals or deductions will occur.'}
@@ -718,28 +915,28 @@ Visit: https://nandankanan.org | Eco-Helpline: 1800-345-6789
                 </div>
 
                 {/* Plan Highlights Grid */}
-                <div className="grid grid-cols-2 gap-2 pt-0.5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 pt-1">
                   {[
                     { label: '4K Ultra HD Live Feeds', desc: 'Direct multi-angle relay' },
                     { label: 'Zero-Queue PTZ Joystick', desc: 'Instant camera movement' },
                     { label: 'Night Vision & Dawn Feeds', desc: 'Infrared nocturnal tracking' },
                     { label: 'VIP Feeder Chatroom', desc: 'Direct keeper reactions' }
                   ].map((perk) => (
-                    <div key={perk.label} className="p-2 rounded-xl bg-forest-950/80 border border-[#26734D]/60 text-xs">
+                    <div key={perk.label} className="p-3 rounded-2xl bg-forest-950/80 border border-[#26734D]/60 text-xs">
                       <div className="flex items-center gap-1.5 font-bold text-ivory-100">
                         <Check className="w-3.5 h-3.5 text-gold-400 shrink-0" />
                         <span>{perk.label}</span>
                       </div>
-                      <span className="text-[10px] text-gray-400 block ml-5">{perk.desc}</span>
+                      <span className="text-[10.5px] text-gray-400 block ml-5 mt-0.5">{perk.desc}</span>
                     </div>
                   ))}
                 </div>
 
                 {/* Billing Rate, Auto-Renew Toggle & Termination Button */}
-                <div className="pt-3 border-t border-[#26734D]/50 flex items-center justify-between flex-wrap gap-2.5">
+                <div className="pt-4 border-t border-[#26734D]/50 flex items-center justify-between flex-wrap gap-3">
                   <div>
                     <span className="text-xs text-gray-400">Plan Rate: </span>
-                    <strong className="text-sm font-mono text-gold-300 font-bold">₹299.00 / month</strong>
+                    <strong className="text-sm sm:text-base font-mono text-gold-300 font-bold">₹299.00 / month</strong>
                     <span className="text-[10.5px] text-gray-400 block">
                       {subscriptionStatus === 'ACTIVE' ? '(Auto-debited from Eco-Wallet)' : '(Auto-debit stopped)'}
                     </span>
@@ -763,12 +960,24 @@ Visit: https://nandankanan.org | Eco-Helpline: 1800-345-6789
                       </button>
                     ) : null}
 
+                    {/* Explore More Subscriptions Quick Action */}
+                    <button
+                      type="button"
+                      onClick={handleExploreMoreSubscriptions}
+                      className="px-4 py-2 rounded-xl bg-gradient-to-r from-gold-400 via-gold-500 to-gold-600 hover:from-gold-300 hover:to-gold-500 text-forest-950 text-xs font-black uppercase tracking-wider transition-all flex items-center gap-1.5 cursor-pointer shadow-md active:scale-95 whitespace-nowrap"
+                      title="Explore All Subscription Passes & Pricing Plans"
+                    >
+                      <Sparkles className="w-3.5 h-3.5 fill-current" />
+                      <span>Explore More Subscriptions</span>
+                      <ChevronRight className="w-3.5 h-3.5 stroke-[3]" />
+                    </button>
+
                     {/* Functional Terminate or Reactivate Button */}
                     {subscriptionStatus === 'ACTIVE' ? (
                       <button
                         type="button"
                         onClick={handleTerminateSubscription}
-                        className="px-3 py-1.5 rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-500/40 hover:border-red-500/60 text-red-400 hover:text-red-300 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95"
+                        className="px-3.5 py-2 rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-500/40 hover:border-red-500/60 text-red-400 hover:text-red-300 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95"
                         title="Terminate subscription & cancel auto-renew"
                       >
                         <XCircle className="w-3.5 h-3.5 text-red-400" />
@@ -778,7 +987,7 @@ Visit: https://nandankanan.org | Eco-Helpline: 1800-345-6789
                       <button
                         type="button"
                         onClick={handleReactivateSubscription}
-                        className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-gold-500 to-gold-600 hover:brightness-110 text-forest-950 text-xs font-black uppercase tracking-wider transition-all flex items-center gap-1.5 cursor-pointer shadow-md active:scale-95"
+                        className="px-4 py-2 rounded-xl bg-gradient-to-r from-gold-500 to-gold-600 hover:brightness-110 text-forest-950 text-xs font-black uppercase tracking-wider transition-all flex items-center gap-1.5 cursor-pointer shadow-md active:scale-95"
                         title="Reactivate VIP pass"
                       >
                         <RotateCcw className="w-3.5 h-3.5 stroke-[3]" />
@@ -786,48 +995,6 @@ Visit: https://nandankanan.org | Eco-Helpline: 1800-345-6789
                       </button>
                     )}
                   </div>
-                </div>
-              </div>
-
-              {/* Right Column: Other Sanctuary Feeds with 1-Click Subscribe */}
-              <div className="lg:col-span-5 space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-gold-400 flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5" />
-                    <span>Other Sanctuary Feeds</span>
-                  </h4>
-                  <span className="text-[10px] text-gray-400 font-mono">1-Click Wallet Access</span>
-                </div>
-
-                <div className="space-y-2">
-                  {[
-                    { name: 'Asiatic Lion Safari Feed', price: 199, icon: '🦁', desc: 'Open ridge & scrubland savanna cam' },
-                    { name: 'Asian Elephant Wetland Feed', price: 149, icon: '🐘', desc: 'Freshwater lake mud wallow stream' },
-                    { name: 'White Bengal Tiger Heritage Feed', price: 249, icon: '🐅', desc: 'Rare white tiger enclosure feed' },
-                    { name: 'Sloth Bear & Aviary Stream', price: 129, icon: '🐻', desc: 'Cave enclosure & Kanjia bird sanctuary' }
-                  ].map((sub) => (
-                    <div 
-                      key={sub.name}
-                      className="p-2.5 rounded-2xl bg-forest-900/80 border border-forest-700/60 flex items-center justify-between gap-2.5 hover:border-gold-500/50 transition-all shadow-sm"
-                    >
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <span className="text-xl shrink-0">{sub.icon}</span>
-                        <div className="min-w-0">
-                          <h5 className="text-xs font-bold text-ivory-100 truncate">{sub.name}</h5>
-                          <span className="text-[10px] text-gray-400 block truncate">{sub.desc}</span>
-                        </div>
-                      </div>
-
-                      <button
-                        onClick={() => handleSubscribeFeed(sub.name, sub.price)}
-                        className="px-2.5 py-1 rounded-xl bg-[#1B6537] hover:bg-[#26734D] text-white text-xs font-bold font-mono shrink-0 transition-colors flex items-center gap-1 shadow cursor-pointer"
-                        title={`Subscribe to ${sub.name}`}
-                      >
-                        <span>₹{sub.price}</span>
-                        <ChevronRight className="w-3 h-3" />
-                      </button>
-                    </div>
-                  ))}
                 </div>
               </div>
             </div>
@@ -1184,6 +1351,289 @@ Visit: https://nandankanan.org | Eco-Helpline: 1800-345-6789
                     </>
                   )}
                 </button>
+              </div>
+            </div>
+          )}
+
+          {/* -----------------------------------------------------------------------
+              TAB 4: SHARE HAPPINESS, FEED THE ANIMALS (FLUID & FULLY RESPONSIVE)
+              ----------------------------------------------------------------------- */}
+          {activeTab === 'feed' && (
+            <div className="w-full space-y-4 animate-fadeIn">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
+                
+                {/* Left Column: Animal Selection & Food Ration Choice */}
+                <div className="lg:col-span-7 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-[#0B2A1A] to-[#071D12] border border-[#C8A96B]/50 p-4 sm:p-5 shadow-xl flex flex-col justify-between space-y-3.5">
+                  
+                  {/* Header & Animal Selector */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 border-b border-[#26734D]/40">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#C8A96B] to-[#997736] flex items-center justify-center text-xl shadow-md shadow-[#C8A96B]/30 shrink-0">
+                        {feedAnimal?.emoji ? (
+                          <span>{feedAnimal.emoji}</span>
+                        ) : (
+                          <Heart className="w-5 h-5 text-[#071D12] fill-current" />
+                        )}
+                      </div>
+                      <div>
+                        <h3 className="font-serif font-bold text-base sm:text-lg text-[#F5F4EA] leading-tight">
+                          Share Happiness, Feed the Animals
+                        </h3>
+                        <p className="text-[11px] sm:text-xs text-[#C8A96B] font-mono">
+                          Support nutrition and animal welfare
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Animal Resident Selector Dropdown */}
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <select
+                        value={feedAnimal.slug}
+                        onChange={(e) => {
+                          const found = ANIMAL_PROGRAMS.find((a) => a.slug === e.target.value);
+                          if (found) setFeedAnimal(found);
+                        }}
+                        className="w-full sm:w-auto px-3 py-1.5 rounded-xl bg-[#06180E] border border-[#C8A96B]/50 text-xs text-[#F5F4EA] font-semibold focus:outline-none focus:border-gold-400 cursor-pointer shadow-sm"
+                      >
+                        {ANIMAL_PROGRAMS.map((a) => (
+                          <option key={a.slug} value={a.slug}>
+                            {a.emoji} {a.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Official Care Protocol Notice */}
+                  <div className="p-2 sm:p-2.5 rounded-xl bg-forest-900/80 border border-[#C8A96B]/20 text-[10.5px] sm:text-[11px] text-[#A7D7A9] flex items-start gap-2 leading-snug">
+                    <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                    <span>
+                      <strong>Official Care Protocol:</strong> Donations support zoo-approved animal nutrition, veterinary care, & enrichment diets managed by Nandankanan wildlife experts. Visitors do not directly feed animals.
+                    </span>
+                  </div>
+
+                  {/* SELECT FOOD CONTRIBUTION */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label className="text-[11px] font-mono uppercase tracking-wider text-[#C8A96B] font-bold">
+                        SELECT FOOD CONTRIBUTION:
+                      </label>
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-950/80 border border-emerald-500/30 text-emerald-400">
+                        {FOOD_CONTRIBUTIONS.length} options
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
+                      {FOOD_CONTRIBUTIONS.map((food) => {
+                        const isSelected = !feedIsCustom && feedFoodId === food.id;
+                        return (
+                          <button
+                            key={food.id}
+                            type="button"
+                            onClick={() => handleFoodSelect(food)}
+                            title={`${food.name}: ₹${food.price}`}
+                            className={`py-2 px-1 rounded-xl border text-center transition-all duration-150 cursor-pointer flex flex-col items-center justify-center gap-0.5 ${
+                              isSelected
+                                ? 'bg-[#C8A96B] text-[#071D12] border-[#C8A96B] shadow-md shadow-[#C8A96B]/30 scale-[1.02] font-black'
+                                : 'bg-[#06180E]/90 text-[#F5F4EA] border-white/10 hover:border-[#C8A96B]/50 hover:bg-[#0B2A1A]'
+                            }`}
+                          >
+                            <span className="text-xl sm:text-2xl leading-none transition-transform hover:scale-110 select-none">
+                              {food.emoji}
+                            </span>
+                            <span className={`text-[10.5px] sm:text-[11px] font-serif font-bold tracking-tight truncate w-full px-0.5 ${
+                              isSelected ? 'text-[#071D12]' : 'text-[#F5F4EA]'
+                            }`}>
+                              {food.name}
+                            </span>
+                            <span className={`font-mono font-bold text-[11px] sm:text-xs tracking-tight ${
+                              isSelected ? 'text-[#071D12]' : 'text-[#C8A96B]'
+                            }`}>
+                              ₹{food.price}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Custom Amount Option */}
+                    <div className="mt-2 flex items-center justify-between text-xs pt-2 border-t border-white/10">
+                      <button
+                        type="button"
+                        onClick={handleCustomFoodClick}
+                        className={`text-[11px] font-mono flex items-center gap-1.5 transition-colors cursor-pointer ${
+                          feedIsCustom ? 'text-[#C8A96B] font-bold underline' : 'text-[#A7D7A9] hover:text-[#C8A96B]'
+                        }`}
+                      >
+                        <span>⭐</span>
+                        <span>Or enter custom contribution amount</span>
+                      </button>
+                      {feedIsCustom && (
+                        <div className="flex items-center gap-1.5 w-32">
+                          <span className="text-xs font-mono text-[#C8A96B] font-bold">₹</span>
+                          <input
+                            type="number"
+                            min="10"
+                            step="10"
+                            value={feedCustomAmount}
+                            onChange={(e) => setFeedCustomAmount(e.target.value)}
+                            placeholder="e.g. 250"
+                            className="w-full px-2 py-1 rounded-lg bg-black/50 border border-[#C8A96B]/50 text-[#F5F4EA] font-mono text-xs focus:outline-none focus:border-[#C8A96B]"
+                            autoFocus
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                </div>
+
+                {/* Right Column: Dedication Details, Payment Method & Confirmation */}
+                <div className="lg:col-span-5 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-[#0B2A1A] to-[#071D12] border border-[#C8A96B]/50 p-4 sm:p-5 shadow-xl flex flex-col justify-between space-y-4">
+                  
+                  {/* Selected Animal Resident Banner */}
+                  <div className="p-3 rounded-2xl bg-forest-950/80 border border-forest-800 flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-forest-900 border border-[#C8A96B]/40 flex items-center justify-center text-xl shrink-0">
+                      {feedAnimal?.emoji || '🐾'}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-serif font-bold text-sm text-[#F5F4EA] truncate">
+                          {feedAnimal.name}
+                        </span>
+                        <span className="text-[9.5px] px-1.5 py-0.2 rounded bg-gold-500/20 text-gold-400 font-mono font-bold uppercase">
+                          SANCTUARY CARE
+                        </span>
+                      </div>
+                      <p className="text-[10.5px] text-[#A7D7A9] font-mono truncate">
+                        {feedAnimal?.desc || 'Approved nutrition & health program'}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Donor Details: Name & Message */}
+                  <div className="space-y-2.5">
+                    <div>
+                      <label className="block text-[10.5px] font-mono uppercase tracking-wider text-[#C8A96B] font-semibold mb-1">
+                        YOUR NAME:
+                      </label>
+                      <input
+                        type="text"
+                        value={feedDonorName}
+                        onChange={(e) => setFeedDonorName(e.target.value)}
+                        placeholder="Priya Sharma"
+                        disabled={feedAnonymous}
+                        className="w-full px-3 py-1.5 rounded-xl bg-black/40 border border-white/10 text-xs text-[#F5F4EA] focus:outline-none focus:border-[#C8A96B] disabled:opacity-50"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[10.5px] font-mono uppercase tracking-wider text-[#C8A96B] font-semibold mb-1">
+                        PERSONAL MESSAGE:
+                      </label>
+                      <input
+                        type="text"
+                        value={feedMessage}
+                        onChange={(e) => setFeedMessage(e.target.value)}
+                        placeholder="Sending love to our majestic friends! ❤️"
+                        className="w-full px-3 py-1.5 rounded-xl bg-black/40 border border-white/10 text-xs text-[#F5F4EA] focus:outline-none focus:border-[#C8A96B]"
+                      />
+                    </div>
+
+                    {/* Anonymous Toggle */}
+                    <label className="flex items-center gap-2 cursor-pointer text-[11px] text-[#A7D7A9] font-sans pt-0.5">
+                      <input
+                        type="checkbox"
+                        checked={feedAnonymous}
+                        onChange={(e) => setFeedAnonymous(e.target.checked)}
+                        className="accent-[#C8A96B] w-3.5 h-3.5 rounded cursor-pointer"
+                      />
+                      <span>Make my contribution anonymous in Live Sharing Moments</span>
+                    </label>
+                  </div>
+
+                  {/* PAYMENT METHOD */}
+                  <div className="space-y-1.5">
+                    <label className="block text-[10.5px] sm:text-xs font-mono uppercase tracking-wider text-[#C8A96B] font-semibold">
+                      PAYMENT METHOD:
+                    </label>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setFeedPaymentMethod('wallet')}
+                        disabled={!feedCanPayFromWallet}
+                        className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                          feedPaymentMethod === 'wallet' && feedCanPayFromWallet
+                            ? 'bg-[#14532D] border-emerald-400 text-white shadow-sm ring-1 ring-emerald-400/50'
+                            : feedCanPayFromWallet
+                            ? 'bg-black/30 border-white/10 text-[#F5F4EA]/70 hover:border-white/20'
+                            : 'bg-black/20 border-white/5 text-white/30 cursor-not-allowed'
+                        }`}
+                      >
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <Wallet className="w-3.5 h-3.5 text-emerald-400" />
+                          <span className="text-xs font-bold">Wildlife Wallet</span>
+                        </div>
+                        <div className="text-[10.5px] font-mono text-[#C8A96B]">
+                          Balance: ₹{balance.toLocaleString('en-IN')}
+                          {!feedCanPayFromWallet && (
+                            <span className="text-red-400 block text-[9.5px] mt-0.5">(Need ₹{feedEffectiveAmount - balance} more)</span>
+                          )}
+                        </div>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setFeedPaymentMethod('razorpay')}
+                        className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                          feedPaymentMethod === 'razorpay'
+                            ? 'bg-[#14532D] border-[#C8A96B] text-white shadow-sm ring-1 ring-[#C8A96B]/50'
+                            : 'bg-black/30 border-white/10 text-[#F5F4EA]/70 hover:border-white/20'
+                        }`}
+                      >
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <CreditCard className="w-3.5 h-3.5 text-[#C8A96B]" />
+                          <span className="text-xs font-bold">UPI / Card / NetBanking</span>
+                        </div>
+                        <span className="text-[10px] font-mono text-[#A7D7A9]">
+                          Instant Razorpay Demo
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Error Notice */}
+                  {feedError && (
+                    <div className="p-2.5 rounded-lg bg-red-950/70 border border-red-500/50 text-red-300 text-xs flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4 shrink-0" />
+                      <span>{feedError}</span>
+                    </div>
+                  )}
+
+                  {/* Submit Action Button */}
+                  <div className="pt-1">
+                    <button
+                      type="button"
+                      onClick={handleConfirmFeed}
+                      disabled={feedSubmitting || feedEffectiveAmount <= 0}
+                      className="w-full py-3 rounded-2xl bg-gradient-to-r from-[#C8A96B] via-[#E2CB99] to-[#C8A96B] hover:brightness-105 active:scale-[0.99] text-[#071D12] font-serif font-black text-xs sm:text-sm uppercase tracking-wider transition-all shadow-lg shadow-[#C8A96B]/25 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                    >
+                      {feedSubmitting ? (
+                        <>
+                          <span className="w-4 h-4 rounded-full border-2 border-[#071D12] border-t-transparent animate-spin" />
+                          <span>Verifying Contribution...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Heart className="w-4 h-4 fill-current text-rose-700" />
+                          <span>CONFIRM CONTRIBUTION – ₹{feedEffectiveAmount}</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+
+                </div>
+
               </div>
             </div>
           )}

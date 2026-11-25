@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
-const ANIMAL_PROGRAMS = [
+export const ANIMAL_PROGRAMS = [
   {
     slug: 'royal-bengal-tiger',
     name: 'Royal Bengal Tiger',
@@ -187,7 +187,7 @@ export const FOOD_CONTRIBUTIONS = [
   }
 ];
 
-const resolveAnimal = (target) => {
+export const resolveAnimal = (target) => {
   if (!target) return ANIMAL_PROGRAMS[0];
   const targetSlug = (target.slug || '').toLowerCase();
   const targetName = (target.animal_name || target.name || '').toLowerCase();

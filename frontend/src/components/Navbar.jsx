@@ -12,12 +12,14 @@ import {
   Type, 
   Sun, 
   Volume1, 
-  RotateCcw 
+  RotateCcw,
+  Sparkles 
 } from 'lucide-react';
 import { toggleRainforestAmbience } from '../utils/audioSynthesizer';
 import { useLanguage } from '../context/LanguageContext';
 import WalletModal from './WalletModal';
 import NewsNoticeModal from './NewsNoticeModal';
+import SubscriptionModal from './SubscriptionModal';
 
 // Official UN Universal Symbol of Accessibility (Matching user reference image 3)
 function UniversalAccessibilityIcon({ className = "w-5 h-5" }) {
@@ -69,8 +71,15 @@ export default function Navbar({
   const [dignitaryFading, setDignitaryFading] = useState(false);
   const [isDignitaryPaused, setIsDignitaryPaused] = useState(false);
   const [walletModalOpen, setWalletModalOpen] = useState(false);
+  const [subscriptionModalOpen, setSubscriptionModalOpen] = useState(false);
   const [newsNoticeModalOpen, setNewsNoticeModalOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleOpenSub = () => setSubscriptionModalOpen(true);
+    window.addEventListener('open-subscription-modal', handleOpenSub);
+    return () => window.removeEventListener('open-subscription-modal', handleOpenSub);
+  }, []);
 
   // Dynamic Eco-Wallet Balance synchronized with WalletModal
   const [ecoBalance, setEcoBalance] = useState(() => {
@@ -466,8 +475,7 @@ export default function Navbar({
     { key: 'species', name: t('nav.species'), href: '#explore-animals', sectionId: 'explore-animals', scrollTarget: 'species-grid' },
     { key: 'stories', name: t('nav.stories'), href: '#conservation-stories', sectionId: 'conservation-stories', scrollTarget: 'stories-grid' },
     { key: 'notices', name: t('nav.newsNotice'), href: '#notices', sectionId: 'notices', scrollTarget: 'notices-bulletin-box' },
-    { key: 'adopt', name: t('nav.adopt'), href: '#sponsorship-portal', sectionId: 'sponsorship-portal', scrollTarget: 'sponsorship-flow' },
-    { key: 'wallet', name: t('nav.wallet'), href: '#wallet', onClick: () => setWalletModalOpen(true) },
+    { key: 'adopt', name: t('nav.adopt'), href: '#sponsorship-portal', sectionId: 'sponsorship-portal', scrollTarget: 'sponsorship-flow' }
   ];
 
   return (
@@ -506,77 +514,130 @@ export default function Navbar({
             </div>
           </a>
 
-          {/* Right: Dignitary Portrait Card (Auto-Transitioning between CM, Minister & Director) */}
-          <div 
-            className="hidden sm:flex items-center gap-2.5 shrink-0 pl-3 border-l border-gray-200 cursor-pointer select-none group"
-            onMouseEnter={() => setIsDignitaryPaused(true)}
-            onMouseLeave={() => setIsDignitaryPaused(false)}
-            onClick={handleManualToggleDignitary}
-            title="Auto-transitioning between Hon'ble Chief Minister, Minister and Director (Hover to pause, Click to toggle)"
-          >
-            {/* Dignitary Text Info with Smooth Crossfade & Slide Transition */}
-            <div className={`text-right transition-all duration-300 ease-in-out ${
-              dignitaryFading ? 'opacity-0 -translate-y-1 scale-[0.98]' : 'opacity-100 translate-y-0 scale-100'
-            }`}>
-              <div className="flex items-center justify-end">
-                <span className="text-xs sm:text-[13px] font-extrabold text-[#111612] tracking-tight block">
-                  {currentDignitary.name}
-                </span>
-              </div>
-
-              <span className="text-[9.5px] sm:text-[10.5px] font-semibold text-[#1B6537] block leading-tight mt-0.5">
-                {currentDignitary.role}
-              </span>
-              <span className="text-[8.5px] sm:text-[9.5px] text-gray-500 block leading-tight">
-                {currentDignitary.dept}
-              </span>
-
-              {/* Dignitary Slide Indicator Dots (CM, Minister, Director) */}
-              <div className="flex items-center justify-end gap-1.5 mt-0.5">
-                <button
-                  type="button"
-                  onClick={(e) => { e.stopPropagation(); switchToDignitary('cm'); }}
-                  className={`h-1 rounded-full transition-all duration-300 focus:outline-none ${
-                    dignitaryView === 'cm' ? 'w-3.5 bg-[#1B6537]' : 'w-1 bg-gray-300 hover:bg-gray-400'
-                  }`}
-                  title="Hon'ble Chief Minister Shri Mohan Charan Majhi"
-                  aria-label="Chief Minister"
-                />
-                <button
-                  type="button"
-                  onClick={(e) => { e.stopPropagation(); switchToDignitary('minister'); }}
-                  className={`h-1 rounded-full transition-all duration-300 focus:outline-none ${
-                    dignitaryView === 'minister' ? 'w-3.5 bg-[#1B6537]' : 'w-1 bg-gray-300 hover:bg-gray-400'
-                  }`}
-                  title="Hon'ble Minister Shri Ganesh Ram Singkhuntia"
-                  aria-label="Minister"
-                />
-                <button
-                  type="button"
-                  onClick={(e) => { e.stopPropagation(); switchToDignitary('director'); }}
-                  className={`h-1 rounded-full transition-all duration-300 focus:outline-none ${
-                    dignitaryView === 'director' ? 'w-3.5 bg-[#C8A96B]' : 'w-1 bg-gray-300 hover:bg-gray-400'
-                  }`}
-                  title="Director Shri Sanath Kumar N., IFS"
-                  aria-label="Director"
-                />
-              </div>
-            </div>
-
-            {/* Dignitary Round Portrait Photograph with Crossfade Animation */}
-            <div className="relative">
-              <div className={`relative w-9 h-9 sm:w-11 sm:h-11 rounded-full overflow-hidden border-2 shadow-sm ring-1.5 transition-all duration-300 ease-in-out ${
-                currentDignitary.ringStyle
-              } ${
-                dignitaryFading ? 'opacity-0 scale-90 rotate-6' : 'opacity-100 scale-100 rotate-0'
+          {/* Right Header Area: Dignitary Showcase + User Sign In Profile */}
+          <div className="flex items-center gap-2 sm:gap-3.5 shrink-0">
+            
+            {/* Dignitary Portrait Card (Auto-Transitioning between CM, Minister & Director) */}
+            <div 
+              className="hidden sm:flex items-center gap-2.5 shrink-0 pl-3 border-l border-gray-200 cursor-pointer select-none group"
+              onMouseEnter={() => setIsDignitaryPaused(true)}
+              onMouseLeave={() => setIsDignitaryPaused(false)}
+              onClick={handleManualToggleDignitary}
+              title="Auto-transitioning between Hon'ble Chief Minister, Minister and Director (Hover to pause, Click to toggle)"
+            >
+              {/* Dignitary Text Info with Smooth Crossfade & Slide Transition */}
+              <div className={`text-right transition-all duration-300 ease-in-out ${
+                dignitaryFading ? 'opacity-0 -translate-y-1 scale-[0.98]' : 'opacity-100 translate-y-0 scale-100'
               }`}>
-                <img 
-                  src={currentDignitary.image} 
-                  alt={currentDignitary.alt} 
-                  className={`w-full h-full ${currentDignitary.imgStyle}`}
-                />
+                <div className="flex items-center justify-end">
+                  <span className="text-xs sm:text-[13px] font-extrabold text-[#111612] tracking-tight block">
+                    {currentDignitary.name}
+                  </span>
+                </div>
+
+                <span className="text-[9.5px] sm:text-[10.5px] font-semibold text-[#1B6537] block leading-tight mt-0.5">
+                  {currentDignitary.role}
+                </span>
+                <span className="text-[8.5px] sm:text-[9.5px] text-gray-500 block leading-tight">
+                  {currentDignitary.dept}
+                </span>
+
+                {/* Dignitary Slide Indicator Dots (CM, Minister, Director) */}
+                <div className="flex items-center justify-end gap-1.5 mt-0.5">
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); switchToDignitary('cm'); }}
+                    className={`h-1 rounded-full transition-all duration-300 focus:outline-none ${
+                      dignitaryView === 'cm' ? 'w-3.5 bg-[#1B6537]' : 'w-1 bg-gray-300 hover:bg-gray-400'
+                    }`}
+                    title="Hon'ble Chief Minister Shri Mohan Charan Majhi"
+                    aria-label="Chief Minister"
+                  />
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); switchToDignitary('minister'); }}
+                    className={`h-1 rounded-full transition-all duration-300 focus:outline-none ${
+                      dignitaryView === 'minister' ? 'w-3.5 bg-[#1B6537]' : 'w-1 bg-gray-300 hover:bg-gray-400'
+                    }`}
+                    title="Hon'ble Minister Shri Ganesh Ram Singkhuntia"
+                    aria-label="Minister"
+                  />
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); switchToDignitary('director'); }}
+                    className={`h-1 rounded-full transition-all duration-300 focus:outline-none ${
+                      dignitaryView === 'director' ? 'w-3.5 bg-[#C8A96B]' : 'w-1 bg-gray-300 hover:bg-gray-400'
+                    }`}
+                    title="Director Shri Sanath Kumar N., IFS"
+                    aria-label="Director"
+                  />
+                </div>
+              </div>
+
+              {/* Dignitary Round Portrait Photograph with Crossfade Animation */}
+              <div className="relative">
+                <div className={`relative w-9 h-9 sm:w-11 sm:h-11 rounded-full overflow-hidden border-2 shadow-sm ring-1.5 transition-all duration-300 ease-in-out ${
+                  currentDignitary.ringStyle
+                } ${
+                  dignitaryFading ? 'opacity-0 scale-90 rotate-6' : 'opacity-100 scale-100 rotate-0'
+                }`}>
+                  <img 
+                    src={currentDignitary.image} 
+                    alt={currentDignitary.alt} 
+                    className={`w-full h-full ${currentDignitary.imgStyle}`}
+                  />
+                </div>
               </div>
             </div>
+
+            {/* Official Citizen / Supporter Account Access (Sanctuary Emerald & Gold Theme) */}
+            <div className="pl-2.5 sm:pl-3.5 border-l border-[#C8A96B]/30 flex items-center shrink-0">
+              {currentUser ? (
+                <div className="flex items-center gap-2">
+                  {currentUser.is_staff && (
+                    <button
+                      onClick={onOpenAdmin}
+                      className="px-2.5 py-1 text-xs font-serif font-bold rounded-lg bg-[#071D12] text-[#C8A96B] border border-[#C8A96B]/60 hover:border-[#C8A96B] hover:bg-[#0B2A1A] transition-all shadow-xs cursor-pointer"
+                    >
+                      {t('nav.admin')}
+                    </button>
+                  )}
+                  <div className="flex items-center gap-2 py-1 px-2.5 rounded-full bg-gradient-to-r from-[#0B2A1A]/10 via-[#123D2B]/15 to-[#0B2A1A]/10 border border-[#C8A96B]/50 text-gray-800 shadow-xs">
+                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-[#0B2A1A] via-[#123D2B] to-[#071D12] border-1.5 border-[#C8A96B] flex items-center justify-center text-[#C8A96B] shrink-0 shadow-xs">
+                      <User className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#C8A96B] fill-[#C8A96B]/30" />
+                    </div>
+                    <span className="text-xs font-serif font-black max-w-[85px] sm:max-w-[120px] truncate text-[#071D12]">
+                      {currentUser.name}
+                    </span>
+                  </div>
+                  <button
+                    onClick={onLogout}
+                    className="text-xs font-bold text-red-600 hover:text-red-700 px-1 py-0.5 transition-colors cursor-pointer"
+                  >
+                    {t('nav.logout')}
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={onOpenAuth}
+                  className="flex items-center gap-2 p-1 sm:px-2.5 sm:py-1 rounded-full bg-gradient-to-r from-[#0B2A1A]/5 via-[#C8A96B]/10 to-[#0B2A1A]/5 hover:from-[#123D2B]/15 hover:to-[#0B2A1A]/20 border border-[#C8A96B]/50 hover:border-[#C8A96B] transition-all cursor-pointer group active:scale-95 shadow-xs hover:shadow-md"
+                  title="Sign In / Register to Nandankanan"
+                  aria-label="Sign In"
+                >
+                  {/* Sanctuary Emerald & Gold Medallion Avatar */}
+                  <div className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-br from-[#0B2A1A] via-[#123D2B] to-[#071D12] border-2 border-[#C8A96B] ring-1 ring-[#1B6537]/50 flex items-center justify-center text-[#C8A96B] shadow-sm transition-all group-hover:scale-105 group-hover:border-[#E5C378] group-hover:shadow-[0_0_12px_rgba(200,169,107,0.45)] shrink-0">
+                    <User className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-[#C8A96B] fill-[#C8A96B]/25 stroke-[2.2]" />
+                  </div>
+                  <div className="text-left hidden sm:block pr-1">
+                    <span className="block text-xs font-serif font-black text-[#071D12] group-hover:text-[#123D2B] tracking-wide leading-none transition-colors">
+                      {t('nav.signIn') || 'Sign In'}
+                    </span>
+                  </div>
+                </button>
+              )}
+            </div>
+
           </div>
 
         </div>
@@ -617,8 +678,8 @@ export default function Navbar({
               </span>
             </div>
 
-            {/* Right Action Area (Grouped Utility Controls + Eco-Wallet + User + Explore Button) */}
-            <div className="hidden lg:flex items-center gap-1.5 xl:gap-2 shrink-0">
+            {/* Right Action Area (Grouped Utility Controls + Eco-Wallet + Subscribe + Explore Button) */}
+            <div className="hidden lg:flex items-center gap-2 xl:gap-2.5 shrink-0">
               
               {/* Sleek Frosted Utility Hub (Accessibility + Language Switcher) */}
               <div className="flex items-center bg-[#092215]/85 border border-[#26734D]/50 rounded-xl px-1.5 py-0.5 shadow-inner">
@@ -800,56 +861,37 @@ export default function Navbar({
                 </div>
               </div>
 
-              {/* Digital Sanctuary Eco-Wallet Quick Access */}
+              {/* Digital Sanctuary Eco-Wallet Quick Access (Matching Image 1) */}
               <button
+                type="button"
                 onClick={() => setWalletModalOpen(true)}
-                className="px-2 xl:px-2.5 py-1.5 rounded-lg bg-[#0B2A1A] border border-[#C8A96B]/50 hover:border-[#C8A96B] text-[#C8A96B] hover:text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm hover:scale-105 active:scale-95 whitespace-nowrap"
+                className="px-2 sm:px-2.5 py-1 rounded-xl bg-[#04110A] border border-[#C8A96B]/60 hover:border-[#C8A96B] flex items-center gap-1.5 sm:gap-2 transition-all shadow-sm hover:scale-105 active:scale-95 cursor-pointer"
                 title="Open Nandankanan Digital Eco-Wallet"
                 aria-label="Open Eco-Wallet"
               >
-                <Wallet className="w-3.5 h-3.5 text-[#C8A96B]" />
-                <span className="hidden xl:inline">{t('nav.wallet')}</span>
-                <span className="text-[10px] font-black font-mono bg-[#C8A96B] text-[#071D12] px-1.5 py-0.5 rounded-md shadow-xs">
+                <Wallet className="w-4 h-4 text-[#C8A96B] shrink-0" />
+                <span className="px-2 py-0.5 rounded-lg bg-[#C8A96B] text-[#071D12] font-mono font-bold text-xs shadow-xs leading-none">
                   ₹{ecoBalance.toLocaleString('en-IN')}
                 </span>
               </button>
 
-              {/* User Sign In / Dashboard */}
-              {currentUser ? (
-                <div className="flex items-center gap-2">
-                  {currentUser.is_staff && (
-                    <button
-                      onClick={onOpenAdmin}
-                      className="px-2.5 py-1 text-xs font-semibold rounded bg-[#C8A96B]/20 text-[#C8A96B] border border-[#C8A96B]/40"
-                    >
-                      {t('nav.admin')}
-                    </button>
-                  )}
-                  <div className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded bg-[#0B2A1A] border border-[#26734D] text-[#F5F4EA]">
-                    <User className="w-3 h-3 text-[#C8A96B]" />
-                    <span className="max-w-[80px] truncate">{currentUser.name}</span>
-                  </div>
-                  <button
-                    onClick={onLogout}
-                    className="text-xs text-[#F5F4EA]/70 hover:text-white hover:underline"
-                  >
-                    {t('nav.logout')}
-                  </button>
-                </div>
-              ) : (
-                <button
-                  onClick={onOpenAuth}
-                  className="px-3 py-1 text-xs font-semibold tracking-wider uppercase text-[#F5F4EA] hover:text-[#C8A96B] transition-colors"
-                >
-                  {t('nav.signIn')}
-                </button>
-              )}
+              {/* VIP Live Streaming Subscribe Button (Matching Image 1) */}
+              <button
+                type="button"
+                onClick={() => setSubscriptionModalOpen(true)}
+                className="px-3 sm:px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-[#C8A96B] via-[#E5C378] to-[#C8A96B] text-[#071D12] font-black text-xs uppercase tracking-wider flex items-center gap-1.5 shadow-md hover:brightness-105 active:scale-95 transition-all cursor-pointer whitespace-nowrap"
+                title="Subscribe to Unlimited Wildlife Live Streaming"
+                aria-label="Subscribe to Live Streaming"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-[#071D12] fill-current" />
+                <span>SUBSCRIBE</span>
+              </button>
 
               {/* Fast-Track Explore Action Button (Redirects to Live Videos) */}
               <a
                 href="#live-wildlife"
                 onClick={(e) => handleNavClick(e, { key: 'liveViews', href: '#live-wildlife', sectionId: 'live-wildlife', scrollTarget: 'live-cameras-grid' })}
-                className="px-3 xl:px-4 py-1.5 rounded-lg bg-gradient-to-r from-[#C8A96B] to-[#b39352] hover:from-[#d8b87a] hover:to-[#C8A96B] text-[#071D12] font-black text-[11px] xl:text-xs uppercase tracking-wider shadow-md hover:scale-105 active:scale-95 transition-all whitespace-nowrap cursor-pointer"
+                className="px-3.5 xl:px-4 py-1.5 rounded-xl bg-gradient-to-r from-[#C8A96B] to-[#b39352] hover:from-[#d8b87a] hover:to-[#C8A96B] text-[#071D12] font-black text-[11px] xl:text-xs uppercase tracking-wider shadow-md hover:scale-105 active:scale-95 transition-all whitespace-nowrap cursor-pointer"
               >
                 <span>{t('nav.exploreNow')}</span>
               </a>
@@ -913,6 +955,32 @@ export default function Navbar({
                 </a>
               );
             })}
+            <div className="pt-2.5 mt-2 border-t border-[#26734D]/40 flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  setWalletModalOpen(true);
+                }}
+                className="flex-1 px-3 py-2 rounded-xl bg-[#04110A] border border-[#C8A96B]/50 text-[#C8A96B] flex items-center justify-center gap-2 text-xs font-bold font-mono"
+              >
+                <Wallet className="w-4 h-4 text-[#C8A96B]" />
+                <span className="px-2 py-0.5 rounded bg-[#C8A96B] text-[#071D12] font-bold">
+                  ₹{ecoBalance.toLocaleString('en-IN')}
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  setSubscriptionModalOpen(true);
+                }}
+                className="flex-1 px-3 py-2 rounded-xl bg-gradient-to-r from-[#C8A96B] via-[#E5C378] to-[#C8A96B] text-[#071D12] font-black text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 shadow"
+              >
+                <Sparkles className="w-3.5 h-3.5 fill-current" />
+                <span>SUBSCRIBE</span>
+              </button>
+            </div>
           </div>
         )}
       </nav>
@@ -921,6 +989,16 @@ export default function Navbar({
       <WalletModal 
         isOpen={walletModalOpen} 
         onClose={() => setWalletModalOpen(false)} 
+        onOpenSubscription={() => {
+          setWalletModalOpen(false);
+          setSubscriptionModalOpen(true);
+        }}
+      />
+
+      {/* VIP Unlimited Wildlife Live Streaming Subscription Modal */}
+      <SubscriptionModal 
+        isOpen={subscriptionModalOpen} 
+        onClose={() => setSubscriptionModalOpen(false)} 
       />
 
       {/* News & Notices Bulletin Modal */}

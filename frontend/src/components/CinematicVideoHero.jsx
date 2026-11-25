@@ -137,7 +137,7 @@ export default function CinematicVideoHero({ onExploreClick, onMapClick, onWatch
   return (
     <section 
       id="hero" 
-      className="relative w-full min-h-[72vh] sm:min-h-[80vh] md:min-h-[85vh] flex flex-col justify-center overflow-hidden select-none bg-[#071D12] pt-8 sm:pt-12 md:pt-14 pb-24 sm:pb-28"
+      className="relative w-full min-h-[70vh] sm:min-h-[76vh] md:min-h-[82vh] flex flex-col justify-start overflow-hidden select-none bg-[#071D12] pt-3 sm:pt-4 md:pt-5 pb-6 sm:pb-8 md:pb-10"
     >
       {/* 1. Cinematic Background Video Carousel */}
       <div className="absolute inset-0 z-0 overflow-hidden">
@@ -158,7 +158,7 @@ export default function CinematicVideoHero({ onExploreClick, onMapClick, onWatch
                 muted={isMuted}
                 playsInline
                 poster={scene.poster}
-                className="w-full h-full object-cover object-center scale-105"
+                className="w-full h-full object-cover object-center scale-105 brightness-[1.12] contrast-[1.08] saturate-[1.18]"
               >
                 <source src={scene.videoUrl} type="video/webm" />
                 {scene.fallbackVideoUrl && (
@@ -169,135 +169,172 @@ export default function CinematicVideoHero({ onExploreClick, onMapClick, onWatch
           );
         })}
 
-        {/* Cinematic Darkness Vignette Overlays for Maximum Text Legibility */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#05140C]/90 via-[#071D12]/70 to-transparent z-10" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#071D12] via-transparent to-[#05140C]/60 z-10" />
-        <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[#071D12] to-transparent z-10 pointer-events-none" />
+        {/* Vantara-Style Ambient Natural Lighting & Clear Scrim Overlays (Zero-Blur, High-Luminance) */}
+        {/* 1. Subtle horizontal text contrast scrim on the left (keeps video fully visible while ensuring sharp text) */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/55 via-black/25 to-transparent z-10 pointer-events-none" />
+        
+        {/* 2. Soft top header blend (for seamless transition under sticky navbar) */}
+        <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/35 to-transparent z-10 pointer-events-none" />
+
+        {/* 3. Golden natural sunlight ambient warmth (Vantara signature warm golden daylight glow) */}
+        <div className="absolute inset-0 bg-gradient-to-tr from-[#C8A96B]/15 via-transparent to-[#10B981]/5 mix-blend-screen pointer-events-none z-10" />
+
+        {/* 4. Soft bottom seamless section fade */}
+        <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#071D12] to-transparent z-10 pointer-events-none" />
       </div>
 
-      {/* 2. Hero Content Container */}
-      <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-8 sm:pt-12">
-        <div className="max-w-3xl">
+      {/* 2. Hero Content Container with Responsive Grid Layout */}
+      <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-1 sm:pt-2 flex-1 flex flex-col justify-center">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-end">
           
-          {/* Top Odia Tagline matching 1st pic */}
-          <div className="text-xl sm:text-2xl md:text-3xl font-odia font-bold text-[#C8A96B] tracking-wide mb-3 drop-shadow-md">
-            {language === 'or' ? (t('hero.odiaTagline') || 'WHERE THE WILD FINDS IT\'S HOME') : (t('hero.odiaTagline') || 'ଯେଉଁଠି ବନ୍ୟଜୀବନ ପାଏ ଆଶ୍ରୟ')}
+          {/* Main Left Column: Editorial Typography, Actions & Metrics */}
+          <div className="lg:col-span-8 xl:col-span-9 max-w-3xl">
+            
+            {/* Top Odia Tagline matching 1st pic */}
+            <div className="text-xl sm:text-2xl md:text-3xl font-odia font-bold text-[#C8A96B] tracking-wide mb-2 sm:mb-2.5 drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)]">
+              {language === 'or' ? (t('hero.odiaTagline') || 'WHERE THE WILD FINDS IT\'S HOME') : (t('hero.odiaTagline') || 'ଯେଉଁଠି ବନ୍ୟଜୀବନ ପାଏ ଆଶ୍ରୟ')}
+            </div>
+
+            {/* Editorial Grand Typography matching 1st pic */}
+            <h1 className="font-display font-black text-4xl sm:text-6xl md:text-7xl lg:text-[5.25rem] tracking-tight leading-[1.04] text-[#F5F4EA] drop-shadow-[0_4px_24px_rgba(0,0,0,0.95)] mb-3 sm:mb-4">
+              {language === 'en' ? (
+                <>
+                  WHERE THE <br />
+                  WILD <br />
+                  <span className="text-[#C8A96B] font-editorial italic font-normal tracking-normal drop-shadow-[0_4px_20px_rgba(0,0,0,0.9)]">
+                    FINDS IT'S HOME
+                  </span>
+                </>
+              ) : (
+                <>
+                  {t('hero.englishHeadingLine1')} <br />
+                  <span className="text-[#C8A96B] font-editorial italic font-normal tracking-normal drop-shadow-[0_4px_20px_rgba(0,0,0,0.9)]">
+                    {t('hero.englishHeadingLine2')}
+                  </span>
+                </>
+              )}
+            </h1>
+
+            {/* Dual Description Paragraphs matching 1st pic */}
+            <p className="text-base sm:text-lg md:text-xl text-[#F5F4EA] max-w-2xl font-light leading-relaxed mb-2 sm:mb-2.5 drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)]">
+              {t('hero.subtitle')}
+            </p>
+            <p className="text-xs sm:text-sm md:text-[15px] text-[#C2E0CB] max-w-2xl font-medium leading-relaxed mb-4 sm:mb-5 drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)]">
+              {t('hero.shortIntro')}
+            </p>
+
+            {/* Call-To-Action Button Suite */}
+            <div className="flex flex-wrap items-center gap-3.5 mb-5 sm:mb-6">
+              <button
+                onClick={onExploreClick}
+                className="btn-accent px-6 sm:px-8 py-3 sm:py-3.5 rounded-xl text-xs sm:text-sm tracking-wider uppercase inline-flex items-center gap-2.5 shadow-xl group cursor-pointer"
+              >
+                <span>{t('hero.exploreWildlife')}</span>
+                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+              </button>
+
+              <a
+                href="#interactive-map"
+                onClick={(e) => {
+                  if (typeof window !== 'undefined') {
+                    window.dispatchEvent(new CustomEvent('reset-zoo-map-view'));
+                  }
+                  if (onMapClick) {
+                    e.preventDefault();
+                    onMapClick();
+                  }
+                }}
+                className="px-5 py-3 rounded-xl bg-[#06180E]/75 hover:bg-[#123D2B] text-[#F5F4EA] hover:text-[#C8A96B] border border-[#26734D]/60 hover:border-[#C8A96B]/80 font-bold text-xs uppercase tracking-wider backdrop-blur-md shadow-md transition-all flex items-center gap-2 cursor-pointer"
+              >
+                <MapIcon className="w-4 h-4 text-[#C8A96B]" />
+                <span>{t('hero.discoverZooMap')}</span>
+              </a>
+
+              <button
+                onClick={onWatchLiveClick}
+                className="px-5 py-3 rounded-xl bg-[#06180E]/75 hover:bg-[#123D2B] text-[#F5F4EA] hover:text-[#C8A96B] border border-[#26734D]/60 hover:border-[#C8A96B]/80 font-bold text-xs uppercase tracking-wider backdrop-blur-md shadow-md transition-all flex items-center gap-2 cursor-pointer"
+              >
+                <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
+                <span>{t('hero.watchLive')}</span>
+              </button>
+            </div>
+
+            {/* Sanctuary Metric Trust Badges (Frosted Conservation Capsules) */}
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 pt-3 sm:pt-4 border-t border-white/15">
+              {/* Badge 1: Corridor Area */}
+              <div className="inline-flex items-center gap-2.5 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl bg-[#06180E]/75 hover:bg-[#06180E]/90 border border-[#26734D]/50 hover:border-[#C8A96B]/60 backdrop-blur-md shadow-lg transition-all group">
+                <span className="text-base sm:text-lg">🌲</span>
+                <div className="flex flex-col">
+                  <span className="text-[#C8A96B] font-display font-black text-sm sm:text-base leading-tight">
+                    437 ha
+                  </span>
+                  <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-[#F5F4EA]/80 leading-none">
+                    {t('hero.corridorStat')}
+                  </span>
+                </div>
+              </div>
+
+              {/* Badge 2: Protected Species */}
+              <div className="inline-flex items-center gap-2.5 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl bg-[#06180E]/75 hover:bg-[#06180E]/90 border border-[#26734D]/50 hover:border-[#C8A96B]/60 backdrop-blur-md shadow-lg transition-all group">
+                <span className="text-base sm:text-lg">🐾</span>
+                <div className="flex flex-col">
+                  <span className="text-[#C8A96B] font-display font-black text-sm sm:text-base leading-tight">
+                    156+
+                  </span>
+                  <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-[#F5F4EA]/80 leading-none">
+                    {t('hero.speciesStat')}
+                  </span>
+                </div>
+              </div>
+
+              {/* Badge 3: Heritage Foundation */}
+              <div className="inline-flex items-center gap-2.5 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl bg-[#06180E]/75 hover:bg-[#06180E]/90 border border-[#26734D]/50 hover:border-[#C8A96B]/60 backdrop-blur-md shadow-lg transition-all group">
+                <span className="text-base sm:text-lg">🏛️</span>
+                <div className="flex flex-col">
+                  <span className="text-[#C8A96B] font-display font-black text-sm sm:text-base leading-tight">
+                    1960
+                  </span>
+                  <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-[#F5F4EA]/80 leading-none">
+                    {t('hero.heritageStat')}
+                  </span>
+                </div>
+              </div>
+            </div>
+
           </div>
 
-          {/* Editorial Grand Typography matching 1st pic */}
-          <h1 className="font-display font-black text-4xl sm:text-6xl md:text-7xl lg:text-[5.25rem] tracking-tight leading-[1.04] text-[#F5F4EA] drop-shadow-2xl mb-5">
-            {language === 'en' ? (
-              <>
-                WHERE THE <br />
-                WILD <br />
-                <span className="text-[#C8A96B] font-editorial italic font-normal tracking-normal drop-shadow-lg">
-                  FINDS IT'S HOME
-                </span>
-              </>
-            ) : (
-              <>
-                {t('hero.englishHeadingLine1')} <br />
-                <span className="text-[#C8A96B] font-editorial italic font-normal tracking-normal drop-shadow-lg">
-                  {t('hero.englishHeadingLine2')}
-                </span>
-              </>
-            )}
-          </h1>
-
-          {/* Dual Description Paragraphs matching 1st pic */}
-          <p className="text-base sm:text-lg md:text-xl text-[#F5F4EA]/90 max-w-2xl font-light leading-relaxed mb-3 drop-shadow">
-            {t('hero.subtitle')}
-          </p>
-          <p className="text-xs sm:text-sm md:text-[15px] text-[#A6C6AF] max-w-2xl font-normal leading-relaxed mb-6 drop-shadow-sm">
-            {t('hero.shortIntro')}
-          </p>
-
-          {/* Call-To-Action Button Suite */}
-          <div className="flex flex-wrap items-center gap-3.5 mb-10">
+          {/* Right Column: Hero Video Playback Controls (Zero-Overlap Grid Placement) */}
+          <div className="lg:col-span-4 xl:col-span-3 flex lg:justify-end items-center gap-2.5 pb-2">
+            {/* 1. Play / Pause Button */}
             <button
-              onClick={onExploreClick}
-              className="btn-accent px-6 sm:px-8 py-3.5 rounded-xl text-xs sm:text-sm tracking-wider uppercase inline-flex items-center gap-2.5 shadow-xl group cursor-pointer"
+              onClick={togglePlay}
+              className="p-2.5 sm:p-3 rounded-xl bg-[#06180E]/85 hover:bg-[#123D2B] text-[#F5F4EA] hover:text-[#C8A96B] border border-[#26734D]/60 hover:border-[#C8A96B]/80 backdrop-blur-md shadow-xl transition-all cursor-pointer flex items-center justify-center group hover:scale-105 active:scale-95"
+              title={isPlaying ? "Pause Video" : "Play Video"}
+              aria-label={isPlaying ? "Pause Video" : "Play Video"}
             >
-              <span>{t('hero.exploreWildlife')}</span>
-              <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+              {isPlaying ? (
+                <Pause className="w-4 h-4 sm:w-5 sm:h-5 text-[#F5F4EA]/80 group-hover:text-white" />
+              ) : (
+                <Play className="w-4 h-4 sm:w-5 sm:h-5 text-[#C8A96B]" />
+              )}
             </button>
 
-            <a
-              href="#interactive-map"
-              onClick={(e) => {
-                if (typeof window !== 'undefined') {
-                  window.dispatchEvent(new CustomEvent('reset-zoo-map-view'));
-                }
-                if (onMapClick) {
-                  e.preventDefault();
-                  onMapClick();
-                }
-              }}
-              className="px-5 py-3 rounded-xl bg-[#06180E]/75 hover:bg-[#123D2B] text-[#F5F4EA] hover:text-[#C8A96B] border border-[#26734D]/60 hover:border-[#C8A96B]/80 font-bold text-xs uppercase tracking-wider backdrop-blur-md shadow-md transition-all flex items-center gap-2 cursor-pointer"
-            >
-              <MapIcon className="w-4 h-4 text-[#C8A96B]" />
-              <span>{t('hero.discoverZooMap')}</span>
-            </a>
-
+            {/* 2. Volume / Mute Button */}
             <button
-              onClick={onWatchLiveClick}
-              className="px-5 py-3 rounded-xl bg-[#06180E]/75 hover:bg-[#123D2B] text-[#F5F4EA] hover:text-[#C8A96B] border border-[#26734D]/60 hover:border-[#C8A96B]/80 font-bold text-xs uppercase tracking-wider backdrop-blur-md shadow-md transition-all flex items-center gap-2 cursor-pointer"
+              onClick={toggleMute}
+              className="p-2.5 sm:p-3 rounded-xl bg-[#06180E]/85 hover:bg-[#123D2B] text-[#F5F4EA] hover:text-[#C8A96B] border border-[#26734D]/60 hover:border-[#C8A96B]/80 backdrop-blur-md shadow-xl transition-all cursor-pointer flex items-center justify-center group hover:scale-105 active:scale-95"
+              title={isMuted ? "Unmute Video" : "Mute Video"}
+              aria-label={isMuted ? "Unmute Video" : "Mute Video"}
             >
-              <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
-              <span>{t('hero.watchLive')}</span>
+              {isMuted ? (
+                <VolumeX className="w-4 h-4 sm:w-5 sm:h-5 text-[#F5F4EA]/80 group-hover:text-white" />
+              ) : (
+                <Volume2 className="w-4 h-4 sm:w-5 sm:h-5 text-[#C8A96B] animate-pulse" />
+              )}
             </button>
-          </div>
-
-          {/* Sanctuary Metric Trust Badges */}
-          <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-xs text-[#F5F4EA]/70 font-mono pt-3 border-t border-white/10">
-            <div className="flex items-center gap-2">
-              <span className="text-[#C8A96B] font-bold text-sm">437 ha</span>
-              <span>{t('hero.corridorStat')}</span>
-            </div>
-            <span className="text-white/30 hidden sm:inline">•</span>
-            <div className="flex items-center gap-2">
-              <span className="text-[#C8A96B] font-bold text-sm">156+</span>
-              <span>{t('hero.speciesStat')}</span>
-            </div>
-            <span className="text-white/30 hidden sm:inline">•</span>
-            <div className="flex items-center gap-2">
-              <span className="text-[#C8A96B] font-bold text-sm">1960</span>
-              <span>{t('hero.heritageStat')}</span>
-            </div>
           </div>
 
         </div>
-      </div>
-
-      {/* 3. Hero Video Play/Pause & Sound Controls (Shifted upwards to align horizontally with Watch Live) */}
-      <div className="absolute bottom-38 sm:bottom-44 md:bottom-48 right-8 sm:right-12 md:right-14 z-30 flex items-center gap-2.5">
-        {/* 1. Play / Pause Button */}
-        <button
-          onClick={togglePlay}
-          className="p-2.5 sm:p-3 rounded-xl bg-[#06180E]/85 hover:bg-[#123D2B] text-[#F5F4EA] hover:text-[#C8A96B] border border-[#26734D]/60 hover:border-[#C8A96B]/80 backdrop-blur-md shadow-xl transition-all cursor-pointer flex items-center justify-center group hover:scale-105 active:scale-95"
-          title={isPlaying ? "Pause Video" : "Play Video"}
-          aria-label={isPlaying ? "Pause Video" : "Play Video"}
-        >
-          {isPlaying ? (
-            <Pause className="w-4 h-4 sm:w-5 sm:h-5 text-[#F5F4EA]/80 group-hover:text-white" />
-          ) : (
-            <Play className="w-4 h-4 sm:w-5 sm:h-5 text-[#C8A96B]" />
-          )}
-        </button>
-
-        {/* 2. Volume / Mute Button */}
-        <button
-          onClick={toggleMute}
-          className="p-2.5 sm:p-3 rounded-xl bg-[#06180E]/85 hover:bg-[#123D2B] text-[#F5F4EA] hover:text-[#C8A96B] border border-[#26734D]/60 hover:border-[#C8A96B]/80 backdrop-blur-md shadow-xl transition-all cursor-pointer flex items-center justify-center group hover:scale-105 active:scale-95"
-          title={isMuted ? "Unmute Video" : "Mute Video"}
-          aria-label={isMuted ? "Unmute Video" : "Mute Video"}
-        >
-          {isMuted ? (
-            <VolumeX className="w-4 h-4 sm:w-5 sm:h-5 text-[#F5F4EA]/80 group-hover:text-white" />
-          ) : (
-            <Volume2 className="w-4 h-4 sm:w-5 sm:h-5 text-[#C8A96B] animate-pulse" />
-          )}
-        </button>
       </div>
 
 
@@ -307,7 +344,7 @@ export default function CinematicVideoHero({ onExploreClick, onMapClick, onWatch
         <svg 
           viewBox="0 0 1200 120" 
           preserveAspectRatio="none" 
-          className="relative block w-full h-6 sm:h-9 md:h-12 text-[#071810] fill-current"
+          className="relative block w-full h-5 sm:h-7 md:h-9 text-[#071810] fill-current"
         >
           <path d="M0,0 C150,80 350,-30 500,40 C650,110 900,10 1200,35 L1200,120 L0,120 Z" />
         </svg>
