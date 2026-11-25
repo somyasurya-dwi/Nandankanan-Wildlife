@@ -2012,6 +2012,24 @@ export const INITIAL_MARKERS = [
 export const INITIAL_STORIES = [
   {
     id: 1,
+    title: "The Miracle Quintet: Rescuing 5 Infant Orangutans in Odisha",
+    slug: "baby-orangutans-rescue-odisha",
+    category: "Primate Rescue & Neonatal Care",
+    cover_image: "/images/baby_orangutans_odisha.jpg",
+    author: "Dr. Rajesh Kumar Mohapatra, Chief Biologist",
+    read_time: "4 min read",
+    summary: "Inside the specialized 24/7 neonatal nursery at Nandankanan, where five critically endangered baby orangutans rescued from wildlife trafficking found a loving sanctuary.",
+    content: `In an extraordinary cross-agency wildlife interception, five infant orangutans—one of the world's most endangered and intelligent primate species—were rescued from an illegal international trafficking syndicate traversing transit corridors in Odisha. Immediately transferred into the emergency protective custody of Nandankanan Zoological Park, the fragile infants arrived dehydrated, traumatized, and in urgent need of intensive neonatal intervention.
+
+Nandankanan's dedicated veterinary and primate rehabilitation division instantly transformed a specialized quarantine suite into a climate-controlled primate neonatal ICU. Under round-the-clock surveillance by senior wildlife veterinarians and compassionate foster handlers, each infant was placed on individualized electrolyte rehydration, specialized high-protein primate milk formulas, and gentle thermal management to simulate maternal body warmth.
+
+To alleviate psychological trauma and nurture vital physical dexterity, caretakers designed enriched nursery playpens equipped with soft artificial fleece bedding, tactile climbing ropes, and cognitive sensory play objects. The five lively infants bonded quickly as a resilient surrogate family—tumbling, grooming, and thriving under meticulous bio-secure monitoring.
+
+Today, the 'Miracle Quintet' stands as a shining testament to Odisha's zero-tolerance enforcement against illicit wildlife trafficking and Nandankanan's world-class veterinary prowess in rescuing, rehabilitating, and safeguarding global biodiversity.`,
+    featured: true
+  },
+  {
+    id: 2,
     title: "The White Tiger Miracle: Nandankanan's Historic Legacy",
     slug: "white-tiger-miracle",
     category: "Breeding Breakthrough",
@@ -2024,10 +2042,10 @@ export const INITIAL_STORIES = [
 Prior to this momentous event, all captive white tigers in India were descended exclusively from 'Mohan', a solitary white tiger cub captured in Rewa, Madhya Pradesh in 1951. Because subsequent white tigers were produced through repeated father-daughter or sibling matings, the Rewa lineage suffered severe genetic depression.
 
 Nandankanan proved that the recessive white gene was naturally preserved within wild populations of Odisha's forests. Today, Nandankanan is celebrated as a cradle of tiger conservation, with generations of healthy, vigorous white tigers flourishing in expansive forest enclosures.`,
-    featured: true
+    featured: false
   },
   {
-    id: 2,
+    id: 3,
     title: "Rescuing the River Sovereign: The Kanjia Gharial Breeding Project",
     slug: "gharial-captive-breeding",
     category: "Species Recovery",
@@ -2040,10 +2058,10 @@ Nandankanan proved that the recessive white gene was naturally preserved within 
 In collaboration with the Government of Odisha and the UNDP/FAO, Nandankanan established a specialized Gharial breeding and rearing facility in 1980 right on the banks of Kanjia Lake. Biologists recreated natural sandy basking ramps and fast-circulating deep river pools.
 
 Within months, the park achieved the world's first captive breeding of Gharials. Hundreds of healthy juveniles have since been head-started and rehabilitated back into the Mahanadi River and Satkosia Gorge sanctuary, creating a global benchmark in crocodilian conservation biology.`,
-    featured: true
+    featured: false
   },
   {
-    id: 3,
+    id: 4,
     title: "Guardians of the Scaled Nomad: The Indian Pangolin Center",
     slug: "pangolin-conservation",
     category: "Species Recovery",
@@ -2059,7 +2077,7 @@ Their perseverance bore fruit: Nandankanan became the first and only zoological 
     featured: false
   },
   {
-    id: 4,
+    id: 5,
     title: "Healing the Wild: The Nandankanan Rescue & Rehabilitation Mission",
     slug: "rescue-and-rehabilitation",
     category: "Animal Welfare",

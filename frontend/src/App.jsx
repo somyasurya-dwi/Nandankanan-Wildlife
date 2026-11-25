@@ -137,19 +137,19 @@ export default function App() {
     setCurrentUser(null);
   };
 
-  // Initialize Lenis Smooth Scroll with Auto-RAF & Synchronize with GSAP ScrollTrigger
+  // Initialize Lenis Smooth Scroll with GSAP Ticker Synchronization
   useEffect(() => {
     if (currentPage !== 'sanctuary') return;
 
     const lenis = new Lenis({
-      duration: 1.25,
-      easing: (t) => 1 - Math.pow(1 - t, 4),
+      duration: 0.8,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       orientation: 'vertical',
       gestureOrientation: 'vertical',
       smoothWheel: true,
-      wheelMultiplier: 0.95,
-      touchMultiplier: 1.2,
-      autoRaf: true,
+      wheelMultiplier: 1.0,
+      touchMultiplier: 1.0,
+      autoRaf: false, // Driven precisely by GSAP ticker to eliminate frame fighting & auto-drift
     });
 
     lenisRef.current = lenis;
@@ -164,14 +164,22 @@ export default function App() {
       }
     });
 
+    // Synchronize Lenis with GSAP's RAF Ticker
+    const updateTicker = (time) => {
+      lenis.raf(time * 1000);
+    };
+    gsap.ticker.add(updateTicker);
+    gsap.ticker.lagSmoothing(0);
+
     // Settle loading screen
     const timer = setTimeout(() => {
       setIsLoaded(true);
       ScrollTrigger.refresh();
-    }, 600);
+    }, 500);
 
     return () => {
       clearTimeout(timer);
+      gsap.ticker.remove(updateTicker);
       lenisRef.current = null;
       if (typeof window !== 'undefined') window.__lenis = null;
       lenis.destroy();
@@ -200,7 +208,7 @@ export default function App() {
     if (lenisRef.current) {
       lenisRef.current.scrollTo(el, {
         offset: -headerHeight - 12,
-        duration: 1.2,
+        duration: 0.85,
         immediate: false
       });
     } else {

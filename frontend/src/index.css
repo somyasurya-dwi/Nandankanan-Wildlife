@@ -87,6 +87,28 @@ html {
   height: 0 !important;
 }
 
+/* Adopt Animal Picker Scrollbar */
+.adopt-animal-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #C8A96B rgba(11, 36, 25, 0.8);
+}
+.adopt-animal-scrollbar::-webkit-scrollbar {
+  width: 6px !important;
+  height: 0px !important;
+}
+.adopt-animal-scrollbar::-webkit-scrollbar-track {
+  background: rgba(11, 36, 25, 0.6) !important;
+  border-radius: 9999px;
+}
+.adopt-animal-scrollbar::-webkit-scrollbar-thumb {
+  background: #C8A96B !important;
+  border-radius: 9999px;
+  border: 1px solid rgba(11, 36, 25, 0.5);
+}
+.adopt-animal-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #DFB876 !important;
+}
+
 /* Universal Scrollbar Hide Utilities */
 .scrollbar-none::-webkit-scrollbar,
 .no-scrollbar::-webkit-scrollbar {
